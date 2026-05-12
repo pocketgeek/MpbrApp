@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1A2A1A"/>
+      <stop offset="100%" stop-color="#060E06"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="500" fill="url(#bg)"/>
+
+  <!-- Subtle lens tint inside ring -->
+  <circle cx="730" cy="250" r="178" fill="#000000" fill-opacity="0.18"/>
+
+  <!-- Cardboard silhouette — head (scaled 5x from icon, center offset to 730,210) -->
+  <path fill="#C8A050" stroke="#A07830" stroke-width="3.5"
+    d="M730,187.5 A22.5,22.5 0 0,1 752.5,210 A22.5,22.5 0 0,1 730,232.5 A22.5,22.5 0 0,1 707.5,210 A22.5,22.5 0 0,1 730,187.5 Z"/>
+
+  <!-- Cardboard silhouette — body -->
+  <path fill="#C8A050" stroke="#A07830" stroke-width="3.5"
+    d="M680,240 L780,240 L767.5,320 L692.5,320 Z"/>
+
+  <!-- 65 MOA circle ring — r=180, center (730,250) -->
+  <path fill="none" stroke="#FF2020" stroke-width="13"
+    d="M730,70 A180,180 0 0,1 910,250 A180,180 0 0,1 730,430 A180,180 0 0,1 550,250 A180,180 0 0,1 730,70 Z"/>
+
+  <!-- Hash marks at 12/3/6/9 o'clock, 35px inward -->
+  <path fill="none" stroke="#FF2020" stroke-width="13" stroke-linecap="butt"
+    d="M730,70 L730,105 M910,250 L875,250 M730,430 L730,395 M550,250 L585,250"/>
+
+  <!-- 2 MOA center dot — r=15 -->
+  <path fill="#FF2020"
+    d="M730,235 A15,15 0 0,1 745,250 A15,15 0 0,1 730,265 A15,15 0 0,1 715,250 A15,15 0 0,1 730,235 Z"/>
+
+  <!-- Title: MPBR -->
+  <text x="70" y="210" font-family="sans-serif" font-weight="900" font-size="148"
+        fill="#FFFFFF" letter-spacing="-4">MPBR</text>
+
+  <!-- Red accent line -->
+  <rect x="70" y="228" width="380" height="4" fill="#FF2020"/>
+
+  <!-- Subtitle: Calculator -->
+  <text x="70" y="305" font-family="sans-serif" font-weight="700" font-size="72"
+        fill="#FF2020">Calculator</text>
+
+  <!-- Tagline -->
+  <text x="72" y="358" font-family="sans-serif" font-size="28"
+        fill="#AAAAAA" letter-spacing="1">Maximum Point Blank Range</text>
+
+</svg>

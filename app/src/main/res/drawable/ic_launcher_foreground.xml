@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Holosun 510c green dot reticle over a small cardboard silhouette target.
+    Drawing order (back to front): silhouette → ring → hash marks → dot
+    Viewport 108×108; adaptive-icon safe zone = center 72×72 (inset 18 each side).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Cardboard silhouette — head, r=4.5, center (54,46) -->
+    <path
+        android:fillColor="#C8A050"
+        android:strokeColor="#A07830"
+        android:strokeWidth="0.7"
+        android:pathData="M54,41.5 A4.5,4.5 0 0,1 58.5,46 A4.5,4.5 0 0,1 54,50.5 A4.5,4.5 0 0,1 49.5,46 A4.5,4.5 0 0,1 54,41.5 Z" />
+
+    <!-- Cardboard silhouette — body (shoulders taper to waist) -->
+    <path
+        android:fillColor="#C8A050"
+        android:strokeColor="#A07830"
+        android:strokeWidth="0.7"
+        android:pathData="M44,52 L64,52 L61.5,68 L46.5,68 Z" />
+
+    <!-- 65 MOA circle ring — four quarter-arcs, r=36 -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,18 A36,36 0 0,1 90,54 A36,36 0 0,1 54,90 A36,36 0 0,1 18,54 A36,36 0 0,1 54,18 Z"
+        android:strokeColor="#FF2020"
+        android:strokeWidth="2.8" />
+
+    <!-- Hash marks at 12/3/6/9 o'clock, projecting 7dp inward from ring -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,18 L54,25 M90,54 L83,54 M54,90 L54,83 M18,54 L25,54"
+        android:strokeColor="#FF2020"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="butt" />
+
+    <!-- 2 MOA center dot — r=3, sits at center-mass of silhouette -->
+    <path
+        android:fillColor="#FF2020"
+        android:pathData="M54,51 A3,3 0 0,1 57,54 A3,3 0 0,1 54,57 A3,3 0 0,1 51,54 A3,3 0 0,1 54,51 Z" />
+
+</vector>

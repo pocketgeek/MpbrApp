@@ -3,7 +3,10 @@
 An Android app that computes Maximum Point Blank Range (MPBR), modeled after
 shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
-atmospheric corrections.
+atmospheric corrections and full-value crosswind drift.
+
+Includes 100+ factory ammo presets organized into color-coded categories
+(rifle, rimfire, pistol) with a trajectory table at 50 yd steps out to 500 yd.
 
 ## Opening in Android Studio
 
@@ -16,7 +19,7 @@ atmospheric corrections.
 5. Click ▶️ Run.
 
 Tested with Android Studio Hedgehog / Iguana / Jellyfish (anything from 2023
-onward). Builds against Android SDK 34, supports devices from Android 7
+onward). Builds against Android SDK 35, supports devices from Android 7
 (API 24) up.
 
 ## What's where
@@ -44,16 +47,19 @@ boilerplate Android needs to actually launch the app.
 
 ## Default sanity check
 
-With the built-in defaults (2700 fps, 0.400 G1, 1.5" sight height, 6" vital
-zone, ICAO standard atmosphere):
+App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
+(Parma, ID defaults), 6" vital zone:
 
 - Near zero ≈ 25 yd
-- Optimal zero (far zero) ≈ 238 yd
-- Max ordinate ≈ 3.0" @ 133 yd
-- MPBR ≈ 280 yd
-- Bore angle above LOS ≈ 6.4 MOA
+- Optimal zero (far zero) ≈ 229 yd
+- Max ordinate ≈ 3.0" @ 128 yd
+- MPBR ≈ 270 yd
 
 ## Inputs
+
+**Ammo preset** — 100+ factory loads grouped into Rifle (green), Rimfire
+(blue), and Pistol (amber) categories. Selecting a preset populates all bullet
+and sight fields. Editing any field manually switches the selector to "Custom".
 
 **Drag model** — G1 or G7. The BC value you enter must reference the model you
 pick. Manufacturers usually publish G1; many also publish G7 for long
@@ -63,9 +69,10 @@ fixed multiplier; use the manufacturer's value.
 **Bullet & sight** — muzzle velocity (fps), BC, sight height above bore (in),
 vital zone diameter (in).
 
-**Atmosphere** — altitude (ft), temperature (°F), humidity (%). Defaults are
-ICAO standard sea level (0, 59, 0) so leaving these alone reproduces dry
-sea-level results.
+**Atmosphere** — altitude (ft), temperature (°F), humidity (%), wind speed
+(mph full-value crosswind). Defaults are Parma, ID conditions (2231 ft, 70°F,
+25% RH, 0 mph). Set wind to 0 to hide the drift columns in the trajectory
+table.
 
 ## Algorithm
 
@@ -81,14 +88,12 @@ sea-level results.
 Drag uses standard G1/G7 Cd vs Mach tables with linear interpolation. Air
 density and speed of sound scale from ICAO sea-level standards using the
 ICAO troposphere pressure model, temperature, and humidity (Magnus saturation
-+ standard `1 − 0.378·Pᵥ/P` correction). Flat-fire approximation: no wind, no
-spin drift, no Coriolis.
++ standard `1 − 0.378·Pᵥ/P` correction). Crosswind enters as a lateral
+air-relative velocity component so it naturally affects drag magnitude and
+produces lateral drift. No spin drift, no Coriolis.
 
 ## Things to add next
 
-- Trajectory table (drop at every 50 yd) — `Ballistics.simulate()` already
-  produces one; render in a `LazyColumn`.
-- Save/recall presets per cartridge — Room or DataStore.
+- Save/recall custom loads — Room or DataStore.
 - Metric units toggle.
-- Wind drift — extend simulator to track lateral position.
 - Custom drag function (CDM) for users with manufacturer Doppler radar curves.

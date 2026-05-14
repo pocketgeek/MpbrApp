@@ -31,7 +31,7 @@ object Ballistics {
     private const val T_STD_RANKINE      = 518.67       // 59 °F = 518.67 °R
 
     enum class DragModel { G1, G7 }
-    enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL }
+    enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     /**
      * Common factory ammunition presets. BCs and MVs are nominal factory
@@ -228,7 +228,26 @@ object Ballistics {
         AmmoPreset("45 ACP 230gr JHP +P",     950.0, 0.162, 230.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 Colt 200gr JHP",         1100.0, 0.130, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 Colt 250gr JHP",          780.0, 0.146, 250.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
-        AmmoPreset("45 Colt 255gr LRN",         1000.0, 0.155, 255.0, 0.7, 4.0, category = AmmoCategory.PISTOL)
+        AmmoPreset("45 Colt 255gr LRN",         1000.0, 0.155, 255.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        // ── Shotgun ───────────────────────────────────────────────────────────────
+        // 12ga slugs — smoothbore (sight height 0.5" bead; vital zone 8" for deer)
+        AmmoPreset("12ga Foster 1oz 2¾\"",           1560.0, 0.068, 437.5, 0.5, 8.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga Foster 1oz 3\" Mag",         1760.0, 0.068, 437.5, 0.5, 8.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga Brenneke 1oz 2¾\"",          1476.0, 0.086, 437.5, 0.5, 8.0, category = AmmoCategory.SHOTGUN),
+        // 12ga sabot slugs — rifled barrel (sight height 1.5" scope)
+        AmmoPreset("12ga Sabot 300gr SST",            2000.0, 0.200, 300.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga Sabot 300gr Trophy Copper",  1900.0, 0.168, 300.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga Sabot 385gr AccuTip",        1850.0, 0.200, 385.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga Sabot 385gr Partition Gold", 1900.0, 0.190, 385.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
+        // 20ga slugs
+        AmmoPreset("20ga Foster 7/8oz 2¾\"",          1600.0, 0.055, 383.0, 0.5, 8.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("20ga Sabot 260gr AccuTip",        1900.0, 0.140, 260.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
+        // .410 slug
+        AmmoPreset("410 Slug 1/5oz",                  1830.0, 0.040,  87.5, 0.5, 4.0, category = AmmoCategory.SHOTGUN),
+        // Buckshot — single-pellet ballistics; vital zone 4" (defensive)
+        AmmoPreset("12ga 000 Buck (per pellet)",      1325.0, 0.083,  68.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga 00 Buck (per pellet)",       1325.0, 0.078,  54.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga #4 Buck (per pellet)",       1325.0, 0.058,  21.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN)
     )
 
     /** Standard G1 drag coefficient table. */

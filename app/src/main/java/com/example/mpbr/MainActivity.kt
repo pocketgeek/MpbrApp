@@ -345,6 +345,7 @@ private fun AmmoPresetDropdown(
                         Ballistics.AmmoCategory.RIFLE   -> "Rifle"
                         Ballistics.AmmoCategory.RIMFIRE -> "Rimfire"
                         Ballistics.AmmoCategory.PISTOL  -> "Pistol"
+                        Ballistics.AmmoCategory.SHOTGUN -> "Shotgun"
                     }
                     DropdownMenuItem(
                         text    = { Text(headerLabel, style = MaterialTheme.typography.labelSmall) },
@@ -357,6 +358,7 @@ private fun AmmoPresetDropdown(
                     Ballistics.AmmoCategory.RIFLE   -> Color(0x334CAF50)
                     Ballistics.AmmoCategory.RIMFIRE -> Color(0x332196F3)
                     Ballistics.AmmoCategory.PISTOL  -> Color(0x33FF9800)
+                    Ballistics.AmmoCategory.SHOTGUN -> Color(0x339C27B0)
                 }
                 DropdownMenuItem(
                     text     = { Text(p.name) },

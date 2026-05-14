@@ -5,8 +5,9 @@ shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections and full-value crosswind drift.
 
-Includes 100+ factory ammo presets organized into color-coded categories
-(rifle, rimfire, pistol) with a trajectory table at 50 yd steps out to 500 yd.
+Includes 115+ factory ammo presets organized into color-coded categories
+(rifle, rimfire, pistol, shotgun) with a trajectory table at 50 yd steps out
+to 500 yd.
 
 ## Opening in Android Studio
 
@@ -57,9 +58,15 @@ App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 
 ## Inputs
 
-**Ammo preset** — 100+ factory loads grouped into Rifle (green), Rimfire
-(blue), and Pistol (amber) categories. Selecting a preset populates all bullet
-and sight fields. Editing any field manually switches the selector to "Custom".
+**Ammo preset** — 115+ factory loads grouped into Rifle (green), Rimfire
+(blue), Pistol (amber), and Shotgun (purple) categories. Selecting a preset
+populates all bullet and sight fields. Editing any field manually switches the
+selector to "Custom".
+
+Shotgun notes: smoothbore slug presets use 0.5" sight height (bead) and an 8"
+vital zone (deer); sabot presets use 1.5" (scoped rifled barrel). Buckshot
+presets model a single pellet's ballistics with a 4" vital zone — useful for
+gauging effective range but not pattern spread.
 
 **Drag model** — G1 or G7. The BC value you enter must reference the model you
 pick. Manufacturers usually publish G1; many also publish G7 for long

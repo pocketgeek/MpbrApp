@@ -31,6 +31,7 @@ object Ballistics {
     private const val T_STD_RANKINE      = 518.67       // 59 °F = 518.67 °R
 
     enum class DragModel { G1, G7 }
+    enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL }
 
     /**
      * Common factory ammunition presets. BCs and MVs are nominal factory
@@ -45,7 +46,8 @@ object Ballistics {
         val bulletWeightGr: Double,
         val sightHeightIn: Double,
         val vitalZoneIn: Double,
-        val dragModel: DragModel = DragModel.G1
+        val dragModel: DragModel = DragModel.G1,
+        val category: AmmoCategory = AmmoCategory.RIFLE
     )
 
     val PRESETS: List<AmmoPreset> = listOf(
@@ -153,80 +155,80 @@ object Ballistics {
         AmmoPreset("50 BMG M33 Ball 660gr",       2900.0, 0.701, 660.0, 2.0, 6.0),
         // ── Rimfire ───────────────────────────────────────────────────────────────
         // .17 HMR
-        AmmoPreset("17 HMR 17gr A17",             2650.0, 0.128,  17.0, 1.5, 2.0),
-        AmmoPreset("17 HMR 17gr V-MAX",           2550.0, 0.128,  17.0, 1.5, 2.0),
-        AmmoPreset("17 HMR 20gr XTP",             2375.0, 0.125,  20.0, 1.5, 2.0),
+        AmmoPreset("17 HMR 17gr A17",             2650.0, 0.128,  17.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("17 HMR 17gr V-MAX",           2550.0, 0.128,  17.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("17 HMR 20gr XTP",             2375.0, 0.125,  20.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         // .17 WSM
-        AmmoPreset("17 WSM 20gr",                 3000.0, 0.185,  20.0, 1.5, 2.0),
-        AmmoPreset("17 WSM 25gr",                 2600.0, 0.230,  25.0, 1.5, 2.0),
+        AmmoPreset("17 WSM 20gr",                 3000.0, 0.185,  20.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("17 WSM 25gr",                 2600.0, 0.230,  25.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         // .22 LR
-        AmmoPreset("22 LR 32gr Stinger",           1640.0, 0.103,  32.0, 1.5, 2.0),
-        AmmoPreset("22 LR 40gr Mini-Mag",          1235.0, 0.124,  40.0, 1.5, 2.0),
-        AmmoPreset("22 LR 40gr Std Velocity",      1070.0, 0.120,  40.0, 1.5, 2.0),
-        AmmoPreset("22 LR 40gr Velocitor",         1435.0, 0.125,  40.0, 1.5, 2.0),
-        AmmoPreset("22 LR 60gr SSS (subsonic)",     950.0, 0.200,  60.0, 1.5, 2.0),
+        AmmoPreset("22 LR 32gr Stinger",           1640.0, 0.103,  32.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Mini-Mag",          1235.0, 0.124,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Std Velocity",      1070.0, 0.120,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Velocitor",         1435.0, 0.125,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 60gr SSS (subsonic)",     950.0, 0.200,  60.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         // .22 WMR
-        AmmoPreset("22 WMR 30gr VNT",              2200.0, 0.116,  30.0, 1.5, 2.0),
-        AmmoPreset("22 WMR 40gr JHP Maxi-Mag",    1875.0, 0.114,  40.0, 1.5, 2.0),
-        AmmoPreset("22 WMR 40gr JHP Super-X",     1910.0, 0.116,  40.0, 1.5, 2.0),
+        AmmoPreset("22 WMR 30gr VNT",              2200.0, 0.116,  30.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 WMR 40gr JHP Maxi-Mag",    1875.0, 0.114,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 WMR 40gr JHP Super-X",     1910.0, 0.116,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         // ── Pistol ────────────────────────────────────────────────────────────────
         // 5.7×28mm
-        AmmoPreset("5.7×28mm 27gr SS195LF",     1965.0, 0.095,  27.0, 0.7, 4.0),
-        AmmoPreset("5.7×28mm 40gr V-MAX",       1600.0, 0.200,  40.0, 0.7, 4.0),
+        AmmoPreset("5.7×28mm 27gr SS195LF",     1965.0, 0.095,  27.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("5.7×28mm 40gr V-MAX",       1600.0, 0.200,  40.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // .380 ACP
-        AmmoPreset("380 ACP 90gr FTX",           990.0, 0.099,  90.0, 0.7, 4.0),
-        AmmoPreset("380 ACP 90gr Gold Dot",     1040.0, 0.101,  90.0, 0.7, 4.0),
-        AmmoPreset("380 ACP 95gr FMJ",           955.0, 0.100,  95.0, 0.7, 4.0),
-        AmmoPreset("380 ACP 99gr HST",          1030.0, 0.110,  99.0, 0.7, 4.0),
+        AmmoPreset("380 ACP 90gr FTX",           990.0, 0.099,  90.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("380 ACP 90gr Gold Dot",     1040.0, 0.101,  90.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("380 ACP 95gr FMJ",           955.0, 0.100,  95.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("380 ACP 99gr HST",          1030.0, 0.110,  99.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // 9mm
-        AmmoPreset("9mm 115 gr",          1180.0, 0.150, 115.0, 0.7, 4.0),
-        AmmoPreset("9mm 115gr Critical Def",  1135.0, 0.129, 115.0, 0.7, 4.0),
-        AmmoPreset("9mm 124 gr",          1110.0, 0.165, 124.0, 0.7, 4.0),
-        AmmoPreset("9mm 124gr Gold Dot",      1150.0, 0.134, 124.0, 0.7, 4.0),
-        AmmoPreset("9mm 124gr HST",           1150.0, 0.150, 124.0, 0.7, 4.0),
-        AmmoPreset("9mm 124gr HST +P",        1200.0, 0.150, 124.0, 0.7, 4.0),
-        AmmoPreset("9mm NATO 124 gr",             1180.0, 0.165, 124.0, 0.7, 4.0),
-        AmmoPreset("9mm 135gr Critical Duty", 1160.0, 0.195, 135.0, 0.7, 4.0),
-        AmmoPreset("9mm 147 gr (subsonic)",    990.0, 0.190, 147.0, 0.7, 4.0),
-        AmmoPreset("9mm 147gr HST",           1000.0, 0.200, 147.0, 0.7, 4.0),
+        AmmoPreset("9mm 115 gr",          1180.0, 0.150, 115.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 115gr Critical Def",  1135.0, 0.129, 115.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 124 gr",          1110.0, 0.165, 124.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 124gr Gold Dot",      1150.0, 0.134, 124.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 124gr HST",           1150.0, 0.150, 124.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 124gr HST +P",        1200.0, 0.150, 124.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm NATO 124 gr",             1180.0, 0.165, 124.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 135gr Critical Duty", 1160.0, 0.195, 135.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 147 gr (subsonic)",    990.0, 0.190, 147.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("9mm 147gr HST",           1000.0, 0.200, 147.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // .38 Spl / .357
-        AmmoPreset("38 Spl 110gr JHP",           990.0, 0.125, 110.0, 0.7, 4.0),
-        AmmoPreset("38 Spl 125gr JHP",           950.0, 0.150, 125.0, 0.7, 4.0),
-        AmmoPreset("38 Spl 158gr LRN",           770.0, 0.165, 158.0, 0.7, 4.0),
-        AmmoPreset("357 Mag 125gr Gold Dot",   1450.0, 0.141, 125.0, 0.7, 4.0),
-        AmmoPreset("357 Mag 125gr XTP",        1500.0, 0.151, 125.0, 0.7, 4.0),
-        AmmoPreset("357 Mag 158gr JSP",        1235.0, 0.163, 158.0, 0.7, 4.0),
-        AmmoPreset("357 Mag 158gr XTP",        1240.0, 0.206, 158.0, 0.7, 4.0),
-        AmmoPreset("357 Mag 180gr JHP",          1100.0, 0.195, 180.0, 0.7, 4.0),
-        AmmoPreset("357 SIG 125gr Gold Dot",     1350.0, 0.141, 125.0, 0.7, 4.0),
-        AmmoPreset("357 SIG 125gr HST",          1450.0, 0.150, 125.0, 0.7, 4.0),
-        AmmoPreset("357 SIG 135gr FlexLock",     1225.0, 0.153, 135.0, 0.7, 4.0),
+        AmmoPreset("38 Spl 110gr JHP",           990.0, 0.125, 110.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("38 Spl 125gr JHP",           950.0, 0.150, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("38 Spl 158gr LRN",           770.0, 0.165, 158.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 Mag 125gr Gold Dot",   1450.0, 0.141, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 Mag 125gr XTP",        1500.0, 0.151, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 Mag 158gr JSP",        1235.0, 0.163, 158.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 Mag 158gr XTP",        1240.0, 0.206, 158.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 Mag 180gr JHP",          1100.0, 0.195, 180.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 SIG 125gr Gold Dot",     1350.0, 0.141, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 SIG 125gr HST",          1450.0, 0.150, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("357 SIG 135gr FlexLock",     1225.0, 0.153, 135.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // .40/10mm
-        AmmoPreset("40 S&W 165gr FMJ",       1060.0, 0.155, 165.0, 0.7, 4.0),
-        AmmoPreset("40 S&W 165gr JHP",       1150.0, 0.145, 165.0, 0.7, 4.0),
-        AmmoPreset("40 S&W 180gr FMJ",       1000.0, 0.165, 180.0, 0.7, 4.0),
-        AmmoPreset("40 S&W 180gr JHP",        1010.0, 0.155, 180.0, 0.7, 4.0),
-        AmmoPreset("10mm 155gr XTP",          1410.0, 0.137, 155.0, 0.7, 4.0),
-        AmmoPreset("10mm 155gr XTP (full)",   1500.0, 0.137, 155.0, 0.7, 4.0),
-        AmmoPreset("10mm 180gr XTP",          1275.0, 0.164, 180.0, 0.7, 4.0),
-        AmmoPreset("10mm 180gr XTP (full)",   1300.0, 0.164, 180.0, 0.7, 4.0),
-        AmmoPreset("10mm 200gr Hard Cast",     1300.0, 0.194, 200.0, 0.7, 4.0),
-        AmmoPreset("10mm 200gr XTP",          1300.0, 0.199, 200.0, 0.7, 4.0),
+        AmmoPreset("40 S&W 165gr FMJ",       1060.0, 0.155, 165.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("40 S&W 165gr JHP",       1150.0, 0.145, 165.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("40 S&W 180gr FMJ",       1000.0, 0.165, 180.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("40 S&W 180gr JHP",        1010.0, 0.155, 180.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("10mm 155gr XTP",          1410.0, 0.137, 155.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("10mm 155gr XTP (full)",   1500.0, 0.137, 155.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("10mm 180gr XTP",          1275.0, 0.164, 180.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("10mm 180gr XTP (full)",   1300.0, 0.164, 180.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("10mm 200gr Hard Cast",     1300.0, 0.194, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("10mm 200gr XTP",          1300.0, 0.199, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // .44
-        AmmoPreset("44 Spl 180gr XTP",          1000.0, 0.138, 180.0, 0.7, 4.0),
-        AmmoPreset("44 Spl 200gr Gold Dot",      875.0, 0.145, 200.0, 0.7, 4.0),
-        AmmoPreset("44 Spl 240gr LFN",           750.0, 0.175, 240.0, 0.7, 4.0),
-        AmmoPreset("44 Mag 180gr XTP",          1600.0, 0.138, 180.0, 0.7, 4.0),
-        AmmoPreset("44 Mag 240gr XTP",          1230.0, 0.205, 240.0, 0.7, 4.0),
-        AmmoPreset("44 Mag 300gr XTP",          1200.0, 0.245, 300.0, 0.7, 4.0),
+        AmmoPreset("44 Spl 180gr XTP",          1000.0, 0.138, 180.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("44 Spl 200gr Gold Dot",      875.0, 0.145, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("44 Spl 240gr LFN",           750.0, 0.175, 240.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("44 Mag 180gr XTP",          1600.0, 0.138, 180.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("44 Mag 240gr XTP",          1230.0, 0.205, 240.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("44 Mag 300gr XTP",          1200.0, 0.245, 300.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // .45
-        AmmoPreset("45 ACP 185gr JHP",       1000.0, 0.130, 185.0, 0.7, 4.0),
-        AmmoPreset("45 ACP 200gr JHP",       1080.0, 0.140, 200.0, 0.7, 4.0),
-        AmmoPreset("45 ACP 230gr FMJ",        855.0, 0.162, 230.0, 0.7, 4.0),
-        AmmoPreset("45 ACP 230gr JHP +P",     950.0, 0.162, 230.0, 0.7, 4.0),
-        AmmoPreset("45 Colt 200gr JHP",         1100.0, 0.130, 200.0, 0.7, 4.0),
-        AmmoPreset("45 Colt 250gr JHP",          780.0, 0.146, 250.0, 0.7, 4.0),
-        AmmoPreset("45 Colt 255gr LRN",         1000.0, 0.155, 255.0, 0.7, 4.0)
+        AmmoPreset("45 ACP 185gr JHP",       1000.0, 0.130, 185.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 ACP 200gr JHP",       1080.0, 0.140, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 ACP 230gr FMJ",        855.0, 0.162, 230.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 ACP 230gr JHP +P",     950.0, 0.162, 230.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 Colt 200gr JHP",         1100.0, 0.130, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 Colt 250gr JHP",          780.0, 0.146, 250.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 Colt 255gr LRN",         1000.0, 0.155, 255.0, 0.7, 4.0, category = AmmoCategory.PISTOL)
     )
 
     /** Standard G1 drag coefficient table. */

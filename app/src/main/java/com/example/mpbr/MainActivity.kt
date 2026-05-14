@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
@@ -336,21 +338,35 @@ private fun AmmoPresetDropdown(
             expanded         = expanded,
             onDismissRequest = { expanded = false }
         ) {
+            var lastCategory: Ballistics.AmmoCategory? = null
             for (p in presets) {
-                DropdownMenuItem(
-                    text    = { Text(p.name) },
-                    onClick = {
-                        onSelect(p)
-                        expanded = false
+                if (p.category != lastCategory) {
+                    val headerLabel = when (p.category) {
+                        Ballistics.AmmoCategory.RIFLE   -> "Rifle"
+                        Ballistics.AmmoCategory.RIMFIRE -> "Rimfire"
+                        Ballistics.AmmoCategory.PISTOL  -> "Pistol"
                     }
+                    DropdownMenuItem(
+                        text    = { Text(headerLabel, style = MaterialTheme.typography.labelSmall) },
+                        onClick = {},
+                        enabled = false
+                    )
+                    lastCategory = p.category
+                }
+                val bgColor = when (p.category) {
+                    Ballistics.AmmoCategory.RIFLE   -> Color(0x334CAF50)
+                    Ballistics.AmmoCategory.RIMFIRE -> Color(0x332196F3)
+                    Ballistics.AmmoCategory.PISTOL  -> Color(0x33FF9800)
+                }
+                DropdownMenuItem(
+                    text     = { Text(p.name) },
+                    onClick  = { onSelect(p); expanded = false },
+                    modifier = Modifier.background(bgColor)
                 )
             }
             DropdownMenuItem(
                 text    = { Text("Custom") },
-                onClick = {
-                    onSelect(null)
-                    expanded = false
-                }
+                onClick = { onSelect(null); expanded = false }
             )
         }
     }

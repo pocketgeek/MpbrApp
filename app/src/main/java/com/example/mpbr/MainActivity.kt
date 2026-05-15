@@ -711,25 +711,29 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.BALLISTIC_E3 -> {
-                // From scratch — matches the Burris product image exactly.
-                // Wide FOV (vertExtent=40) makes reticle a compact cluster in lower scope.
-                val gap    = reticle.majorSpacing.toFloat() * ppu   // 4 MOA thin section half-width
-                val barHH  = reticle.minorSpacing.toFloat() * ppu   // 2.2 MOA bar half-height
-                val tickH  = barHH * 0.55f                           // tick mark half-height
-                val topLen = gap                                      // thin line above = same as gap
+                val gap   = reticle.majorSpacing.toFloat() * ppu    // 4 MOA thin half-width
+                val barHH = reticle.minorSpacing.toFloat() * ppu    // bar half-height
+                val tickH = barHH * 0.55f
+                val topPostLen = r.toFloat() * 0.05f                 // short thick top post (5% of R)
+                val bdcHW = listOf(1.5f, 2.5f, 3.5f)
+                val wdMoa = listOf(1.54f, 2.42f, 3.38f)
+                val dotR  = (barHH * 0.35f).coerceAtLeast(s * 2f)
 
                 val pBlk  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
                 val pBar  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = barHH * 2f }
                 val pTick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f }
                 val pBdc  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
                 val pDot  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
-                val dotR  = (ppu * 0.25f).coerceAtLeast(s * 2f)
 
-                // 1. Horizontal thick bars — two heavy lines spanning scope edge to gap
+                // Short thick top post at scope boundary, then thin vertical all the way to crosshair
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy - r.toFloat() + topPostLen, pBar)
+                cv.drawLine(cx, cy - r.toFloat() + topPostLen, cx, cy, pBlk)
+
+                // Thick horizontal bars spanning scope edge to gap
                 cv.drawLine(cx - r.toFloat(), cy, cx - gap, cy, pBar)
-                cv.drawLine(cx + gap, cy, cx + r.toFloat(), cy, pBar)
+                cv.drawLine(cx + gap,         cy, cx + r.toFloat(), cy, pBar)
 
-                // 2. Thin horizontal line across the gap with tick marks
+                // Thin horizontal line in the gap with tick marks at 1/2/3/4 MOA
                 cv.drawLine(cx - gap, cy, cx + gap, cy, pBlk)
                 for (t in 1..reticle.majorSpacing.toInt()) {
                     val tx = t * ppu
@@ -737,16 +741,10 @@ private fun drawReticleSection(
                     cv.drawLine(cx - tx, cy - tickH, cx - tx, cy + tickH, pTick)
                 }
 
-                // 3. Short thin vertical above center, then thick top bar
-                cv.drawLine(cx, cy - topLen, cx, cy, pBlk)
-                cv.drawLine(cx, cy - topLen, cx, cy - r.toFloat(), pBar)
-
-                // 4. Thin vertical below center to first BDC mark
+                // Thin vertical from crosshair to first BDC mark
                 cv.drawLine(cx, cy, cx, cy + reticle.holdoverMarks[0].toFloat() * ppu, pBlk)
 
-                // 5. BDC marks: short horizontal line + dot each side, connected by thin line
-                val bdcHW = listOf(1.5f, 2.5f, 3.5f)
-                val wdMoa = listOf(1.54f, 2.42f, 3.38f)
+                // BDC marks + windage dots connected by thin vertical
                 reticle.holdoverMarks.forEachIndexed { idx, h ->
                     val hy  = cy + h.toFloat() * ppu
                     val hw  = bdcHW.getOrElse(idx) { 2f } * ppu
@@ -758,9 +756,9 @@ private fun drawReticleSection(
                         cv.drawLine(cx, hy, cx, cy + reticle.holdoverMarks[idx + 1].toFloat() * ppu, pBlk)
                 }
 
-                // 6. Thick bottom bar from last BDC mark to scope edge
-                val lastY = cy + reticle.holdoverMarks.last().toFloat() * ppu + ppu * 0.5f
-                cv.drawLine(cx, lastY, cx, cy + r.toFloat(), pBar)
+                // Thick bottom post from below last BDC to scope edge
+                val bottomStart = cy + reticle.holdoverMarks.last().toFloat() * ppu + ppu * 0.6f
+                cv.drawLine(cx, bottomStart, cx, cy + r.toFloat(), pBar)
             }
 
             Ballistics.ReticleStyle.DUPLEX -> {

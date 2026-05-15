@@ -103,9 +103,9 @@ vital zone diameter (in).
 25% RH, 0 mph). Set wind to 0 to hide the drift columns in the trajectory
 table.
 
-**Trajectory Table** — configurable start and end range (defaults 50 / 500 yd,
-range 0–2000 yd, 50 yd steps). Both on-screen table and DOPE chart use these
-values. Start must be less than end.
+**Trajectory Table** — configurable start, step, and end range (defaults
+50 / 50 / 500 yd; start 0–2000, step 1–500, end 0–2000). Both on-screen
+table and DOPE chart use these values. Start must be less than end.
 
 **DOPE Card Title** — editable heading printed at the top of the saved JPEG
 (default "MPBR DOPE CARD"). Leave blank to keep the default.

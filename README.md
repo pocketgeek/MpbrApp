@@ -82,7 +82,7 @@ presets are all real manufacturer scopes:
 
 | Preset | Unit | Focal plane | Style | Details |
 |---|---|---|---|---|
-| Vortex Strike Eagle AR-BDC3 (MOA, SFP) | MOA | SFP (8×) | AR-BDC3 | Horseshoe illumination (large top arc + side hooks, open bottom) + 1 MOA center dot; BDC post 2.4/5.6/9.5/14.6 MOA (300–600 yd) with windage dot rows widening to 5/7/10/12 MOA |
+| Vortex Strike Eagle AR-BDC3 (MOA, SFP) | MOA | SFP (8×) | AR-BDC3 | Horseshoe (large top arc + side hooks, open bottom) + 1 MOA center dot; BDC post at 2.4/5.6/9.5/14.6 MOA (300–600 yd); windage dot rows widening at 1 MOA steps to ±5/7/10/12 MOA; "3"–"6" range labels and "10" mph wind label at 600 yd |
 | Vortex Dead-Hold BDC (MOA, SFP) | MOA | SFP (max mag) | BDC | Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA; windage ±2 / ±4 / ±6 MOA; thick outer posts at 7 MOA |
 | Viridian MDS25 BRC (MOA, 1×) | MOA | 1× (always accurate) | BRC | 3 MOA center dot (50/200 yd); holdunder dots ≈7 MOA (15 yd) and ≈25 MOA (7 yd) below; inward chevrons for ranging. Dot positions estimated — exact MOA not published by Viridian |
 | Vortex Spitfire AR DRT (MOA, 1×) | MOA | 1× (always accurate) | DRT | 3 MOA center dot; inner ring 44 MOA ID / 6 MOA thick; outer ring 140 MOA ID / 3 MOA thick |

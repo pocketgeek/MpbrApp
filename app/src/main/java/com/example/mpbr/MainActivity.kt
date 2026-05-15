@@ -87,7 +87,7 @@ fun MpbrScreen() {
     var humidity     by remember { mutableStateOf("25") }
     var windSpeed    by remember { mutableStateOf("0") }
 
-    var tableStart   by remember { mutableStateOf("50") }
+    var tableStart   by remember { mutableStateOf("0") }
     var tableEnd     by remember { mutableStateOf("500") }
     var tableStep    by remember { mutableStateOf("50") }
     var dopeTitle    by remember { mutableStateOf("MPBR DOPE CARD") }

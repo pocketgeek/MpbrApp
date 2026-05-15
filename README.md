@@ -99,6 +99,20 @@ ICAO troposphere pressure model, temperature, and humidity (Magnus saturation
 air-relative velocity component so it naturally affects drag magnitude and
 produces lateral drift. No spin drift, no Coriolis.
 
+## Saving a DOPE chart
+
+After calculating, tap **Save DOPE Chart** (appears below the trajectory
+table). The app renders a 1200 px JPEG containing:
+
+- Load name, near/far zero, MPBR, max ordinate, bore angle
+- Altitude, temperature, humidity, wind conditions
+- Full trajectory table (same columns as the on-screen table — drift columns
+  appear only when wind ≠ 0, energy column only when bullet weight is set)
+- Date of generation
+
+The file is written to **Pictures/MPBR DOPE Charts/** in your gallery.
+On Android 8 or earlier the app will ask for storage permission the first time.
+
 ## Things to add next
 
 - Save/recall custom loads — Room or DataStore.

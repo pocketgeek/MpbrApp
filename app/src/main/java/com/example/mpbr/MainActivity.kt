@@ -1,9 +1,17 @@
 package com.example.mpbr
 
+import android.content.ContentValues
+import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Arrangement
@@ -34,8 +42,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +86,12 @@ fun MpbrScreen() {
 
     var result by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
     var error  by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+    val onPermissionResult = remember { mutableStateOf<(Boolean) -> Unit>({}) }
+    val permLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> onPermissionResult.value(granted) }
 
     // When the user types in a field, we want the dropdown label to flip to "Custom"
     // so it doesn't lie about what's loaded. These wrap the raw setters.
@@ -212,6 +230,42 @@ fun MpbrScreen() {
                     showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
                 )
             }
+
+            Button(
+                onClick = {
+                    val label      = selectedPreset?.name ?: "Custom"
+                    val showEnergy = r.energyAtMpbrFtLb > 0.0
+                    val showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
+
+                    fun doSave() {
+                        val bmp = buildDopeChartBitmap(
+                            context, r, label,
+                            altitude.toDoubleOrNull()    ?: 0.0,
+                            temperature.toDoubleOrNull() ?: 59.0,
+                            humidity.toDoubleOrNull()    ?: 0.0,
+                            windSpeed.toDoubleOrNull()   ?: 0.0,
+                            showEnergy, showDrift
+                        )
+                        val ok = saveDopeChart(context, bmp, label)
+                        android.widget.Toast.makeText(
+                            context,
+                            if (ok) "Saved to Pictures/MPBR DOPE Charts" else "Save failed",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+                        context.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            != android.content.pm.PackageManager.PERMISSION_GRANTED
+                    ) {
+                        onPermissionResult.value = { granted -> if (granted) doSave() }
+                        permLauncher.launch(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    } else {
+                        doSave()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Save DOPE Chart") }
         }
     }
 }
@@ -372,6 +426,130 @@ private fun AmmoPresetDropdown(
             )
         }
     }
+}
+
+/**
+ * Renders a DOPE card to a 1200-px-wide Bitmap using Android Canvas.
+ * 3× scale so text is sharp when viewed or printed.
+ */
+private fun buildDopeChartBitmap(
+    context: android.content.Context,
+    result: Ballistics.MpbrResult,
+    ammoLabel: String,
+    altFt: Double,
+    tempF: Double,
+    rhPct: Double,
+    windMph: Double,
+    showEnergy: Boolean,
+    showDrift: Boolean
+): Bitmap {
+    val S   = 3
+    val W   = 400 * S
+    val pad = 14 * S
+    val tsz = 18f * S
+    val bsz = 12f * S
+    val lnH = (bsz + 12).toInt()
+    val rwH = (bsz + 16).toInt()
+
+    val windStr = if (windMph == 0.0) "calm" else "%.0f mph".format(windMph)
+    val info = listOf(
+        ammoLabel,
+        "Near Zero: %.0f yd  |  Far Zero: %.0f yd  |  MPBR: %.0f yd"
+            .format(result.nearZeroYards, result.farZeroYards, result.mpbrYards),
+        "Max Ordinate: %.2f\" @ %.0f yd  |  Bore Angle: %.2f MOA"
+            .format(result.maxOrdinateInches, result.maxOrdinateRangeYards, result.boreAngleMoa),
+        "Alt: %.0f ft  |  Temp: %.0f°F  |  RH: %.0f%%  |  Wind: %s"
+            .format(altFt, tempF, rhPct, windStr),
+        "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
+    )
+    val cols = buildList {
+        add("Rng (yd)"); add("Drop (in)"); add("MOA"); add("MIL")
+        if (showDrift)  { add("W.MOA"); add("W.MIL") }
+        add("Vel (fps)")
+        if (showEnergy) add("E (ft·lb)")
+    }
+
+    val headerH = pad + tsz.toInt() + 14 + info.size * lnH + pad
+    val tableH  = pad + bsz.toInt() + 10 + S + rwH * result.trajectoryTable.size + pad
+    val H       = headerH + S + tableH
+
+    val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
+    val cv  = android.graphics.Canvas(bmp)
+    cv.drawColor(android.graphics.Color.WHITE)
+
+    val pTitle  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.BLACK; textSize = tsz; typeface = Typeface.DEFAULT_BOLD
+    }
+    val pBody   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.BLACK; textSize = bsz
+    }
+    val pHdr    = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.BLACK; textSize = bsz; typeface = Typeface.DEFAULT_BOLD
+    }
+    val pRule   = Paint().apply { color = 0xFFCCCCCC.toInt() }
+    val pStripe = Paint().apply { color = 0xFFF0F0F0.toInt() }
+
+    var y = pad.toFloat() + tsz
+    cv.drawText("MPBR DOPE CARD", pad.toFloat(), y, pTitle)
+    y += 14f
+    for (line in info) { y += lnH; cv.drawText(line, pad.toFloat(), y, pBody) }
+    y += pad
+
+    cv.drawRect(0f, y, W.toFloat(), y + S, pRule)
+    y += S + pad
+
+    val colW = (W - 2 * pad).toFloat() / cols.size
+    cols.forEachIndexed { i, col -> cv.drawText(col, pad + i * colW, y, pHdr) }
+    y += bsz + 10
+    cv.drawRect(0f, y, W.toFloat(), y + S, pRule)
+    y += S + bsz * 0.3f
+
+    result.trajectoryTable.forEachIndexed { idx, row ->
+        if (idx % 2 == 1) cv.drawRect(0f, y - bsz * 0.9f, W.toFloat(), y + bsz * 0.3f, pStripe)
+        val cells = buildList {
+            add("${row.rangeYards}")
+            add("%.1f".format(row.dropInches))
+            add("%.1f".format(row.holdoverMoa))
+            add("%.2f".format(row.holdoverMil))
+            if (showDrift)  { add("%.1f".format(row.driftMoa)); add("%.2f".format(row.driftMil)) }
+            add("%.0f".format(row.velocityFps))
+            if (showEnergy) add("%.0f".format(row.energyFtLb))
+        }
+        cells.forEachIndexed { i, cell -> cv.drawText(cell, pad + i * colW, y, pBody) }
+        y += rwH
+    }
+
+    return bmp
+}
+
+/** Saves [bmp] as a JPEG to Pictures/MPBR DOPE Charts via MediaStore. Returns true on success. */
+private fun saveDopeChart(
+    context: android.content.Context,
+    bmp: Bitmap,
+    ammoLabel: String
+): Boolean {
+    val name = "DOPE_${ammoLabel.replace(Regex("[^A-Za-z0-9]"), "_")}_" +
+               SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date()) + ".jpg"
+    return try {
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, name)
+            put(MediaStore.Images.Media.MIME_TYPE,    "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/MPBR DOPE Charts")
+                put(MediaStore.Images.Media.IS_PENDING,    1)
+            }
+        }
+        val uri = context.contentResolver
+            .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return false
+        context.contentResolver.openOutputStream(uri)
+            ?.use { bmp.compress(Bitmap.CompressFormat.JPEG, 95, it) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
+            context.contentResolver.update(uri, values, null, null)
+        }
+        true
+    } catch (e: Exception) { false }
 }
 
 /** Format a Double as a clean integer string when whole, else trim trailing zeros. */

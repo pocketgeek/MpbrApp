@@ -46,6 +46,8 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **Trajectory table columns** — controlled by two booleans passed to `TrajectoryTableCard`: `showEnergy` (true when bullet weight > 0) and `showDrift` (true when wind speed != 0). When wind is 0 the W.MOA/W.MIL columns are hidden entirely.
 
+**DOPE chart export** — `buildDopeChartBitmap()` draws a 1200×~1050 px JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
+
 **Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph wind.
 
 **Sign conventions**:

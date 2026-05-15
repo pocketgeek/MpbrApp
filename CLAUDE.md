@@ -23,6 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 There are no unit tests in this project. All logic is in two Kotlin files that can be verified by running the app.
 
+**Build toolchain:** Kotlin 2.2.10 · AGP 9.2.1 · Gradle 9.4.1. Since Kotlin 2.x the Compose compiler ships as `org.jetbrains.kotlin.plugin.compose` (declared in `build.gradle.kts`); the old `composeOptions.kotlinCompilerExtensionVersion` block is no longer used. Note: the system JDK 25 causes Gradle to fail with a version-parse error — build from Android Studio (which uses its bundled JDK 17/21) instead.
+
 ## Architecture
 
 The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:

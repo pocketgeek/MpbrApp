@@ -21,9 +21,12 @@ every range that fits within the reticle's extent.
 4. If prompted about a missing Android SDK, accept the offer to install it.
 5. Click ▶️ Run.
 
-Tested with Android Studio Hedgehog / Iguana / Jellyfish (anything from 2023
-onward). Builds against Android SDK 35, supports devices from Android 7
-(API 24) up.
+Tested with Android Studio Meerkat (2024.3) or later. Builds against Android
+SDK 35, supports devices from Android 7 (API 24) up.
+
+Build toolchain: Kotlin 2.2.10 · AGP 9.2.1 · Gradle 9.4.1. The Kotlin
+Compose compiler plugin (`org.jetbrains.kotlin.plugin.compose`) is now
+separate from the Kotlin plugin — required since Kotlin 2.x.
 
 ## What's where
 

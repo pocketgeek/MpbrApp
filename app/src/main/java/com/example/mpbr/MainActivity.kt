@@ -48,6 +48,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withClip
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -985,7 +986,7 @@ private fun buildReticleBitmap(
     val h   = 560
     val s   = 2
     val bsz = 12f * s
-    val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    val bmp = createBitmap(w, h)
     val cv  = android.graphics.Canvas(bmp)
     cv.drawColor(android.graphics.Color.WHITE)
     drawReticleSection(cv, w, result, reticle, 0f, h.toFloat(), bsz, s)
@@ -1046,7 +1047,7 @@ private fun buildDopeChartBitmap(
     val tableH   = pad + (bsz * 0.2f).toInt() + s * 2 + s + (bsz * 0.8f).toInt() + s * 2 + rwH * result.trajectoryTable.size + pad
     val h        = headerH + s + (if (reticle != null) reticleH + s else 0) + tableH
 
-    val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    val bmp = createBitmap(w, h)
     val cv  = android.graphics.Canvas(bmp)
     cv.drawColor(android.graphics.Color.WHITE)
 

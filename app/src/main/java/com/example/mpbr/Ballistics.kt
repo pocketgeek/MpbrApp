@@ -75,12 +75,13 @@ object Ballistics {
         // 3 BDC holdover marks at 1.49 / 4.31 / 7.18 MOA (200/300/400 yd for average calibers);
         // BDC line half-widths: 1.5 / 2.5 / 3.5 MOA; windage dots at ±1.54 / ±2.42 / ±3.38 MOA.
         // SFP, calibrated at 12×. Source: Burris Ballistic E3 subtension diagram.
-        // majorSpacing = horizontal thin section gap (MOA) — same large-gap as Plex crosshair.
-        // minorSpacing = post half-height (MOA). postStart = where horiz thick posts begin (= majorSpacing).
-        // The vertical thin section above center is hardcoded to 1.5 MOA (much shorter than horizontal).
+        // Source: Burris Ballistic E3 subtension diagram (exact values).
+        // majorSpacing = horizontal thin-section half-extent (4 MOA). Ticks at 1/2/3/4 MOA.
+        // minorSpacing = post half-height (MOA). postStart = where thick horizontal posts begin (MOA).
+        // vertExtent = 16 so 4 MOA gap = 25% of scope radius → thick posts dominate.
         ReticlePreset(
             "Burris Fullfield Ballistic E3 (MOA, SFP)",
-            ReticleUnit.MOA, 4.0, 1.6, 20.0,
+            ReticleUnit.MOA, 4.0, 1.4, 18.0,
             ReticleStyle.BALLISTIC_E3,
             holdoverMarks = listOf(1.49, 4.31, 7.18),
             postStart     = 4.0

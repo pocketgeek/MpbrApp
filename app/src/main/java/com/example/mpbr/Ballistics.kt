@@ -33,6 +33,36 @@ object Ballistics {
     enum class DragModel { G1, G7 }
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
+    enum class ReticleUnit  { MIL, MOA }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE }
+
+    /**
+     * Describes a scope reticle for DOPE chart illustration.
+     * majorSpacing = units between labeled/thicker marks.
+     * minorSpacing = units between fine marks (0 = major-only).
+     * vertExtent   = how many units are visible below the center crosshair.
+     */
+    data class ReticlePreset(
+        val name: String,
+        val unit: ReticleUnit,
+        val majorSpacing: Double,
+        val minorSpacing: Double,
+        val vertExtent: Double,
+        val style: ReticleStyle = ReticleStyle.HASH
+    )
+
+    val RETICLE_PRESETS: List<ReticlePreset> = listOf(
+        // ── MIL ─────────────────────────────────────────────────────────────
+        ReticlePreset("Mil-Dot",              ReticleUnit.MIL, 1.0, 0.5, 10.0, ReticleStyle.DOT),
+        ReticlePreset("Mil Hash · 0.5",       ReticleUnit.MIL, 1.0, 0.5, 10.0),
+        ReticlePreset("Mil Hash · 0.2",       ReticleUnit.MIL, 1.0, 0.2, 10.0),
+        ReticlePreset("Mil Christmas Tree",   ReticleUnit.MIL, 1.0, 0.5, 10.0, ReticleStyle.CHRISTMAS_TREE),
+        // ── MOA ─────────────────────────────────────────────────────────────
+        ReticlePreset("MOA Hash · 1.0",       ReticleUnit.MOA, 5.0, 1.0, 35.0),
+        ReticlePreset("MOA Hash · 0.5",       ReticleUnit.MOA, 5.0, 0.5, 35.0),
+        ReticlePreset("MOA Hash · 0.25",      ReticleUnit.MOA, 5.0, 0.25, 35.0)
+    )
+
     /**
      * Common factory ammunition presets. BCs and MVs are nominal factory
      * averages — actual values vary by manufacturer, lot, barrel length, and

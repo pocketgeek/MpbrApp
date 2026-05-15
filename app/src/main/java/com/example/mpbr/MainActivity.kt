@@ -93,6 +93,8 @@ fun MpbrScreen() {
         ActivityResultContracts.RequestPermission()
     ) { granted -> onPermissionResult.value(granted) }
 
+    var selectedReticle by remember { mutableStateOf<Ballistics.ReticlePreset?>(null) }
+
     // When the user types in a field, we want the dropdown label to flip to "Custom"
     // so it doesn't lie about what's loaded. These wrap the raw setters.
     fun userEdit(setter: (String) -> Unit, value: String) {
@@ -147,6 +149,10 @@ fun MpbrScreen() {
                 label    = { Text("G7") }
             )
         }
+
+        // ---- Reticle (shapes the DOPE chart illustration) ----
+        SectionLabel("Reticle")
+        ReticleDropdown(selected = selectedReticle, onSelect = { selectedReticle = it })
 
         // ---- Bullet & sight ----
         SectionLabel("Bullet & Sight")
@@ -244,7 +250,8 @@ fun MpbrScreen() {
                             temperature.toDoubleOrNull() ?: 59.0,
                             humidity.toDoubleOrNull()    ?: 0.0,
                             windSpeed.toDoubleOrNull()   ?: 0.0,
-                            showEnergy, showDrift
+                            showEnergy, showDrift,
+                            selectedReticle
                         )
                         val ok = saveDopeChart(context, bmp, label)
                         android.widget.Toast.makeText(
@@ -428,6 +435,150 @@ private fun AmmoPresetDropdown(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReticleDropdown(
+    selected: Ballistics.ReticlePreset?,
+    onSelect: (Ballistics.ReticlePreset?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+        OutlinedTextField(
+            value         = selected?.name ?: "None",
+            onValueChange = {},
+            readOnly      = true,
+            label         = { Text("Reticle") },
+            trailingIcon  = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier      = Modifier.fillMaxWidth().menuAnchor()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text    = { Text("None") },
+                onClick = { onSelect(null); expanded = false }
+            )
+            var lastUnit: Ballistics.ReticleUnit? = null
+            for (r in Ballistics.RETICLE_PRESETS) {
+                if (r.unit != lastUnit) {
+                    DropdownMenuItem(
+                        text    = { Text(if (r.unit == Ballistics.ReticleUnit.MIL) "MIL" else "MOA",
+                                        style = MaterialTheme.typography.labelSmall) },
+                        onClick = {}, enabled = false
+                    )
+                    lastUnit = r.unit
+                }
+                val bg = if (r.unit == Ballistics.ReticleUnit.MIL) Color(0x332196F3) else Color(0x334CAF50)
+                DropdownMenuItem(
+                    text     = { Text(r.name) },
+                    onClick  = { onSelect(r); expanded = false },
+                    modifier = Modifier.background(bg)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Draws a scope-circle reticle illustration with holdover callouts into [cv].
+ * The section spans [sectionTop]..[sectionTop]+[sectionH] at full bitmap width [W].
+ */
+private fun drawReticleSection(
+    cv: android.graphics.Canvas,
+    W: Int,
+    result: Ballistics.MpbrResult,
+    reticle: Ballistics.ReticlePreset,
+    sectionTop: Float,
+    sectionH: Float,
+    bsz: Float,
+    S: Int
+) {
+    val R   = (sectionH * 0.40f).toInt()          // circle radius in px
+    val cx  = W * 0.26f                            // circle center X
+    val cy  = sectionTop + sectionH * 0.50f        // circle center Y
+    val ppu = R / reticle.vertExtent.toFloat()     // px per reticle unit (mil or MOA)
+
+    // ---- scope circle ----
+    cv.drawCircle(cx, cy, R.toFloat(),
+        Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.WHITE })
+    cv.drawCircle(cx, cy, R.toFloat(),
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = S * 3f
+        })
+
+    // reticle name label above circle
+    val pLbl = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.DKGRAY; textSize = bsz * 0.72f; typeface = Typeface.DEFAULT_BOLD
+    }
+    val lText = "Reticle: ${reticle.name}"
+    cv.drawText(lText, cx - pLbl.measureText(lText) / 2f, sectionTop + S * 8f + bsz * 0.72f, pLbl)
+
+    // ---- clip to circle then draw crosshair + marks ----
+    cv.save()
+    cv.clipPath(android.graphics.Path().apply {
+        addCircle(cx, cy, R.toFloat(), android.graphics.Path.Direction.CW)
+    })
+
+    val pLine = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
+    cv.drawLine(cx - R, cy, cx + R, cy, pLine)
+    cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
+
+    val stepSz        = if (reticle.minorSpacing > 0) reticle.minorSpacing else reticle.majorSpacing
+    val stepsPerMajor = if (reticle.minorSpacing > 0) Math.round(reticle.majorSpacing / reticle.minorSpacing).toInt() else 1
+    val stepCount     = Math.round(reticle.vertExtent / stepSz).toInt()
+
+    val pMaj = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 2f }
+    val pMin = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
+    val pDot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
+
+    for (i in 1..stepCount) {
+        val isMaj = i % stepsPerMajor == 0
+        val hw    = if (isMaj) R * 0.44f else R * 0.22f
+        val paint = if (isMaj) pMaj else pMin
+
+        for (sign in listOf(1f, -1f)) {
+            val y = cy + sign * i * stepSz.toFloat() * ppu
+            when (reticle.style) {
+                Ballistics.ReticleStyle.DOT ->
+                    if (isMaj) cv.drawCircle(cx, y,
+                        (ppu * stepSz * 0.28f).toFloat().coerceAtLeast(S * 2f), pDot)
+                Ballistics.ReticleStyle.HASH ->
+                    cv.drawLine(cx - hw, y, cx + hw, y, paint)
+                Ballistics.ReticleStyle.CHRISTMAS_TREE -> {
+                    // tree arms widen linearly going below center; above center stays normal
+                    val extra = if (sign > 0) i * stepSz.toFloat() * ppu * 0.20f else 0f
+                    cv.drawLine(cx - hw - extra, y, cx + hw + extra, y, paint)
+                }
+            }
+        }
+    }
+    cv.restore()
+
+    // ---- callout lines + range labels ----
+    val lineStartX = cx + R + S * 10f
+    val textX      = W * 0.65f
+    val pDash = Paint().apply {
+        color = android.graphics.Color.DKGRAY; strokeWidth = S.toFloat()
+        pathEffect = android.graphics.DashPathEffect(floatArrayOf(S * 5f, S * 3f), 0f)
+    }
+    val pMark = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
+    val pTxt  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; textSize = bsz * 0.80f }
+
+    var lastY = Float.NEGATIVE_INFINITY
+    for (row in result.trajectoryTable) {
+        val hold = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.holdoverMil else row.holdoverMoa
+        val y    = cy + hold.toFloat() * ppu
+        if (y < sectionTop + S * 4 || y > sectionTop + sectionH - S * 4) continue
+        if (Math.abs(y - lastY) < bsz * 0.82f) continue   // skip overlapping labels
+
+        cv.drawCircle(cx, y, S * 4f, pMark)
+        cv.drawLine(lineStartX, y, textX - S * 4f, y, pDash)
+        val unitStr = if (reticle.unit == Ballistics.ReticleUnit.MIL)
+            "%.2f mil".format(hold) else "%.1f MOA".format(hold)
+        cv.drawText("${row.rangeYards} yd  ($unitStr)", textX, y + bsz * 0.33f, pTxt)
+        lastY = y
+    }
+}
+
 /**
  * Renders a DOPE card to a 1200-px-wide Bitmap using Android Canvas.
  * 3× scale so text is sharp when viewed or printed.
@@ -441,7 +592,8 @@ private fun buildDopeChartBitmap(
     rhPct: Double,
     windMph: Double,
     showEnergy: Boolean,
-    showDrift: Boolean
+    showDrift: Boolean,
+    reticle: Ballistics.ReticlePreset? = null
 ): Bitmap {
     val S   = 3
     val W   = 400 * S
@@ -469,9 +621,10 @@ private fun buildDopeChartBitmap(
         if (showEnergy) add("E (ft·lb)")
     }
 
-    val headerH = pad + tsz.toInt() + 14 + info.size * lnH + pad
-    val tableH  = pad + bsz.toInt() + 10 + S + rwH * result.trajectoryTable.size + pad
-    val H       = headerH + S + tableH
+    val reticleH = if (reticle != null) 640 else 0
+    val headerH  = pad + tsz.toInt() + 14 + info.size * lnH + pad
+    val tableH   = pad + bsz.toInt() + 10 + S + rwH * result.trajectoryTable.size + pad
+    val H        = headerH + S + (if (reticle != null) reticleH + S else 0) + tableH
 
     val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
     val cv  = android.graphics.Canvas(bmp)
@@ -496,7 +649,15 @@ private fun buildDopeChartBitmap(
     y += pad
 
     cv.drawRect(0f, y, W.toFloat(), y + S, pRule)
-    y += S + pad
+    y += S.toFloat()
+
+    if (reticle != null) {
+        drawReticleSection(cv, W, result, reticle, y, reticleH.toFloat(), bsz, S)
+        y += reticleH
+        cv.drawRect(0f, y, W.toFloat(), y + S, pRule)
+        y += S.toFloat()
+    }
+    y += pad
 
     val colW = (W - 2 * pad).toFloat() / cols.size
     cols.forEachIndexed { i, col -> cv.drawText(col, pad + i * colW, y, pHdr) }

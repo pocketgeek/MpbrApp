@@ -710,6 +710,41 @@ private fun drawReticleSection(
                 }
             }
 
+            Ballistics.ReticleStyle.DUPLEX -> {
+                // Classic duplex/Plex: thick tapered posts + short thin center crosshair.
+                // Posts drawn as filled trapezoids — wide at scope edge, tapering to thin at center.
+                val gapPx   = reticle.majorSpacing.toFloat() * ppu   // thin-to-thick transition
+                val postHH  = reticle.minorSpacing.toFloat() * ppu   // post half-height at outer end
+                val thinH   = s * 0.4f                                // thin crosshair half-width
+                val pFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                val pThin   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+
+                // Vertical: top post (outer edge to gap, tapering wide→thin)
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - postHH, cy - r.toFloat()); lineTo(cx + postHH, cy - r.toFloat())
+                    lineTo(cx + thinH,  cy - gapPx);       lineTo(cx - thinH,  cy - gapPx); close()
+                }, pFill)
+                // Vertical: bottom post
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - postHH, cy + r.toFloat()); lineTo(cx + postHH, cy + r.toFloat())
+                    lineTo(cx + thinH,  cy + gapPx);       lineTo(cx - thinH,  cy + gapPx); close()
+                }, pFill)
+                // Horizontal: left post
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - r.toFloat(), cy - postHH); lineTo(cx - r.toFloat(), cy + postHH)
+                    lineTo(cx - gapPx,       cy + thinH);  lineTo(cx - gapPx,      cy - thinH); close()
+                }, pFill)
+                // Horizontal: right post
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx + r.toFloat(), cy - postHH); lineTo(cx + r.toFloat(), cy + postHH)
+                    lineTo(cx + gapPx,       cy + thinH);  lineTo(cx + gapPx,      cy - thinH); close()
+                }, pFill)
+
+                // Short thin center crosshair
+                cv.drawLine(cx - gapPx, cy, cx + gapPx, cy, pThin)
+                cv.drawLine(cx, cy - gapPx, cx, cy + gapPx, pThin)
+            }
+
             Ballistics.ReticleStyle.CIRCLE_BDC -> {
                 // Circle drawn outside clip; inside: center dot, thin post, BDC ticks, thick bottom post
                 val dotR   = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)

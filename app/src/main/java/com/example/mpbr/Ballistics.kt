@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -56,6 +56,19 @@ object Ballistics {
     )
 
     val RETICLE_PRESETS: List<ReticlePreset> = listOf(
+        // ── Burris ───────────────────────────────────────────────────────────────
+        // Burris Fullfield 2-8×35 SFP — Plex (duplex) reticle.
+        // Classic thick outer posts tapering to thin center crosshair.
+        // SFP, subtensions valid at 8× only.
+        // majorSpacing = gap from center to inner face of thick post (A ≈ 0.35 MOA at 8×).
+        // minorSpacing = half-height of thick horizontal bar (B ≈ 0.93 MOA at 8×).
+        // Outer posts extend to ≈10.6 MOA from center (W scaled from Fullfield II 3-9×40 @ 9×).
+        // Source: Burris Plex subtension diagram (Fullfield II at high mag, scaled for 8×).
+        ReticlePreset(
+            "Burris Fullfield Plex (MOA, SFP)",
+            ReticleUnit.MOA, 0.35, 0.93, 11.0,
+            ReticleStyle.DUPLEX
+        ),
         // ── EOTech ───────────────────────────────────────────────────────────────
         // EOTech VUDU 3-9×32 SFP HC1 — hunting crosshair. SFP, valid at 9× only.
         // Windage ±2–±12 MOA; holdover 2–22 MOA at 2 MOA steps.

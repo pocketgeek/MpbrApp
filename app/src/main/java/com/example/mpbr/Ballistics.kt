@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3 }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -56,75 +56,9 @@ object Ballistics {
     )
 
     val RETICLE_PRESETS: List<ReticlePreset> = listOf(
-        // Vortex Dead-Hold BDC (MOA, SFP) — found in Viper 4-12×40, 3.5-10×50, etc.
-        // Subtensions valid at maximum magnification only (second focal plane).
-        // Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA below center.
-        // Windage hashes: ±2, ±4, ±6 MOA; thick outer posts begin at ~7 MOA.
-        ReticlePreset(
-            "Vortex Dead-Hold BDC (MOA, SFP)",
-            ReticleUnit.MOA, 0.0, 0.0, 11.0,
-            ReticleStyle.BDC,
-            holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
-            windageMarks  = listOf(2.0, 4.0, 6.0),
-            postStart     = 7.0
-        ),
-        // Vortex Strike Eagle 1-8×24 SFP — AR-BDC3 (MOA) reticle.
-        // SFP: subtensions valid at maximum magnification (8×) only.
-        // Horseshoe illumination: large top arc (~120°) + two side hooks at 3 & 9 o'clock;
-        // open at the bottom. 1 MOA center dot.
-        // Holdover marks on vertical post: 2.4 / 5.6 / 9.5 / 14.6 MOA below center
-        //   (calibrated for 300 / 400 / 500 / 600 yd with common 5.56 loads).
-        // majorSpacing = broken circle radius (8.3125 MOA); minorSpacing = center dot radius (0.5 MOA).
-        // Source: Uncle Zo AR-BDC3 review + Vortex product page.
-        ReticlePreset(
-            "Vortex Strike Eagle AR-BDC3 (MOA, SFP)",
-            ReticleUnit.MOA, 8.3125, 0.5, 25.0,
-            ReticleStyle.AR_BDC3,
-            holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6)
-        ),
-        // Viridian MDS25 Modern Dot Sight — BRC (Bullet Rise Compensating) MOA reticle.
-        // 1× red dot, always accurate. Center 3 MOA dot + 2 holdunder dots + ranging chevrons.
-        // Exact MOA positions not published; estimated for ~2.5" HOB, 50-yd zero, .223 55gr:
-        //   15-yd holdunder ≈ 7 MOA below center; 7-yd holdunder ≈ 25 MOA below center.
-        //   Chevron dimensions estimated from product image.
-        // minorSpacing = center dot radius (1.5 MOA). holdoverMarks = [7yd holdunder, 7yd holdunder] MOA.
-        // Source: Viridian product page / product image.
-        ReticlePreset(
-            "Viridian MDS25 BRC (MOA, 1×)",
-            ReticleUnit.MOA, 0.0, 1.5, 40.0,
-            ReticleStyle.BRC,
-            holdoverMarks = listOf(7.0, 25.0)
-        ),
-        // Vortex Spitfire AR 1× Prism Scope — DRT (Dual Ring Tactical) MOA reticle.
-        // Etched prism; works without battery; 1× fixed magnification — always accurate.
-        // Center dot 3 MOA (1.5 MOA radius). Inner ring: 44 MOA ID / 6 MOA thick (~25 MOA center radius).
-        // Outer ring: 140 MOA ID / 3 MOA thick (~71.5 MOA center radius).
-        // majorSpacing = inner ring center radius; postStart = outer ring center radius.
-        // Source: Vortex product page + GunsAmerica review subtension measurements.
-        ReticlePreset(
-            "Vortex Spitfire AR DRT (MOA, 1×)",
-            ReticleUnit.MOA, 25.0, 1.5, 85.0,
-            ReticleStyle.DRT,
-            postStart = 71.5
-        ),
-        // Vortex EBR-7C (MOA, FFP) — found in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II.
-        // Subtensions valid at ALL magnifications (first focal plane).
-        // Numbered horizontal stadia: 1 MOA minor / 4 MOA major (labeled 4–24), thick posts at ±26 MOA.
-        // Numbered vertical stadia above center: same spacing, labels 4–32, no thick top post.
-        // Dot-grid tree below center: rows every 4 MOA (4→36); at row N MOA, dots from -N to +N
-        // at 2 MOA horizontal spacing. Thick bottom post below tree. Center dot 0.14 MOA.
-        // Source: Vortex EBR-7C MOA reticle product image / reticle manual.
-        ReticlePreset(
-            "Vortex EBR-7C (MOA, FFP)",
-            ReticleUnit.MOA, 4.0, 1.0, 40.0,
-            ReticleStyle.MOA_TREE,
-            postStart = 26.0
-        ),
-        // EOTech VUDU 3-9×32 SFP HC1 (MOA, SFP) — hunting crosshair with regular MOA hash marks.
-        // Subtensions valid at maximum magnification (9×) only (second focal plane).
-        // Windage hashes: ±2, ±4, ±6, ±8, ±10, ±12 MOA each side.
-        // Holdover marks: 2 MOA increments, 2–22 MOA below center (11 marks total).
-        // Source: EOTech specs — 12 MOA windage, 22 MOA elevation at 9×, 2 MOA increments.
+        // ── EOTech ───────────────────────────────────────────────────────────────
+        // EOTech VUDU 3-9×32 SFP HC1 — hunting crosshair. SFP, valid at 9× only.
+        // Windage ±2–±12 MOA; holdover 2–22 MOA at 2 MOA steps.
         ReticlePreset(
             "EOTech VUDU HC1 (MOA, SFP)",
             ReticleUnit.MOA, 0.0, 0.0, 22.0,
@@ -133,24 +67,71 @@ object Ballistics {
             windageMarks  = listOf(2.0, 4.0, 6.0, 8.0, 10.0, 12.0),
             postStart     = 0.0
         ),
-        // Holosun HS510C — 2 MOA center dot + 65 MOA ring, 1× red dot sight.
-        // Subtensions are fixed at all times (no magnification).
-        // majorSpacing encodes ring radius (32.5 MOA); minorSpacing encodes dot radius (1.0 MOA).
-        ReticlePreset(
-            "Holosun 510C (2 MOA / 65 MOA)",
-            ReticleUnit.MOA, 32.5, 1.0, 40.0,
-            ReticleStyle.CIRCLE_DOT
-        ),
-        // EOTech VUDU 4-12×36 FFP MR5 — MRAD dot-grid Christmas tree, first focal plane.
-        // Horizontal: numbered hashes every 1 MRAD, minor ticks at 0.5 MRAD, thick outer
-        // posts beginning at 6 MRAD. Center 1-MRAD-radius speed ring. Short vertical stadia
-        // above center. Tree below center: rows 2-8 MRAD, dots at 1 MRAD grid, half-MRAD ticks.
-        // Subtensions valid at ALL magnifications (FFP). Source: EOTech / OpticsPlanet specs.
+        // EOTech VUDU 4-12×36 FFP MR5 — MRAD dot-grid Christmas tree. FFP, all mags.
         ReticlePreset(
             "EOTech VUDU MR5 (MRAD, FFP)",
             ReticleUnit.MIL, 1.0, 0.5, 8.0,
             ReticleStyle.MRAD_TREE,
             postStart = 6.0
+        ),
+        // ── Firefield ────────────────────────────────────────────────────────────
+        // Firefield RapidStrike 1-6×24 SFP — Circle Dot BDC reticle.
+        // SFP, calibrated for .223 55gr FMJ. Circle 9.95 MOA diameter + 1.34 MOA center dot.
+        // BDC tick marks below circle for 300/400/500/600 yd; thick bottom post.
+        // BDC positions estimated from image proportions — exact MOA not published.
+        // majorSpacing = circle radius (4.975 MOA); minorSpacing = dot radius (0.67 MOA).
+        // Source: Firefield product page + reticle image.
+        ReticlePreset(
+            "Firefield RapidStrike Circle Dot (MOA, SFP)",
+            ReticleUnit.MOA, 4.975, 0.67, 22.0,
+            ReticleStyle.CIRCLE_BDC,
+            holdoverMarks = listOf(7.0, 10.0, 13.5, 17.5)
+        ),
+        // ── Holosun ──────────────────────────────────────────────────────────────
+        // Holosun HS510C — 2 MOA center dot + 65 MOA ring, 1× red dot.
+        ReticlePreset(
+            "Holosun 510C (2 MOA / 65 MOA)",
+            ReticleUnit.MOA, 32.5, 1.0, 40.0,
+            ReticleStyle.CIRCLE_DOT
+        ),
+        // ── Viridian ─────────────────────────────────────────────────────────────
+        // Viridian MDS25 — BRC reticle, 1×. Positions estimated from HOB physics.
+        ReticlePreset(
+            "Viridian MDS25 BRC (MOA, 1×)",
+            ReticleUnit.MOA, 0.0, 1.5, 40.0,
+            ReticleStyle.BRC,
+            holdoverMarks = listOf(7.0, 25.0)
+        ),
+        // ── Vortex ───────────────────────────────────────────────────────────────
+        // Vortex Dead-Hold BDC — Viper 4-12×40, 3.5-10×50, etc. SFP, max mag only.
+        ReticlePreset(
+            "Vortex Dead-Hold BDC (MOA, SFP)",
+            ReticleUnit.MOA, 0.0, 0.0, 11.0,
+            ReticleStyle.BDC,
+            holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
+            windageMarks  = listOf(2.0, 4.0, 6.0),
+            postStart     = 7.0
+        ),
+        // Vortex EBR-7C — Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II. FFP.
+        ReticlePreset(
+            "Vortex EBR-7C (MOA, FFP)",
+            ReticleUnit.MOA, 4.0, 1.0, 40.0,
+            ReticleStyle.MOA_TREE,
+            postStart = 26.0
+        ),
+        // Vortex Spitfire AR 1× Prism — DRT (Dual Ring Tactical). Always accurate.
+        ReticlePreset(
+            "Vortex Spitfire AR DRT (MOA, 1×)",
+            ReticleUnit.MOA, 25.0, 1.5, 85.0,
+            ReticleStyle.DRT,
+            postStart = 71.5
+        ),
+        // Vortex Strike Eagle 1-8×24 — AR-BDC3 horseshoe BDC. SFP, valid at 8× only.
+        ReticlePreset(
+            "Vortex Strike Eagle AR-BDC3 (MOA, SFP)",
+            ReticleUnit.MOA, 8.3125, 0.5, 25.0,
+            ReticleStyle.AR_BDC3,
+            holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6)
         )
     )
 

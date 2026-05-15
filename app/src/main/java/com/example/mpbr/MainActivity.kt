@@ -566,6 +566,14 @@ private fun drawReticleSection(
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 3f
         })
+    // CIRCLE_BDC: draw the full circle outside clip
+    if (reticle.style == Ballistics.ReticleStyle.CIRCLE_BDC) {
+        val circleR = reticle.majorSpacing.toFloat() * ppu
+        cv.drawCircle(cx, cy, circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+        })
+    }
+
     // AR-BDC3: horseshoe (large top arc + two side hooks) drawn outside clip
     if (reticle.style == Ballistics.ReticleStyle.AR_BDC3) {
         val circleR = reticle.majorSpacing.toFloat() * ppu
@@ -700,6 +708,47 @@ private fun drawReticleSection(
                     val hy = cy + (h * ppu).toFloat()
                     cv.drawLine(cx - hmHW, hy, cx + hmHW, hy, pHMark)
                 }
+            }
+
+            Ballistics.ReticleStyle.CIRCLE_BDC -> {
+                // Circle drawn outside clip; inside: center dot, thin post, BDC ticks, thick bottom post
+                val dotR   = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
+                val circleR = reticle.majorSpacing.toFloat() * ppu
+                val tickHW = ppu * 1.8f
+                val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL;   color = android.graphics.Color.BLACK }
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 5f }
+                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                val pLbl   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = ppu * 2.4f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
+                }
+
+                val rangeLabels = listOf("300", "400", "500", "600")
+
+                // Center dot inside the circle
+                cv.drawCircle(cx, cy, dotR, pFill)
+
+                // Faint reference above center for trajectory callouts
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy - circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()
+                })
+
+                // Thin BDC post from bottom of circle to last holdover mark
+                val lastHy = if (reticle.holdoverMarks.isNotEmpty())
+                    cy + reticle.holdoverMarks.last().toFloat() * ppu else cy + circleR
+                cv.drawLine(cx, cy + circleR, cx, lastHy, pThin)
+
+                // BDC tick marks + labels
+                reticle.holdoverMarks.forEachIndexed { idx, h ->
+                    val hy = cy + h.toFloat() * ppu
+                    cv.drawLine(cx - tickHW, hy, cx + tickHW, hy, pTick)
+                    cv.drawText(rangeLabels.getOrElse(idx) { "" },
+                        cx + tickHW + ppu * 0.3f, hy + pLbl.textSize * 0.35f, pLbl)
+                }
+
+                // Thick bottom post from last BDC mark to scope edge
+                cv.drawLine(cx, lastHy + ppu * 0.5f, cx, cy + r.toFloat(), pThick)
             }
 
             Ballistics.ReticleStyle.AR_BDC3 -> {

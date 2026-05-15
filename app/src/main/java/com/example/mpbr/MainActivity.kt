@@ -270,7 +270,9 @@ fun MpbrScreen() {
                 TrajectoryTableCard(
                     rows       = r.trajectoryTable,
                     showEnergy = r.energyAtMpbrFtLb > 0.0,
-                    showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
+                    showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
+                    showMoa    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
+                    showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL
                 )
             }
 
@@ -318,7 +320,9 @@ fun MpbrScreen() {
 private fun TrajectoryTableCard(
     rows: List<Ballistics.TrajectoryRow>,
     showEnergy: Boolean,
-    showDrift: Boolean
+    showDrift: Boolean,
+    showMoa: Boolean = true,
+    showMil: Boolean = true
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -328,8 +332,13 @@ private fun TrajectoryTableCard(
             Text("Trajectory Table", style = MaterialTheme.typography.titleLarge)
 
             val header = buildList {
-                add("Range"); add("Drop"); add("MOA"); add("MIL")
-                if (showDrift) { add("W.MOA"); add("W.MIL") }
+                add("Range"); add("Drop")
+                if (showMoa) add("MOA")
+                if (showMil) add("MIL")
+                if (showDrift) {
+                    if (showMoa) add("W.MOA")
+                    if (showMil) add("W.MIL")
+                }
                 add("Vel")
                 if (showEnergy) add("Energy")
             }
@@ -340,11 +349,11 @@ private fun TrajectoryTableCard(
                 val cells = buildList {
                     add("${row.rangeYards} yd")
                     add("%.1f in".format(row.dropInches))
-                    add("%.1f".format(row.holdoverMoa))
-                    add("%.2f".format(row.holdoverMil))
+                    if (showMoa) add("%.1f".format(row.holdoverMoa))
+                    if (showMil) add("%.2f".format(row.holdoverMil))
                     if (showDrift) {
-                        add("%.1f".format(row.driftMoa))
-                        add("%.2f".format(row.driftMil))
+                        if (showMoa) add("%.1f".format(row.driftMoa))
+                        if (showMil) add("%.2f".format(row.driftMil))
                     }
                     add("%.0f fps".format(row.velocityFps))
                     if (showEnergy) add("%.0f ft·lb".format(row.energyFtLb))

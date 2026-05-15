@@ -714,46 +714,45 @@ private fun drawReticleSection(
                 // Plex/duplex: large rectangular posts with a small notch at the inner tip.
                 // Horizontal posts are taller than vertical posts are wide (classic Burris look).
                 val gapPx  = reticle.majorSpacing.toFloat() * ppu   // center to inner post tip
-                val hPostHH = reticle.minorSpacing.toFloat() * ppu   // horiz post half-height
-                val vPostHH = hPostHH * 0.70f                         // vert post half-width (narrower)
-                val notch   = hPostHH * 0.60f  // notch depth on inner tip (the pointed cutout)
+                val postHH = reticle.minorSpacing.toFloat() * ppu    // all posts same half-thickness
+                val notch  = postHH * 0.60f  // notch depth on inner tip (the pointed cutout)
                 val pFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
                 val pThin   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
 
                 // Top post: rectangle with a small V-notch at the inner (bottom) tip
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx - vPostHH, cy - r.toFloat())
-                    lineTo(cx + vPostHH, cy - r.toFloat())
-                    lineTo(cx + vPostHH, cy - gapPx - notch)
+                    moveTo(cx - postHH, cy - r.toFloat())
+                    lineTo(cx + postHH, cy - r.toFloat())
+                    lineTo(cx + postHH, cy - gapPx - notch)
                     lineTo(cx,           cy - gapPx)          // notch tip
-                    lineTo(cx - vPostHH, cy - gapPx - notch)
+                    lineTo(cx - postHH, cy - gapPx - notch)
                     close()
                 }, pFill)
                 // Bottom post
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx - vPostHH, cy + r.toFloat())
-                    lineTo(cx + vPostHH, cy + r.toFloat())
-                    lineTo(cx + vPostHH, cy + gapPx + notch)
+                    moveTo(cx - postHH, cy + r.toFloat())
+                    lineTo(cx + postHH, cy + r.toFloat())
+                    lineTo(cx + postHH, cy + gapPx + notch)
                     lineTo(cx,           cy + gapPx)          // notch tip
-                    lineTo(cx - vPostHH, cy + gapPx + notch)
+                    lineTo(cx - postHH, cy + gapPx + notch)
                     close()
                 }, pFill)
                 // Left post: rectangle with V-notch at the inner (right) tip
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx - r.toFloat(), cy - hPostHH)
-                    lineTo(cx - r.toFloat(), cy + hPostHH)
-                    lineTo(cx - gapPx - notch, cy + hPostHH)
+                    moveTo(cx - r.toFloat(), cy - postHH)
+                    lineTo(cx - r.toFloat(), cy + postHH)
+                    lineTo(cx - gapPx - notch, cy + postHH)
                     lineTo(cx - gapPx,         cy)            // notch tip
-                    lineTo(cx - gapPx - notch, cy - hPostHH)
+                    lineTo(cx - gapPx - notch, cy - postHH)
                     close()
                 }, pFill)
                 // Right post
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx + r.toFloat(), cy - hPostHH)
-                    lineTo(cx + r.toFloat(), cy + hPostHH)
-                    lineTo(cx + gapPx + notch, cy + hPostHH)
+                    moveTo(cx + r.toFloat(), cy - postHH)
+                    lineTo(cx + r.toFloat(), cy + postHH)
+                    lineTo(cx + gapPx + notch, cy + postHH)
                     lineTo(cx + gapPx,         cy)            // notch tip
-                    lineTo(cx + gapPx + notch, cy - hPostHH)
+                    lineTo(cx + gapPx + notch, cy - postHH)
                     close()
                 }, pFill)
 

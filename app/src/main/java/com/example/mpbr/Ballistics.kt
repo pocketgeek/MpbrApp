@@ -67,7 +67,7 @@ object Ballistics {
         // Source: Burris Plex product image + subtension diagram.
         ReticlePreset(
             "Burris Fullfield Plex (MOA, SFP)",
-            ReticleUnit.MOA, 3.85, 1.65, 11.0,
+            ReticleUnit.MOA, 3.85, 0.90, 11.0,
             ReticleStyle.DUPLEX
         ),
         // ── EOTech ───────────────────────────────────────────────────────────────

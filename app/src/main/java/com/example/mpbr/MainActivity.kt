@@ -89,6 +89,7 @@ fun MpbrScreen() {
 
     var tableStart   by remember { mutableStateOf("50") }
     var tableEnd     by remember { mutableStateOf("500") }
+    var tableStep    by remember { mutableStateOf("50") }
     var dopeTitle    by remember { mutableStateOf("MPBR DOPE CARD") }
 
     var result by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
@@ -180,6 +181,7 @@ fun MpbrScreen() {
         SectionLabel("Trajectory Table")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NumberField("Start (yd)", tableStart, Modifier.weight(1f)) { tableStart = it }
+            NumberField("Step (yd)",  tableStep,  Modifier.weight(1f)) { tableStep  = it }
             NumberField("End (yd)",   tableEnd,   Modifier.weight(1f)) { tableEnd   = it }
         }
 
@@ -192,8 +194,9 @@ fun MpbrScreen() {
                     val bw   = bulletWeight.toDouble()
                     val sh   = sightHeight.toDouble()
                     val vz   = vitalZone.toDouble()
-                    val tMin = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
-                    val tMax = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
+                    val tMin  = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
+                    val tMax  = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
+                    val tStep = (tableStep.toIntOrNull()  ?: 50).coerceIn(1, 500)
                     if (tMin >= tMax) {
                         error  = "Table start must be less than table end"
                         result = null
@@ -213,6 +216,7 @@ fun MpbrScreen() {
                         dragModel           = dragModel,
                         atmosphere          = atm,
                         windSpeedMph        = windSpeed.toDoubleOrNull() ?: 0.0,
+                        tableStepYards      = tStep,
                         tableMinYards       = tMin,
                         tableMaxYards       = tMax
                     )

@@ -524,12 +524,14 @@ object Ballistics {
         traj: List<TrajectoryPoint>,
         bulletWeightGr: Double,
         stepYards: Int = 50,
-        maxYards: Int  = 500
+        maxYards: Int  = 500,
+        minYards: Int  = 0
     ): List<TrajectoryRow> {
         if (traj.isEmpty()) return emptyList()
         val rows = ArrayList<TrajectoryRow>(maxYards / stepYards + 1)
         var i = 0
         var target = stepYards
+        while (target < minYards) target += stepYards   // skip rows before minYards
         while (target <= maxYards && i < traj.size - 1) {
             while (i < traj.size - 1 && traj[i + 1].rangeYards < target) i++
             if (i >= traj.size - 1) break
@@ -577,7 +579,8 @@ object Ballistics {
         atmosphere: Atmosphere     = Atmosphere.STANDARD,
         windSpeedMph: Double       = 0.0,
         tableStepYards: Int        = 50,
-        tableMaxYards: Int         = 500
+        tableMaxYards: Int         = 500,
+        tableMinYards: Int         = 0
     ): MpbrResult {
         require(muzzleVelocity      > 0)  { "muzzle velocity must be positive" }
         require(ballisticCoeff      > 0)  { "BC must be positive" }
@@ -637,7 +640,7 @@ object Ballistics {
             }
         }
 
-        val table = trajectoryTable(traj, bulletWeightGr, tableStepYards, tableMaxYards)
+        val table = trajectoryTable(traj, bulletWeightGr, tableStepYards, tableMaxYards, tableMinYards)
 
         return MpbrResult(
             nearZeroYards         = nearZero,

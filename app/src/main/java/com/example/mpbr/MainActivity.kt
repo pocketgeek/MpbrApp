@@ -41,7 +41,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -83,6 +86,9 @@ fun MpbrScreen() {
     var temperature  by remember { mutableStateOf("70") }
     var humidity     by remember { mutableStateOf("25") }
     var windSpeed    by remember { mutableStateOf("0") }
+
+    var tableStart   by remember { mutableStateOf("50") }
+    var tableEnd     by remember { mutableStateOf("500") }
 
     var result by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
     var error  by remember { mutableStateOf<String?>(null) }
@@ -169,15 +175,29 @@ fun MpbrScreen() {
         NumberField("Humidity (%)",            humidity)   { humidity = it }
         NumberField("Wind Speed (mph, full value crosswind)", windSpeed) { windSpeed = it }
 
+        // ---- Trajectory table range ----
+        SectionLabel("Trajectory Table")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            NumberField("Start (yd)", tableStart, Modifier.weight(1f)) { tableStart = it }
+            NumberField("End (yd)",   tableEnd,   Modifier.weight(1f)) { tableEnd   = it }
+        }
+
         Button(
             onClick = {
                 error = null
                 try {
-                    val mv = muzzleVel.toDouble()
-                    val b  = bc.toDouble()
-                    val bw = bulletWeight.toDouble()
-                    val sh = sightHeight.toDouble()
-                    val vz = vitalZone.toDouble()
+                    val mv   = muzzleVel.toDouble()
+                    val b    = bc.toDouble()
+                    val bw   = bulletWeight.toDouble()
+                    val sh   = sightHeight.toDouble()
+                    val vz   = vitalZone.toDouble()
+                    val tMin = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
+                    val tMax = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
+                    if (tMin >= tMax) {
+                        error  = "Table start must be less than table end"
+                        result = null
+                        return@Button
+                    }
                     val atm = Ballistics.Atmosphere(
                         altitudeFt   = altitude.toDouble(),
                         temperatureF = temperature.toDouble(),
@@ -192,7 +212,8 @@ fun MpbrScreen() {
                         dragModel           = dragModel,
                         atmosphere          = atm,
                         windSpeedMph        = windSpeed.toDoubleOrNull() ?: 0.0,
-                        tableMaxYards       = 1000
+                        tableMinYards       = tMin,
+                        tableMaxYards       = tMax
                     )
                 } catch (e: NumberFormatException) {
                     error  = "All fields must be numbers"
@@ -236,6 +257,21 @@ fun MpbrScreen() {
                     showEnergy = r.energyAtMpbrFtLb > 0.0,
                     showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
                 )
+            }
+
+            // Reticle illustration (on-screen) when a reticle is selected
+            selectedReticle?.let { reticle ->
+                val reticleBmp = remember(r, reticle) {
+                    buildReticleBitmap(r, reticle, windSpeed.toDoubleOrNull() ?: 0.0)
+                }
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Image(
+                        bitmap           = reticleBmp.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale     = ContentScale.FillWidth,
+                        modifier         = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
             Button(
@@ -350,14 +386,19 @@ private fun SectionLabel(text: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NumberField(label: String, value: String, onChange: (String) -> Unit) {
+private fun NumberField(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    onChange: (String) -> Unit
+) {
     OutlinedTextField(
         value           = value,
         onValueChange   = onChange,
         label           = { Text(label) },
         singleLine      = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-        modifier        = Modifier.fillMaxWidth()
+        modifier        = modifier
     )
 }
 
@@ -848,6 +889,23 @@ private fun drawReticleSection(
                 this.color = color; textSize = bsz * 0.80f; typeface = Typeface.DEFAULT_BOLD
             })
     }
+}
+
+/** Renders just the reticle illustration for on-screen display (2× scale, 1100×560 px). */
+private fun buildReticleBitmap(
+    result: Ballistics.MpbrResult,
+    reticle: Ballistics.ReticlePreset,
+    windSpeedMph: Double
+): Bitmap {
+    val W   = 1100
+    val H   = 560
+    val S   = 2
+    val bsz = 12f * S
+    val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
+    val cv  = android.graphics.Canvas(bmp)
+    cv.drawColor(android.graphics.Color.WHITE)
+    drawReticleSection(cv, W, result, reticle, 0f, H.toFloat(), bsz, S)
+    return bmp
 }
 
 /**

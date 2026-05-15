@@ -166,3 +166,12 @@ On Android 8 or earlier the app will ask for storage permission the first time.
 - Save/recall custom loads — Room or DataStore.
 - Metric units toggle.
 - Custom drag function (CDM) for users with manufacturer Doppler radar curves.
+
+## Code quality
+
+All Android Studio warnings resolved as of v1.27:
+- KTX functions used throughout (`createBitmap`, `withClip`)
+- Kotlin stdlib used for math (`roundToInt`, `abs`, `floor`)
+- No unused parameters, no shadowed lambdas, all locals lowercase
+- `MPBR`, `reticle`, `holdunder`, `Traj`, and date-format tokens added to
+  the project spellcheck dictionary (`.idea/dictionaries/project.xml`)

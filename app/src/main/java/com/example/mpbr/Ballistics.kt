@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -70,14 +70,16 @@ object Ballistics {
         ),
         // Vortex EBR-7C (MOA, FFP) — found in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II.
         // Subtensions valid at ALL magnifications (first focal plane).
-        // 1 MOA minor hashes, 2 MOA major hashes (labeled). The Christmas tree windage dots
-        // below center are floating small marks — represented here as a standard HASH crosshair
-        // which accurately shows the graduated hash portion of the reticle.
-        // Center dot 0.14 MOA. Source: Vortex EBR-7C MOA reticle manual.
+        // Numbered horizontal stadia: 1 MOA minor / 4 MOA major (labeled 4–24), thick posts at ±26 MOA.
+        // Numbered vertical stadia above center: same spacing, labels 4–32, no thick top post.
+        // Dot-grid tree below center: rows every 4 MOA (4→36); at row N MOA, dots from -N to +N
+        // at 2 MOA horizontal spacing. Thick bottom post below tree. Center dot 0.14 MOA.
+        // Source: Vortex EBR-7C MOA reticle product image / reticle manual.
         ReticlePreset(
             "Vortex EBR-7C (MOA, FFP)",
-            ReticleUnit.MOA, 2.0, 1.0, 20.0,
-            ReticleStyle.HASH
+            ReticleUnit.MOA, 4.0, 1.0, 40.0,
+            ReticleStyle.MOA_TREE,
+            postStart = 26.0
         ),
         // EOTech VUDU 3-9×32 SFP HC1 (MOA, SFP) — hunting crosshair with regular MOA hash marks.
         // Subtensions valid at maximum magnification (9×) only (second focal plane).

@@ -70,13 +70,14 @@ object Ballistics {
         ),
         // Vortex EBR-7C (MOA, FFP) — found in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II.
         // Subtensions valid at ALL magnifications (first focal plane).
-        // 1 MOA minor hashes, 2 MOA major hashes (labeled). Christmas tree below center with
-        // windage reference dots at each 2 MOA drop line. Center dot 0.14 MOA.
-        // Source: Vortex EBR-7C MOA reticle manual / OpticsPlanet subtension data.
+        // 1 MOA minor hashes, 2 MOA major hashes (labeled). The Christmas tree windage dots
+        // below center are floating small marks — represented here as a standard HASH crosshair
+        // which accurately shows the graduated hash portion of the reticle.
+        // Center dot 0.14 MOA. Source: Vortex EBR-7C MOA reticle manual.
         ReticlePreset(
             "Vortex EBR-7C (MOA, FFP)",
-            ReticleUnit.MOA, 2.0, 1.0, 30.0,
-            ReticleStyle.CHRISTMAS_TREE
+            ReticleUnit.MOA, 2.0, 1.0, 20.0,
+            ReticleStyle.HASH
         ),
         // EOTech VUDU 3-9×32 SFP HC1 (MOA, SFP) — hunting crosshair with regular MOA hash marks.
         // Subtensions valid at maximum magnification (9×) only (second focal plane).

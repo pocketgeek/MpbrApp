@@ -578,6 +578,28 @@ private fun drawReticleSection(
             }
         }
 
+        Ballistics.ReticleStyle.CIRCLE_DOT -> {
+            val ringR = (reticle.majorSpacing * ppu).toFloat()   // 65 MOA ring radius in px
+            val dotR  = (reticle.minorSpacing * ppu).toFloat()   // 2 MOA dot radius in px
+
+            // 65 MOA ring
+            cv.drawCircle(cx, cy, ringR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                color = android.graphics.Color.BLACK
+                strokeWidth = S * 2f
+            })
+            // 2 MOA center dot
+            cv.drawCircle(cx, cy, dotR.coerceAtLeast(S * 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.FILL
+                color = android.graphics.Color.BLACK
+            })
+            // Faint vertical reference line so trajectory callout dots have a stadia to sit on
+            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.LTGRAY; strokeWidth = S.toFloat()
+                })
+        }
+
         Ballistics.ReticleStyle.MRAD_TREE -> {
             val stepsPerMaj = Math.round(reticle.majorSpacing / reticle.minorSpacing).toInt()
             val minorPx     = (reticle.minorSpacing * ppu).toFloat()

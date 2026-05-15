@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -80,6 +80,14 @@ object Ballistics {
             holdoverMarks = listOf(2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0),
             windageMarks  = listOf(2.0, 4.0, 6.0, 8.0, 10.0, 12.0),
             postStart     = 0.0
+        ),
+        // Holosun HS510C — 2 MOA center dot + 65 MOA ring, 1× red dot sight.
+        // Subtensions are fixed at all times (no magnification).
+        // majorSpacing encodes ring radius (32.5 MOA); minorSpacing encodes dot radius (1.0 MOA).
+        ReticlePreset(
+            "Holosun 510C (2 MOA / 65 MOA)",
+            ReticleUnit.MOA, 32.5, 1.0, 35.0,
+            ReticleStyle.CIRCLE_DOT
         ),
         // EOTech VUDU 4-12×36 FFP MR5 — MRAD dot-grid Christmas tree, first focal plane.
         // Horizontal: numbered hashes every 1 MRAD, minor ticks at 0.5 MRAD, thick outer

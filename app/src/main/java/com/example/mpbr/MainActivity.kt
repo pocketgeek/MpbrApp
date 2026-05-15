@@ -538,18 +538,24 @@ private fun drawReticleSection(
         } else {
             cv.drawLine(cx - R.toFloat(), cy, cx + R.toFloat(), cy, pLine)
         }
-        // Windage hashes
-        val wh = R * 0.10f
+        // Windage hashes — tall enough to be clearly visible over the crosshair
+        val wh    = R * 0.22f
+        val pWind = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.BLACK; strokeWidth = S * 2.5f
+        }
         for (w in reticle.windageMarks) {
             val wx = (w * ppu).toFloat()
             for (sign in listOf(1f, -1f)) {
-                cv.drawLine(cx + sign * wx, cy - wh, cx + sign * wx, cy + wh, pMaj)
+                cv.drawLine(cx + sign * wx, cy - wh, cx + sign * wx, cy + wh, pWind)
             }
         }
-        // Holdover dots
-        val dotR = (R * 0.048f).coerceAtLeast(S * 3f)
+        // Holdover dots — small open circles so they read as reticle features, not callout markers
+        val dotR       = (R * 0.022f).coerceAtLeast(S * 2f)
+        val pReticleDot = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.BLACK; style = Paint.Style.STROKE; strokeWidth = S * 1.5f
+        }
         for (h in reticle.holdoverMarks) {
-            cv.drawCircle(cx, cy + (h * ppu).toFloat(), dotR, pDot)
+            cv.drawCircle(cx, cy + (h * ppu).toFloat(), dotR, pReticleDot)
         }
     } else {
         // ---- Hash / Dot / Christmas tree ----
@@ -584,28 +590,48 @@ private fun drawReticleSection(
     }
     cv.restore()
 
-    // ---- callout lines + range labels ----
+    // ---- color-coded callout lines + range labels ----
+    val calloutColors = intArrayOf(
+        android.graphics.Color.rgb(210,  45,  45),   // red
+        android.graphics.Color.rgb( 30, 130, 200),   // blue
+        android.graphics.Color.rgb( 30, 160,  75),   // green
+        android.graphics.Color.rgb(170,  55, 185),   // purple
+        android.graphics.Color.rgb(200, 125,   0),   // amber
+        android.graphics.Color.rgb(  0, 170, 155),   // teal
+        android.graphics.Color.rgb(215,  85,   0),   // orange
+        android.graphics.Color.rgb(110,  55, 200),   // indigo
+        android.graphics.Color.rgb(  0, 150,  90),   // emerald
+        android.graphics.Color.rgb(175,   0,  85)    // crimson
+    )
     val lineStartX = cx + R + S * 10f
     val textX      = W * 0.65f
-    val pDash = Paint().apply {
-        color = android.graphics.Color.DKGRAY; strokeWidth = S.toFloat()
-        pathEffect = android.graphics.DashPathEffect(floatArrayOf(S * 5f, S * 3f), 0f)
-    }
-    val pMark = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
-    val pTxt  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; textSize = bsz * 0.80f }
 
-    var lastY = Float.NEGATIVE_INFINITY
+    var lastY    = Float.NEGATIVE_INFINITY
+    var colorIdx = 0
     for (row in result.trajectoryTable) {
         val hold = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.holdoverMil else row.holdoverMoa
         val y    = cy + hold.toFloat() * ppu
         if (y < sectionTop + S * 4 || y > sectionTop + sectionH - S * 4) continue
-        if (Math.abs(y - lastY) < bsz * 0.82f) continue   // skip overlapping labels
+        if (Math.abs(y - lastY) < bsz * 0.82f) continue
 
-        cv.drawCircle(cx, y, S * 4f, pMark)
-        cv.drawLine(lineStartX, y, textX - S * 4f, y, pDash)
+        val color = calloutColors[colorIdx % calloutColors.size]
+        colorIdx++
+
+        // Filled colored dot on the stadia
+        cv.drawCircle(cx, y, S * 5f,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; this.color = color })
+        // Dashed leader line in same color
+        cv.drawLine(lineStartX, y, textX - S * 6f, y, Paint().apply {
+            this.color = color; strokeWidth = S * 1.5f
+            pathEffect = android.graphics.DashPathEffect(floatArrayOf(S * 5f, S * 3f), 0f)
+        })
+        // Bold label in same color
         val unitStr = if (reticle.unit == Ballistics.ReticleUnit.MIL)
             "%.2f mil".format(hold) else "%.1f MOA".format(hold)
-        cv.drawText("${row.rangeYards} yd  ($unitStr)", textX, y + bsz * 0.33f, pTxt)
+        cv.drawText("${row.rangeYards} yd  ($unitStr)", textX, y + bsz * 0.33f,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = color; textSize = bsz * 0.80f; typeface = Typeface.DEFAULT_BOLD
+            })
         lastY = y
     }
 }

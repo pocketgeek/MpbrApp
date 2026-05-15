@@ -89,6 +89,7 @@ fun MpbrScreen() {
 
     var tableStart   by remember { mutableStateOf("50") }
     var tableEnd     by remember { mutableStateOf("500") }
+    var dopeTitle    by remember { mutableStateOf("MPBR DOPE CARD") }
 
     var result by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
     var error  by remember { mutableStateOf<String?>(null) }
@@ -181,6 +182,16 @@ fun MpbrScreen() {
             NumberField("Start (yd)", tableStart, Modifier.weight(1f)) { tableStart = it }
             NumberField("End (yd)",   tableEnd,   Modifier.weight(1f)) { tableEnd   = it }
         }
+
+        // ---- DOPE card title ----
+        SectionLabel("DOPE Card Title")
+        OutlinedTextField(
+            value         = dopeTitle,
+            onValueChange = { dopeTitle = it },
+            label         = { Text("Card Title") },
+            singleLine    = true,
+            modifier      = Modifier.fillMaxWidth()
+        )
 
         Button(
             onClick = {
@@ -290,7 +301,8 @@ fun MpbrScreen() {
                             humidity.toDoubleOrNull()    ?: 0.0,
                             windSpeed.toDoubleOrNull()   ?: 0.0,
                             showEnergy, showDrift,
-                            selectedReticle
+                            selectedReticle,
+                            dopeTitle
                         )
                         val ok = saveDopeChart(context, bmp, label)
                         android.widget.Toast.makeText(
@@ -992,7 +1004,8 @@ private fun buildDopeChartBitmap(
     windMph: Double,
     showEnergy: Boolean,
     showDrift: Boolean,
-    reticle: Ballistics.ReticlePreset? = null
+    reticle: Ballistics.ReticlePreset? = null,
+    cardTitle: String = "MPBR DOPE CARD"
 ): Bitmap {
     val S   = 3
     val W   = 400 * S
@@ -1049,7 +1062,7 @@ private fun buildDopeChartBitmap(
     val pStripe = Paint().apply { color = 0xFFF0F0F0.toInt() }
 
     var y = pad.toFloat() + tsz
-    cv.drawText("MPBR DOPE CARD", pad.toFloat(), y, pTitle)
+    cv.drawText(cardTitle.ifBlank { "MPBR DOPE CARD" }, pad.toFloat(), y, pTitle)
     y += 14f
     for (line in info) { y += lnH; cv.drawText(line, pad.toFloat(), y, pBody) }
     y += pad

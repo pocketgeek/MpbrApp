@@ -494,6 +494,26 @@ private fun drawReticleSection(
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = S * 3f
         })
+    // Circle-dot reticles: draw the large ring + cardinal tick marks outside the clip
+    if (reticle.style == Ballistics.ReticleStyle.CIRCLE_DOT) {
+        val ringR    = reticle.majorSpacing.toFloat() * ppu
+        val halfTick = ringR * 0.10f   // tick extends 10% of ring radius each side of the ring
+        val pRing = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = S * 4f
+        }
+        val pTick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.BLACK; strokeWidth = S * 3f
+        }
+        cv.drawCircle(cx, cy, ringR, pRing)
+        // 12 o'clock
+        cv.drawLine(cx, cy - ringR - halfTick, cx, cy - ringR + halfTick, pTick)
+        // 6 o'clock
+        cv.drawLine(cx, cy + ringR - halfTick, cx, cy + ringR + halfTick, pTick)
+        // 3 o'clock
+        cv.drawLine(cx + ringR - halfTick, cy, cx + ringR + halfTick, cy, pTick)
+        // 9 o'clock
+        cv.drawLine(cx - ringR - halfTick, cy, cx - ringR + halfTick, cy, pTick)
+    }
 
     // reticle name label above circle
     val pLbl = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -579,21 +599,11 @@ private fun drawReticleSection(
         }
 
         Ballistics.ReticleStyle.CIRCLE_DOT -> {
-            val ringR = (reticle.majorSpacing * ppu).toFloat()   // 65 MOA ring radius in px
-            val dotR  = (reticle.minorSpacing * ppu).toFloat()   // 2 MOA dot radius in px
-
-            // 65 MOA ring
-            cv.drawCircle(cx, cy, ringR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
-                color = android.graphics.Color.BLACK
-                strokeWidth = S * 2f
+            // Ring drawn outside clip above; here just the center dot + faint reference line
+            val aDotR = reticle.minorSpacing.toFloat() * ppu
+            cv.drawCircle(cx, cy, aDotR.coerceAtLeast(S * 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.FILL; color = android.graphics.Color.BLACK
             })
-            // 2 MOA center dot
-            cv.drawCircle(cx, cy, dotR.coerceAtLeast(S * 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.FILL
-                color = android.graphics.Color.BLACK
-            })
-            // Faint vertical reference line so trajectory callout dots have a stadia to sit on
             cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
                 Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = android.graphics.Color.LTGRAY; strokeWidth = S.toFloat()

@@ -86,7 +86,7 @@ object Ballistics {
         // majorSpacing encodes ring radius (32.5 MOA); minorSpacing encodes dot radius (1.0 MOA).
         ReticlePreset(
             "Holosun 510C (2 MOA / 65 MOA)",
-            ReticleUnit.MOA, 32.5, 1.0, 35.0,
+            ReticleUnit.MOA, 32.5, 1.0, 40.0,
             ReticleStyle.CIRCLE_DOT
         ),
         // EOTech VUDU 4-12×36 FFP MR5 — MRAD dot-grid Christmas tree, first focal plane.

@@ -6,10 +6,12 @@ simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections and full-value crosswind drift.
 
 Includes 168 factory ammo presets organized into color-coded categories
-(rifle, rimfire, pistol, shotgun) with a trajectory table at 50 yd steps out
-to 1,000 yd. DOPE charts can be saved as a JPEG to your gallery, optionally
-with a scope reticle illustration showing color-coded holdover callouts for
-every range that fits within the reticle's extent.
+(rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
+steps, default 50–500 yd, max 2,000 yd). DOPE charts can be saved as a JPEG
+to your gallery, optionally with a scope reticle illustration showing
+color-coded holdover callouts — positioned at the bullet's actual 2D location
+on the reticle (elevation + crosswind drift) for every range that fits within
+the reticle's extent.
 
 ## Opening in Android Studio
 
@@ -142,10 +144,11 @@ table). The app renders a 1200 px JPEG containing:
 - Altitude, temperature, humidity, wind conditions
 - **Reticle illustration** (if a reticle is selected) — a scope circle showing
   the reticle's crosshair and marks. Each trajectory range gets a unique color:
-  a filled dot on the stadia, a dashed leader line, and a bold "250 yd (2.3 MOA)"
-  label. Labels that would overlap are skipped; ranges beyond the reticle's
-  extent are omitted. FFP reticles work at any magnification; SFP values are
-  valid at maximum magnification only.
+  a filled dot placed at the bullet's actual 2D position on the reticle
+  (elevation + crosswind drift), a dashed leader line, and a bold
+  "250 yd (2.3 MOA)" label. Labels that would overlap are skipped; points
+  outside the reticle's extent are omitted. FFP reticles work at any
+  magnification; SFP values are valid at maximum magnification only.
 - Full trajectory table at 50 yd steps over the configured range (same columns
   as on-screen — drift columns appear only when wind ≠ 0, energy only when bullet
   weight is set; the redundant MOA or MIL column is dropped when a reticle is

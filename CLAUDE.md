@@ -54,12 +54,16 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **DOPE chart export** — `buildDopeChartBitmap()` draws a 1200 px wide JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). Layout: header block → optional reticle section (640 px tall) → trajectory table. `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
 
-**Trajectory table range** — `calculateMpbr()` is called with `tableMaxYards = 1000` (50 yd steps), producing 20 rows. The reticle callout code shows only ranges whose holdover fits within the reticle's `vertExtent`.
+**Trajectory table range** — configurable via "Table Start / End" fields in the UI (defaults 50/500 yd, clamped 0–2000, 50 yd steps). Both fields are validated (start < end) before calling `calculateMpbr()` with `tableMinYards`/`tableMaxYards`. The reticle callout code uses a circle-bounds check to show only ranges whose 2D position (elevation + drift) falls within the scope circle.
 
-**Reticle illustration** — `drawReticleSection()` renders a clipped scope circle. Callouts are pre-computed before the clip (so the same color is used both inside and outside). Three drawing paths:
-- *Hash/Dot/Christmas-tree* (`else` branch): evenly-spaced marks driven by `majorSpacing` / `minorSpacing`. Colored trajectory ticks drawn inside clip; labels outside.
-- *BDC*: thin crosshair + optional thick outer posts (`postStart`), windage hashes at `windageMarks`, holdover hash lines at `holdoverMarks`. Mark height/width = `ppu * 0.65f` (scales with unit, prevents overlap for dense mark lists).
-- *MRAD_TREE* (EOTech-style): numbered horizontal stadia with major/minor ticks + thick outer posts, 1 MRAD speed ring, short vertical stadia above center, dot-grid Christmas tree below center (rows `treeStart`..`vertExtent.toInt()`).
+**Reticle illustration** — `drawReticleSection()` renders a clipped scope circle. Callouts are pre-computed before the clip as `ReticleCallout(x, y, color, label)` where `x = cx + drift*ppu` and `y = cy + holdover*ppu` — dots land at the bullet's actual 2D reticle position when wind is non-zero. The circle-bounds check is 2D (`dx²+dy² ≤ (R-margin)²`). Drawing paths by style:
+- *`else`* (HASH/DOT/CHRISTMAS_TREE): evenly-spaced marks driven by `majorSpacing` / `minorSpacing`.
+- *`BDC`*: thin crosshair + optional thick outer posts (`postStart`), windage hashes at `windageMarks`, holdover hash lines at `holdoverMarks`. Mark size = `ppu * 0.65f`.
+- *`MRAD_TREE`*: numbered horizontal stadia + thick outer posts, 1 MRAD speed ring, ticked vertical stadia above center, dot-grid tree below (rows at `majorSpacing` MRAD).
+- *`MOA_TREE`*: same concept as MRAD_TREE for MOA; 4 MOA major / 1 MOA minor, dot-grid tree at 2 MOA horizontal spacing, thick H posts at `postStart`, thick bottom V post.
+- *`CIRCLE_DOT`*: large ring + cardinal tick marks drawn outside clip; center dot inside clip.
+- *`DRT`*: two concentric rings (inner 6 MOA thick, outer 3 MOA thick) drawn outside clip; center dot inside clip.
+- *`BRC`*: center dot + smaller holdunder dots from `holdoverMarks` + inward chevrons, all inside clip.
 
 **Adding a BDC reticle preset** — append to `Ballistics.RETICLE_PRESETS` with `style = ReticleStyle.BDC`, `holdoverMarks`, `windageMarks`, `postStart` (0 = no thick posts). For SFP scopes, source subtensions from the manufacturer's reticle manual at the scope's maximum magnification. No drawing code changes needed.
 

@@ -518,6 +518,9 @@ private fun ReticleDropdown(
     }
 }
 
+/** A single color-coded trajectory callout: 2-D position inside the scope + label. */
+private data class ReticleCallout(val x: Float, val y: Float, val color: Int, val label: String)
+
 /**
  * Draws a scope-circle reticle illustration with holdover callouts into [cv].
  * The section spans [sectionTop]..[sectionTop]+[sectionH] at full bitmap width [W].
@@ -586,18 +589,23 @@ private fun drawReticleSection(
         android.graphics.Color.rgb(  0, 150,  90),   // emerald
         android.graphics.Color.rgb(175,   0,  85)    // crimson
     )
-    val callouts = mutableListOf<Triple<Float, Int, String>>()
+    val callouts = mutableListOf<ReticleCallout>()
     run {
-        var lastY = Float.NEGATIVE_INFINITY
-        var idx   = 0
+        val margin = (R - S * 4f)
+        var lastY  = Float.NEGATIVE_INFINITY
+        var idx    = 0
         for (row in result.trajectoryTable) {
-            val hold = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.holdoverMil else row.holdoverMoa
-            val y    = cy + hold.toFloat() * ppu
-            if (y < sectionTop + S * 4 || y > sectionTop + sectionH - S * 4) continue
+            val hold  = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.holdoverMil  else row.holdoverMoa
+            val drift = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.driftMil     else row.driftMoa
+            val x     = cx + drift.toFloat() * ppu
+            val y     = cy + hold.toFloat()  * ppu
+            // Skip if outside the scope circle
+            val dx = x - cx; val dy = y - cy
+            if (dx * dx + dy * dy > margin * margin) continue
             if (Math.abs(y - lastY) < bsz * 0.82f) continue
             val unitStr = if (reticle.unit == Ballistics.ReticleUnit.MIL)
                 "%.2f mil".format(hold) else "%.1f MOA".format(hold)
-            callouts.add(Triple(y, calloutColors[idx % calloutColors.size], "${row.rangeYards} yd  ($unitStr)"))
+            callouts.add(ReticleCallout(x, y, calloutColors[idx % calloutColors.size], "${row.rangeYards} yd  ($unitStr)"))
             lastY = y
             idx++
         }
@@ -878,9 +886,9 @@ private fun drawReticleSection(
     // Colored trajectory hash marks on the vertical stadia — drawn inside the circle
     // so they appear as horizontal tick marks crossing the crosshair at each holdover position
     val dotR = (R * 0.045f).coerceAtLeast(S * 3f)
-    for ((y, color, _) in callouts) {
-        cv.drawCircle(cx, y, dotR,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; this.color = color })
+    for (c in callouts) {
+        cv.drawCircle(c.x, c.y, dotR,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; this.color = c.color })
     }
 
     cv.restore()
@@ -888,14 +896,14 @@ private fun drawReticleSection(
     // ---- colored leader lines + labels (outside circle) ----
     val lineStartX = cx + R + S * 10f
     val textX      = W * 0.65f
-    for ((y, color, label) in callouts) {
-        cv.drawLine(lineStartX, y, textX - S * 6f, y, Paint().apply {
-            this.color = color; strokeWidth = S * 1.5f
+    for (c in callouts) {
+        cv.drawLine(lineStartX, c.y, textX - S * 6f, c.y, Paint().apply {
+            this.color = c.color; strokeWidth = S * 1.5f
             pathEffect = android.graphics.DashPathEffect(floatArrayOf(S * 5f, S * 3f), 0f)
         })
-        cv.drawText(label, textX, y + bsz * 0.33f,
+        cv.drawText(c.label, textX, c.y + bsz * 0.33f,
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                this.color = color; textSize = bsz * 0.80f; typeface = Typeface.DEFAULT_BOLD
+                this.color = c.color; textSize = bsz * 0.80f; typeface = Typeface.DEFAULT_BOLD
             })
     }
 }

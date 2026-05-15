@@ -566,18 +566,19 @@ private fun drawReticleSection(
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 3f
         })
-    // AR-BDC3: draw the 16.625 MOA broken circle (4 arcs) outside clip
+    // AR-BDC3: horseshoe (large top arc + two side hooks) drawn outside clip
     if (reticle.style == Ballistics.ReticleStyle.AR_BDC3) {
-        val circleR = reticle.majorSpacing.toFloat() * ppu   // 8.3125 MOA radius
+        val circleR = reticle.majorSpacing.toFloat() * ppu
         val oval    = android.graphics.RectF(cx - circleR, cy - circleR, cx + circleR, cy + circleR)
         val pArc    = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2.5f
         }
-        // 4 arcs of 60° each; 30° gaps at 12/3/6/9 o'clock (Android: 0°=right, 90°=bottom)
-        cv.drawArc(oval,  15f, 60f, false, pArc)   // lower-right
-        cv.drawArc(oval, 105f, 60f, false, pArc)   // lower-left
-        cv.drawArc(oval, 195f, 60f, false, pArc)   // upper-left
-        cv.drawArc(oval, 285f, 60f, false, pArc)   // upper-right
+        // Top arc: 120° centered at 12 o'clock (270° in Android canvas)
+        cv.drawArc(oval, 210f, 120f, false, pArc)
+        // Right hook: ~35° at 3 o'clock area
+        cv.drawArc(oval, 345f,  35f, false, pArc)
+        // Left hook: ~35° at 9 o'clock area
+        cv.drawArc(oval, 160f,  35f, false, pArc)
     }
 
     // DRT reticle: draw both rings outside clip for guaranteed visibility
@@ -702,29 +703,54 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.AR_BDC3 -> {
-            // Broken circle drawn outside clip; here: center dot + vertical post + labeled holdovers
-            val dotR   = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
-            val tickHW = ppu * 2.0f   // 2 MOA half-width per tick
-            val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL;   color = android.graphics.Color.BLACK }
-            val pLine  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
-            val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
-            val pLbl   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; textSize = ppu * 2.8f
-                typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
-            }
+                // Horseshoe drawn outside clip; inside: center dot + BDC post + windage dot grid
+                val dotR   = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
+                val tickHW = ppu * 1.5f
+                val wDotR  = (ppu * 0.28f).coerceAtLeast(s * 1.5f)
+                val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                val pLine  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                val pLbl   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = ppu * 2.6f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
+                }
+                val pLblR  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = ppu * 2.6f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.RIGHT
+                }
 
-            cv.drawCircle(cx, cy, dotR, pFill)                         // center dot
-            cv.drawLine(cx, cy - r.toFloat(), cx, cy, Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat() }) // faint line above
-            cv.drawLine(cx, cy, cx, cy + r.toFloat(), pLine)           // vertical post below
+                cv.drawCircle(cx, cy, dotR, pFill)
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()
+                })
+                cv.drawLine(cx, cy, cx, cy + r.toFloat(), pLine)
 
-            val rangeLabels = listOf("3", "4", "5", "6")
-            reticle.holdoverMarks.forEachIndexed { idx, h ->
-                val hy = cy + h.toFloat() * ppu
-                cv.drawLine(cx - tickHW, hy, cx + tickHW, hy, pTick)
-                cv.drawText(rangeLabels.getOrElse(idx) { "" }, cx + tickHW + ppu * 0.4f, hy + pLbl.textSize * 0.35f, pLbl)
+                // Windage extents (MOA) at 15 mph per range row
+                val maxWindage = listOf(5.0f, 7.2f, 9.6f, 12.2f)
+                val rangeLabels = listOf("3", "4", "5", "6")
+
+                reticle.holdoverMarks.forEachIndexed { idx, h ->
+                    val hy   = cy + h.toFloat() * ppu
+                    val maxW = maxWindage.getOrElse(idx) { 5.0f }
+
+                    // BDC tick on the central post
+                    cv.drawLine(cx - tickHW, hy, cx + tickHW, hy, pTick)
+
+                    // Windage dots at 1 MOA spacing out to the 15 mph extent
+                    var wMoa = 1f
+                    while (wMoa <= maxW) {
+                        val wx = wMoa * ppu
+                        cv.drawCircle(cx + wx, hy, wDotR, pFill)
+                        cv.drawCircle(cx - wx, hy, wDotR, pFill)
+                        wMoa += 1f
+                    }
+
+                    // Range label at outermost dot, both sides
+                    val lx = maxW * ppu + ppu * 0.5f
+                    cv.drawText(rangeLabels.getOrElse(idx) { "" }, cx + lx, hy + pLbl.textSize * 0.35f, pLbl)
+                    cv.drawText(rangeLabels.getOrElse(idx) { "" }, cx - lx, hy + pLblR.textSize * 0.35f, pLblR)
+                }
             }
-        }
 
         Ballistics.ReticleStyle.BRC -> {
                 // BRC: center dot, two holdunder dots below center, inward-pointing chevrons

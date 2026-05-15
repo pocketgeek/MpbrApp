@@ -70,7 +70,8 @@ object Ballistics {
         ),
         // Vortex Strike Eagle 1-8×24 SFP — AR-BDC3 (MOA) reticle.
         // SFP: subtensions valid at maximum magnification (8×) only.
-        // 16.625 MOA broken circle (4 arcs, gaps at 12/3/6/9 o'clock) + 1 MOA center dot.
+        // Horseshoe illumination: large top arc (~120°) + two side hooks at 3 & 9 o'clock;
+        // open at the bottom. 1 MOA center dot.
         // Holdover marks on vertical post: 2.4 / 5.6 / 9.5 / 14.6 MOA below center
         //   (calibrated for 300 / 400 / 500 / 600 yd with common 5.56 loads).
         // majorSpacing = broken circle radius (8.3125 MOA); minorSpacing = center dot radius (0.5 MOA).

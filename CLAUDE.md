@@ -30,6 +30,9 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 **`Ballistics.kt`** — pure Kotlin object, no Android dependencies. Contains:
 - `AmmoPreset` data class and `PRESETS` list — factory ammo with name, MV, BC, weight, sight height, vital zone, drag model, and category
 - `AmmoCategory` enum — `RIFLE`, `RIMFIRE`, `PISTOL`, `SHOTGUN`; defaults to `RIFLE` so only non-rifle presets need an explicit tag
+- `ReticlePreset` data class and `RETICLE_PRESETS` list — scope reticle definitions (name, unit, majorSpacing, minorSpacing, vertExtent, style)
+- `ReticleUnit` enum — `MIL`, `MOA`
+- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`
 - `Atmosphere` data class — ICAO pressure model + Magnus humidity correction; call `.densityRatio()` and `.speedOfSound()` for scaled values
 - `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind enters the drag force naturally. Returns `List<TrajectoryPoint>`
 - `calculateMpbr()` — binary-searches bore angle (50 iterations) until trajectory peak = `vitalZone/2`, then re-simulates at high resolution to extract near zero, far zero, max ordinate, MPBR, and trajectory table. Entry point for the UI
@@ -37,8 +40,9 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **`MainActivity.kt`** — single `@Composable` function (`MpbrScreen`) with all state as `mutableStateOf` vars. No ViewModel, no architecture layers. Flow:
 1. User picks an ammo preset → `applyPreset()` populates all fields and sets `selectedPreset`; any manual field edit calls `userEdit()` which resets `selectedPreset = null` (shows "Custom" in dropdown)
-2. Calculate button → calls `Ballistics.calculateMpbr()`, stores result in `result` state
-3. Result renders as a summary Card + `TrajectoryTableCard`
+2. User optionally selects a reticle preset (`selectedReticle`) for the DOPE chart illustration
+3. Calculate button → calls `Ballistics.calculateMpbr()`, stores result in `result` state
+4. Result renders as a summary Card + `TrajectoryTableCard` + Save DOPE Chart button
 
 ## Key conventions
 
@@ -46,7 +50,9 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **Trajectory table columns** — controlled by two booleans passed to `TrajectoryTableCard`: `showEnergy` (true when bullet weight > 0) and `showDrift` (true when wind speed != 0). When wind is 0 the W.MOA/W.MIL columns are hidden entirely.
 
-**DOPE chart export** — `buildDopeChartBitmap()` draws a 1200×~1050 px JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
+**DOPE chart export** — `buildDopeChartBitmap()` draws a 1200 px wide JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). Layout: header block → optional reticle section (640 px tall) → trajectory table. `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
+
+**Reticle illustration** — `drawReticleSection()` renders a clipped scope circle with crosshair, hash/dot/Christmas-tree marks, and dashed callout lines to range+holdover labels. Marks are spaced at `minorSpacing` units; every `majorSpacing/minorSpacing`-th mark is drawn thicker. Callouts iterate the trajectory table and skip any label whose y-position is within 82% of text height of the previous drawn label (overlap prevention). Adding a new reticle preset: append to `Ballistics.RETICLE_PRESETS` — no drawing code changes needed.
 
 **Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph wind.
 

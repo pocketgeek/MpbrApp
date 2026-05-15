@@ -7,7 +7,8 @@ atmospheric corrections and full-value crosswind drift.
 
 Includes 168 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a trajectory table at 50 yd steps out
-to 500 yd.
+to 500 yd. DOPE charts can be saved as a JPEG to your gallery, optionally
+with a scope reticle illustration showing holdover callouts for every range.
 
 ## Opening in Android Studio
 
@@ -68,6 +69,19 @@ vital zone (deer); sabot presets use 1.5" (scoped rifled barrel). Buckshot
 presets model a single pellet's ballistics with a 4" vital zone — useful for
 gauging effective range but not pattern spread.
 
+**Reticle** — optional scope reticle for the DOPE chart illustration. Defaults
+to "None" (no illustration). Available presets:
+
+| Preset | Unit | Major | Minor |
+|---|---|---|---|
+| Mil-Dot | MIL | 1.0 | 0.5 (dots) |
+| Mil Hash · 0.5 | MIL | 1.0 | 0.5 |
+| Mil Hash · 0.2 | MIL | 1.0 | 0.2 |
+| Mil Christmas Tree | MIL | 1.0 | 0.5 (widening) |
+| MOA Hash · 1.0 | MOA | 5.0 | 1.0 |
+| MOA Hash · 0.5 | MOA | 5.0 | 0.5 |
+| MOA Hash · 0.25 | MOA | 5.0 | 0.25 |
+
 **Drag model** — G1 or G7. The BC value you enter must reference the model you
 pick. Manufacturers usually publish G1; many also publish G7 for long
 boat-tail bullets where G7 fits better. Don't convert between them with a
@@ -106,6 +120,10 @@ table). The app renders a 1200 px JPEG containing:
 
 - Load name, near/far zero, MPBR, max ordinate, bore angle
 - Altitude, temperature, humidity, wind conditions
+- **Reticle illustration** (if a reticle is selected) — a scope circle showing
+  crosshair + graduated marks, with a dashed callout line from each range's
+  holdover position to a "250 yd (2.34 mil)" label. Labels that would overlap
+  are skipped automatically. Points beyond the reticle's extent are omitted.
 - Full trajectory table (same columns as the on-screen table — drift columns
   appear only when wind ≠ 0, energy column only when bullet weight is set)
 - Date of generation

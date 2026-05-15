@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -67,6 +67,19 @@ object Ballistics {
             holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
             windageMarks  = listOf(2.0, 4.0, 6.0),
             postStart     = 7.0
+        ),
+        // Viridian MDS25 Modern Dot Sight — BRC (Bullet Rise Compensating) MOA reticle.
+        // 1× red dot, always accurate. Center 3 MOA dot + 2 holdunder dots + ranging chevrons.
+        // Exact MOA positions not published; estimated for ~2.5" HOB, 50-yd zero, .223 55gr:
+        //   15-yd holdunder ≈ 7 MOA below center; 7-yd holdunder ≈ 25 MOA below center.
+        //   Chevron dimensions estimated from product image.
+        // minorSpacing = center dot radius (1.5 MOA). holdoverMarks = [7yd holdunder, 7yd holdunder] MOA.
+        // Source: Viridian product page / product image.
+        ReticlePreset(
+            "Viridian MDS25 BRC (MOA, 1×)",
+            ReticleUnit.MOA, 0.0, 1.5, 40.0,
+            ReticleStyle.BRC,
+            holdoverMarks = listOf(7.0, 25.0)
         ),
         // Vortex Spitfire AR 1× Prism Scope — DRT (Dual Ring Tactical) MOA reticle.
         // Etched prism; works without battery; 1× fixed magnification — always accurate.

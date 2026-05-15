@@ -670,6 +670,33 @@ private fun drawReticleSection(
             }
         }
 
+        Ballistics.ReticleStyle.BRC -> {
+            // BRC: center dot, two holdunder dots below center, inward-pointing chevrons
+            val dotR  = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(S * 3f)  // center 3 MOA dot
+            val holdR = dotR * 0.65f                                                    // smaller holdunder dots
+
+            val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+            val pChev  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 2f }
+
+            // Center dot
+            cv.drawCircle(cx, cy, dotR, pFill)
+            // Holdunder dots below center
+            for (h in reticle.holdoverMarks) {
+                cv.drawCircle(cx, cy + h.toFloat() * ppu, holdR, pFill)
+            }
+            // Chevrons < > (tip inward, arms flare outward ~±35 MOA horiz, ±10 MOA vert)
+            val tipX  = ppu * 20f
+            val armX  = ppu * 35f
+            val armY  = ppu * 10f
+            cv.drawLine(cx - tipX, cy, cx - armX, cy - armY, pChev)
+            cv.drawLine(cx - tipX, cy, cx - armX, cy + armY, pChev)
+            cv.drawLine(cx + tipX, cy, cx + armX, cy - armY, pChev)
+            cv.drawLine(cx + tipX, cy, cx + armX, cy + armY, pChev)
+            // Faint vertical reference for trajectory callouts
+            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.LTGRAY; strokeWidth = S.toFloat() })
+        }
+
         Ballistics.ReticleStyle.DRT -> {
             // Both rings drawn outside clip above; center dot + faint vertical reference
             val dotR = (reticle.minorSpacing * ppu).toFloat().coerceAtLeast(S * 2f)

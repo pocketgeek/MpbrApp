@@ -81,6 +81,7 @@ presets are all real manufacturer scopes:
 | Preset | Unit | Focal plane | Style | Details |
 |---|---|---|---|---|
 | Vortex Dead-Hold BDC (MOA, SFP) | MOA | SFP (max mag) | BDC | Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA; windage ±2 / ±4 / ±6 MOA; thick outer posts at 7 MOA |
+| Viridian MDS25 BRC (MOA, 1×) | MOA | 1× (always accurate) | BRC | 3 MOA center dot (50/200 yd); holdunder dots ≈7 MOA (15 yd) and ≈25 MOA (7 yd) below; inward chevrons for ranging. Dot positions estimated — exact MOA not published by Viridian |
 | Vortex Spitfire AR DRT (MOA, 1×) | MOA | 1× (always accurate) | DRT | 3 MOA center dot; inner ring 44 MOA ID / 6 MOA thick; outer ring 140 MOA ID / 3 MOA thick |
 | Vortex EBR-7C (MOA, FFP) | MOA | FFP (all mags) | MOA tree | Numbered H/V stadia (1 MOA minor / 4 MOA major, labeled 4–24/32), thick posts at ±26 MOA; dot-grid tree below center rows 4→36 MOA at 2 MOA dot spacing; thick bottom post. Used in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II |
 | EOTech VUDU HC1 (MOA, SFP) | MOA | SFP (9×) | BDC | Holdover hashes 2–22 MOA in 2 MOA steps; windage ±2–±12 MOA in 2 MOA steps |

@@ -547,6 +547,20 @@ private fun drawReticleSection(
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = S * 3f
         })
+    // DRT reticle: draw both rings outside clip for guaranteed visibility
+    if (reticle.style == Ballistics.ReticleStyle.DRT) {
+        val innerR      = reticle.majorSpacing.toFloat() * ppu           // ~25 MOA
+        val outerR      = reticle.postStart.toFloat()   * ppu            // ~71.5 MOA
+        val innerStroke = (6f * ppu).coerceAtLeast(S * 2f)               // 6 MOA thick
+        val outerStroke = (3f * ppu).coerceAtLeast(S * 1.5f)             // 3 MOA thick
+        cv.drawCircle(cx, cy, innerR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = innerStroke
+        })
+        cv.drawCircle(cx, cy, outerR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = outerStroke
+        })
+    }
+
     // Circle-dot reticles: draw the large ring + cardinal tick marks outside the clip
     if (reticle.style == Ballistics.ReticleStyle.CIRCLE_DOT) {
         val ringR    = reticle.majorSpacing.toFloat() * ppu
@@ -654,6 +668,18 @@ private fun drawReticleSection(
                 val hy = cy + (h * ppu).toFloat()
                 cv.drawLine(cx - hmHW, hy, cx + hmHW, hy, pHMark)
             }
+        }
+
+        Ballistics.ReticleStyle.DRT -> {
+            // Both rings drawn outside clip above; center dot + faint vertical reference
+            val dotR = (reticle.minorSpacing * ppu).toFloat().coerceAtLeast(S * 2f)
+            cv.drawCircle(cx, cy, dotR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.FILL; color = android.graphics.Color.BLACK
+            })
+            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.LTGRAY; strokeWidth = S.toFloat()
+                })
         }
 
         Ballistics.ReticleStyle.CIRCLE_DOT -> {

@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -67,6 +67,18 @@ object Ballistics {
             holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
             windageMarks  = listOf(2.0, 4.0, 6.0),
             postStart     = 7.0
+        ),
+        // Vortex Spitfire AR 1× Prism Scope — DRT (Dual Ring Tactical) MOA reticle.
+        // Etched prism; works without battery; 1× fixed magnification — always accurate.
+        // Center dot 3 MOA (1.5 MOA radius). Inner ring: 44 MOA ID / 6 MOA thick (~25 MOA center radius).
+        // Outer ring: 140 MOA ID / 3 MOA thick (~71.5 MOA center radius).
+        // majorSpacing = inner ring center radius; postStart = outer ring center radius.
+        // Source: Vortex product page + GunsAmerica review subtension measurements.
+        ReticlePreset(
+            "Vortex Spitfire AR DRT (MOA, 1×)",
+            ReticleUnit.MOA, 25.0, 1.5, 85.0,
+            ReticleStyle.DRT,
+            postStart = 71.5
         ),
         // Vortex EBR-7C (MOA, FFP) — found in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II.
         // Subtensions valid at ALL magnifications (first focal plane).

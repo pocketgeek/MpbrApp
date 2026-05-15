@@ -48,9 +48,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.withClip
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,18 +168,18 @@ fun MpbrScreen() {
 
         // ---- Bullet & sight ----
         SectionLabel("Bullet & Sight")
-        NumberField("Muzzle Velocity (fps)",    muzzleVel)    { userEdit({ muzzleVel = it }, it) }
-        NumberField("Ballistic Coefficient",    bc)           { userEdit({ bc = it }, it) }
-        NumberField("Bullet Weight (gr)",       bulletWeight) { userEdit({ bulletWeight = it }, it) }
-        NumberField("Sight Height (in)",        sightHeight)  { userEdit({ sightHeight = it }, it) }
-        NumberField("Vital Zone Diameter (in)", vitalZone)    { userEdit({ vitalZone = it }, it) }
+        NumberField("Muzzle Velocity (fps)",    muzzleVel,    Modifier.fillMaxWidth()) { v -> userEdit({ muzzleVel = it }, v) }
+        NumberField("Ballistic Coefficient",    bc,           Modifier.fillMaxWidth()) { v -> userEdit({ bc = it }, v) }
+        NumberField("Bullet Weight (gr)",       bulletWeight, Modifier.fillMaxWidth()) { v -> userEdit({ bulletWeight = it }, v) }
+        NumberField("Sight Height (in)",        sightHeight,  Modifier.fillMaxWidth()) { v -> userEdit({ sightHeight = it }, v) }
+        NumberField("Vital Zone Diameter (in)", vitalZone,    Modifier.fillMaxWidth()) { v -> userEdit({ vitalZone = it }, v) }
 
         // ---- Atmosphere ----
         SectionLabel("Atmosphere")
-        NumberField("Altitude (ft)",           altitude)   { altitude = it }
-        NumberField("Temperature (°F)",        temperature){ temperature = it }
-        NumberField("Humidity (%)",            humidity)   { humidity = it }
-        NumberField("Wind Speed (mph, full value crosswind)", windSpeed) { windSpeed = it }
+        NumberField("Altitude (ft)",           altitude,     Modifier.fillMaxWidth()) { altitude = it }
+        NumberField("Temperature (°F)",        temperature,  Modifier.fillMaxWidth()) { temperature = it }
+        NumberField("Humidity (%)",            humidity,     Modifier.fillMaxWidth()) { humidity = it }
+        NumberField("Wind Speed (mph, full value crosswind)", windSpeed, Modifier.fillMaxWidth()) { windSpeed = it }
 
         // ---- Trajectory table range ----
         SectionLabel("Trajectory Table")
@@ -220,7 +224,7 @@ fun MpbrScreen() {
                         tableMinYards       = tMin,
                         tableMaxYards       = tMax
                     )
-                } catch (e: NumberFormatException) {
+                } catch (_: NumberFormatException) {
                     error  = "All fields must be numbers"
                     result = null
                 } catch (e: IllegalArgumentException) {
@@ -259,7 +263,7 @@ fun MpbrScreen() {
             // Reticle illustration (on-screen) when a reticle is selected
             selectedReticle?.let { reticle ->
                 val reticleBmp = remember(r, reticle) {
-                    buildReticleBitmap(r, reticle, windSpeed.toDoubleOrNull() ?: 0.0)
+                    buildReticleBitmap(r, reticle)
                 }
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Image(
@@ -297,7 +301,7 @@ fun MpbrScreen() {
 
                     fun doSave() {
                         val bmp = buildDopeChartBitmap(
-                            context, r, label,
+                            r, label,
                             altitude.toDoubleOrNull()    ?: 0.0,
                             temperature.toDoubleOrNull() ?: 59.0,
                             humidity.toDoubleOrNull()    ?: 0.0,
@@ -412,7 +416,7 @@ private fun SectionLabel(text: String) {
 private fun NumberField(
     label: String,
     value: String,
-    modifier: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier,
     onChange: (String) -> Unit
 ) {
     OutlinedTextField(
@@ -537,36 +541,36 @@ private data class ReticleCallout(val x: Float, val y: Float, val color: Int, va
 
 /**
  * Draws a scope-circle reticle illustration with holdover callouts into [cv].
- * The section spans [sectionTop]..[sectionTop]+[sectionH] at full bitmap width [W].
+ * The section spans [sectionTop]..[sectionTop]+[sectionH] at full bitmap width [w].
  */
 private fun drawReticleSection(
     cv: android.graphics.Canvas,
-    W: Int,
+    w: Int,
     result: Ballistics.MpbrResult,
     reticle: Ballistics.ReticlePreset,
     sectionTop: Float,
     sectionH: Float,
     bsz: Float,
-    S: Int
+    s: Int
 ) {
-    val R   = (sectionH * 0.40f).toInt()
-    val cx  = W * 0.26f
+    val r   = (sectionH * 0.40f).toInt()
+    val cx  = w * 0.26f
     val cy  = sectionTop + sectionH * 0.50f
-    val ppu = R / reticle.vertExtent.toFloat()
+    val ppu = r / reticle.vertExtent.toFloat()
 
     // ---- scope circle ----
-    cv.drawCircle(cx, cy, R.toFloat(),
+    cv.drawCircle(cx, cy, r.toFloat(),
         Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.WHITE })
-    cv.drawCircle(cx, cy, R.toFloat(),
+    cv.drawCircle(cx, cy, r.toFloat(),
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = S * 3f
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 3f
         })
     // DRT reticle: draw both rings outside clip for guaranteed visibility
     if (reticle.style == Ballistics.ReticleStyle.DRT) {
         val innerR      = reticle.majorSpacing.toFloat() * ppu           // ~25 MOA
         val outerR      = reticle.postStart.toFloat()   * ppu            // ~71.5 MOA
-        val innerStroke = (6f * ppu).coerceAtLeast(S * 2f)               // 6 MOA thick
-        val outerStroke = (3f * ppu).coerceAtLeast(S * 1.5f)             // 3 MOA thick
+        val innerStroke = (6f * ppu).coerceAtLeast(s * 2f)               // 6 MOA thick
+        val outerStroke = (3f * ppu).coerceAtLeast(s * 1.5f)             // 3 MOA thick
         cv.drawCircle(cx, cy, innerR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = innerStroke
         })
@@ -580,10 +584,10 @@ private fun drawReticleSection(
         val ringR    = reticle.majorSpacing.toFloat() * ppu
         val halfTick = ringR * 0.10f   // tick extends 10% of ring radius each side of the ring
         val pRing = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = S * 4f
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 4f
         }
         val pTick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = android.graphics.Color.BLACK; strokeWidth = S * 3f
+            color = android.graphics.Color.BLACK; strokeWidth = s * 3f
         }
         cv.drawCircle(cx, cy, ringR, pRing)
         // 12 o'clock
@@ -601,7 +605,7 @@ private fun drawReticleSection(
         color = android.graphics.Color.DKGRAY; textSize = bsz * 0.72f; typeface = Typeface.DEFAULT_BOLD
     }
     val lText = "Reticle: ${reticle.name}"
-    cv.drawText(lText, cx - pLbl.measureText(lText) / 2f, sectionTop + S * 8f + bsz * 0.72f, pLbl)
+    cv.drawText(lText, cx - pLbl.measureText(lText) / 2f, sectionTop + s * 8f + bsz * 0.72f, pLbl)
 
     // ---- pre-compute visible callouts before entering clip ----
     // Each entry: (y position in bitmap, color, label text)
@@ -619,7 +623,7 @@ private fun drawReticleSection(
     )
     val callouts = mutableListOf<ReticleCallout>()
     run {
-        val margin = (R - S * 4f)
+        val margin = (r - s * 4f)
         var lastY  = Float.NEGATIVE_INFINITY
         var idx    = 0
         for (row in result.trajectoryTable) {
@@ -630,7 +634,7 @@ private fun drawReticleSection(
             // Skip if outside the scope circle
             val dx = x - cx; val dy = y - cy
             if (dx * dx + dy * dy > margin * margin) continue
-            if (Math.abs(y - lastY) < bsz * 0.82f) continue
+            if (abs(y - lastY) < bsz * 0.82f) continue
             val unitStr = if (reticle.unit == Ballistics.ReticleUnit.MIL)
                 "%.2f mil".format(hold) else "%.1f MOA".format(hold)
             callouts.add(ReticleCallout(x, y, calloutColors[idx % calloutColors.size], "${row.rangeYards} yd  ($unitStr)"))
@@ -640,333 +644,330 @@ private fun drawReticleSection(
     }
 
     // ---- clip to circle, draw reticle + trajectory hash marks ----
-    cv.save()
-    cv.clipPath(android.graphics.Path().apply {
-        addCircle(cx, cy, R.toFloat(), android.graphics.Path.Direction.CW)
-    })
-
-    val pLine = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
-    val pMaj  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 2f }
+    val pLine = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+    val pMaj  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
     val pDot  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
 
-    when (reticle.style) {
+    cv.withClip(android.graphics.Path().apply {
+        addCircle(cx, cy, r.toFloat(), android.graphics.Path.Direction.CW)
+    }) {
+        when (reticle.style) {
 
-        Ballistics.ReticleStyle.BDC -> {
-            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
-            if (reticle.postStart > 0.0) {
-                val postPx = (reticle.postStart * ppu).toFloat()
-                cv.drawLine(cx - postPx, cy, cx + postPx, cy, pLine)
-                val pPost = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; strokeWidth = S * 5f
+            Ballistics.ReticleStyle.BDC -> {
+                cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
+                if (reticle.postStart > 0.0) {
+                    val postPx = (reticle.postStart * ppu).toFloat()
+                    cv.drawLine(cx - postPx, cy, cx + postPx, cy, pLine)
+                    val pPost = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        color = android.graphics.Color.BLACK; strokeWidth = s * 5f
+                    }
+                    cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pPost)
+                    cv.drawLine(cx + postPx,      cy, cx + r.toFloat(), cy, pPost)
+                } else {
+                    cv.drawLine(cx - r.toFloat(), cy, cx + r.toFloat(), cy, pLine)
                 }
-                cv.drawLine(cx - R.toFloat(), cy, cx - postPx, cy, pPost)
-                cv.drawLine(cx + postPx,      cy, cx + R.toFloat(), cy, pPost)
-            } else {
-                cv.drawLine(cx - R.toFloat(), cy, cx + R.toFloat(), cy, pLine)
-            }
-            val wh    = ppu * 0.65f   // proportional to unit spacing, not circle size
-            val pWind = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; strokeWidth = S * 2f
-            }
-            for (w in reticle.windageMarks) {
-                val wx = (w * ppu).toFloat()
-                for (sign in listOf(1f, -1f)) {
-                    cv.drawLine(cx + sign * wx, cy - wh, cx + sign * wx, cy + wh, pWind)
+                val wh    = ppu * 0.65f   // proportional to unit spacing, not circle size
+                val pWind = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+                }
+                for (wm in reticle.windageMarks) {
+                    val wx = (wm * ppu).toFloat()
+                    for (sign in listOf(1f, -1f)) {
+                        cv.drawLine(cx + sign * wx, cy - wh, cx + sign * wx, cy + wh, pWind)
+                    }
+                }
+                val hmHW   = ppu * 0.65f  // proportional to unit spacing
+                val pHMark = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+                }
+                for (h in reticle.holdoverMarks) {
+                    val hy = cy + (h * ppu).toFloat()
+                    cv.drawLine(cx - hmHW, hy, cx + hmHW, hy, pHMark)
                 }
             }
-            val hmHW   = ppu * 0.65f  // proportional to unit spacing
-            val pHMark = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; strokeWidth = S * 2f
+
+            Ballistics.ReticleStyle.BRC -> {
+                // BRC: center dot, two holdunder dots below center, inward-pointing chevrons
+                val dotR  = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 3f)  // center 3 MOA dot
+                val holdR = dotR * 0.65f                                                    // smaller holdunder dots
+
+                val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                val pChev  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+
+                // Center dot
+                cv.drawCircle(cx, cy, dotR, pFill)
+                // Holdunder dots below center
+                for (h in reticle.holdoverMarks) {
+                    cv.drawCircle(cx, cy + h.toFloat() * ppu, holdR, pFill)
+                }
+                // Chevrons < > (tip inward, arms flare outward ~±35 MOA horiz, ±10 MOA vert)
+                val tipX  = ppu * 20f
+                val armX  = ppu * 35f
+                val armY  = ppu * 10f
+                cv.drawLine(cx - tipX, cy, cx - armX, cy - armY, pChev)
+                cv.drawLine(cx - tipX, cy, cx - armX, cy + armY, pChev)
+                cv.drawLine(cx + tipX, cy, cx + armX, cy - armY, pChev)
+                cv.drawLine(cx + tipX, cy, cx + armX, cy + armY, pChev)
+                // Faint vertical reference for trajectory callouts
+                cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
+                    Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat() })
             }
-            for (h in reticle.holdoverMarks) {
-                val hy = cy + (h * ppu).toFloat()
-                cv.drawLine(cx - hmHW, hy, cx + hmHW, hy, pHMark)
-            }
-        }
 
-        Ballistics.ReticleStyle.BRC -> {
-            // BRC: center dot, two holdunder dots below center, inward-pointing chevrons
-            val dotR  = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(S * 3f)  // center 3 MOA dot
-            val holdR = dotR * 0.65f                                                    // smaller holdunder dots
-
-            val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
-            val pChev  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 2f }
-
-            // Center dot
-            cv.drawCircle(cx, cy, dotR, pFill)
-            // Holdunder dots below center
-            for (h in reticle.holdoverMarks) {
-                cv.drawCircle(cx, cy + h.toFloat() * ppu, holdR, pFill)
-            }
-            // Chevrons < > (tip inward, arms flare outward ~±35 MOA horiz, ±10 MOA vert)
-            val tipX  = ppu * 20f
-            val armX  = ppu * 35f
-            val armY  = ppu * 10f
-            cv.drawLine(cx - tipX, cy, cx - armX, cy - armY, pChev)
-            cv.drawLine(cx - tipX, cy, cx - armX, cy + armY, pChev)
-            cv.drawLine(cx + tipX, cy, cx + armX, cy - armY, pChev)
-            cv.drawLine(cx + tipX, cy, cx + armX, cy + armY, pChev)
-            // Faint vertical reference for trajectory callouts
-            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
-                Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.LTGRAY; strokeWidth = S.toFloat() })
-        }
-
-        Ballistics.ReticleStyle.DRT -> {
-            // Both rings drawn outside clip above; center dot + faint vertical reference
-            val dotR = (reticle.minorSpacing * ppu).toFloat().coerceAtLeast(S * 2f)
-            cv.drawCircle(cx, cy, dotR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.FILL; color = android.graphics.Color.BLACK
-            })
-            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
-                Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.LTGRAY; strokeWidth = S.toFloat()
+            Ballistics.ReticleStyle.DRT -> {
+                // Both rings drawn outside clip above; center dot + faint vertical reference
+                val dotR = (reticle.minorSpacing * ppu).toFloat().coerceAtLeast(s * 2f)
+                cv.drawCircle(cx, cy, dotR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.FILL; color = android.graphics.Color.BLACK
                 })
-        }
+                cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
+                    Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()
+                    })
+            }
 
-        Ballistics.ReticleStyle.CIRCLE_DOT -> {
-            // Ring drawn outside clip above; here just the center dot + faint reference line
-            val aDotR = reticle.minorSpacing.toFloat() * ppu
-            cv.drawCircle(cx, cy, aDotR.coerceAtLeast(S * 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.FILL; color = android.graphics.Color.BLACK
-            })
-            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
-                Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.LTGRAY; strokeWidth = S.toFloat()
+            Ballistics.ReticleStyle.CIRCLE_DOT -> {
+                // Ring drawn outside clip above; here just the center dot + faint reference line
+                val aDotR = reticle.minorSpacing.toFloat() * ppu
+                cv.drawCircle(cx, cy, aDotR.coerceAtLeast(s * 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.FILL; color = android.graphics.Color.BLACK
                 })
-        }
-
-        Ballistics.ReticleStyle.MRAD_TREE -> {
-            val stepsPerMaj = Math.round(reticle.majorSpacing / reticle.minorSpacing).toInt()
-            val minorPx     = (reticle.minorSpacing * ppu).toFloat()
-            val majorPx     = (reticle.majorSpacing * ppu).toFloat()
-            val postPx      = reticle.postStart.toFloat() * ppu
-            val circleR     = ppu * 1.0f      // 1 MRAD speed ring radius
-            val treeStart   = 2               // tree rows begin at 2 MRAD below center
-            val treeDepth   = reticle.vertExtent.toInt()
-
-            val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; strokeWidth = S * 6f
-            }
-            val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; strokeWidth = S.toFloat()
-            }
-            val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; strokeWidth = S * 1.5f
-            }
-            val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color     = android.graphics.Color.BLACK
-                textSize  = majorPx * 0.48f
-                typeface  = Typeface.DEFAULT_BOLD
-                textAlign = Paint.Align.CENTER
+                cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
+                    Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()
+                    })
             }
 
-            // Horizontal: thin inner + thick outer posts
-            cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
-            cv.drawLine(cx - R.toFloat(), cy, cx - postPx, cy, pThick)
-            cv.drawLine(cx + postPx,      cy, cx + R.toFloat(), cy, pThick)
+            Ballistics.ReticleStyle.MRAD_TREE -> {
+                val stepsPerMaj = (reticle.majorSpacing / reticle.minorSpacing).roundToInt()
+                val minorPx     = (reticle.minorSpacing * ppu).toFloat()
+                val majorPx     = (reticle.majorSpacing * ppu).toFloat()
+                val postPx      = reticle.postStart.toFloat() * ppu
+                val circleR     = ppu * 1.0f      // 1 MRAD speed ring radius
+                val treeStart   = 2               // tree rows begin at 2 MRAD below center
+                val treeDepth   = reticle.vertExtent.toInt()
 
-            // Hash marks and numbers on horizontal stadia
-            val majTickH  = majorPx * 0.45f
-            val minTickH  = majorPx * 0.22f
-            val hMaxSteps = Math.round(reticle.postStart / reticle.minorSpacing).toInt()
-            for (hStep in 1..hMaxSteps) {
-                val isMaj = hStep % stepsPerMaj == 0
-                val hx    = hStep * minorPx
-                val th    = if (isMaj) majTickH else minTickH
-                cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
-                cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
-                if (isMaj) {
-                    val label = (hStep / stepsPerMaj).toString()
-                    cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
-                    cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; strokeWidth = s * 6f
+                }
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; strokeWidth = s.toFloat()
+                }
+                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f
+                }
+                val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color     = android.graphics.Color.BLACK
+                    textSize  = majorPx * 0.48f
+                    typeface  = Typeface.DEFAULT_BOLD
+                    textAlign = Paint.Align.CENTER
+                }
+
+                // Horizontal: thin inner + thick outer posts
+                cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
+                cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
+                cv.drawLine(cx + postPx,      cy, cx + r.toFloat(), cy, pThick)
+
+                // Hash marks and numbers on horizontal stadia
+                val majTickH  = majorPx * 0.45f
+                val minTickH  = majorPx * 0.22f
+                val hMaxSteps = (reticle.postStart / reticle.minorSpacing).roundToInt()
+                for (hStep in 1..hMaxSteps) {
+                    val isMaj = hStep % stepsPerMaj == 0
+                    val hx    = hStep * minorPx
+                    val th    = if (isMaj) majTickH else minTickH
+                    cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
+                    cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
+                    if (isMaj) {
+                        val label = (hStep / stepsPerMaj).toString()
+                        cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
+                        cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
+                    }
+                }
+
+                // Center speed ring
+                cv.drawCircle(cx, cy, circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.STROKE
+                    color = android.graphics.Color.BLACK
+                    strokeWidth = s * 1.5f
+                })
+
+                // Short vertical stadia above center with minor ticks
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy - circleR, pThin)
+                val vMaxSteps = floor(((r - circleR) / minorPx).toDouble()).toInt()
+                for (vStep in 1..vMaxSteps) {
+                    val vy    = circleR + vStep * minorPx
+                    val isMaj = vStep % stepsPerMaj == 0
+                    val tw    = if (isMaj) majTickH else minTickH
+                    cv.drawLine(cx - tw, cy - vy, cx + tw, cy - vy, pTick)
+                }
+
+                // Vertical connector from circle bottom to tree start
+                cv.drawLine(cx, cy + circleR, cx, cy + treeStart * ppu, pThin)
+
+                // Christmas tree: dot grid + half-MRAD ticks between dots
+                val dotRad    = (majorPx * 0.13f).coerceAtLeast(s * 3f)
+                val halfTickH = majorPx * 0.20f
+                val pDotFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; style = Paint.Style.FILL
+                }
+                for (row in treeStart..treeDepth) {
+                    val ry = cy + row * ppu
+                    for (col in -row..row) {
+                        cv.drawCircle(cx + col * ppu, ry, dotRad, pDotFill)
+                    }
+                    for (col in -row until row) {
+                        val hx = cx + (col + 0.5f) * ppu
+                        cv.drawLine(hx, ry - halfTickH, hx, ry + halfTickH, pTick)
+                    }
                 }
             }
 
-            // Center speed ring
-            cv.drawCircle(cx, cy, circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
-                color = android.graphics.Color.BLACK
-                strokeWidth = S * 1.5f
-            })
+            Ballistics.ReticleStyle.MOA_TREE -> {
+                // Vortex EBR-7C style: numbered graduated crosshair + dot-grid tree below center.
+                val stepsPerMaj = (reticle.majorSpacing / reticle.minorSpacing).roundToInt() // 4
+                val minorPx     = (reticle.minorSpacing * ppu).toFloat()   // 1 MOA
+                val majorPx     = (reticle.majorSpacing * ppu).toFloat()   // 4 MOA
+                val postPx      = reticle.postStart.toFloat() * ppu         // 26 MOA
+                val treeStep    = reticle.majorSpacing.toInt()              // 4
+                val treeDepth   = reticle.vertExtent.toInt() - treeStep    // 36
 
-            // Short vertical stadia above center with minor ticks
-            cv.drawLine(cx, cy - R.toFloat(), cx, cy - circleR, pThin)
-            val vMaxSteps = Math.floor(((R - circleR) / minorPx).toDouble()).toInt()
-            for (vStep in 1..vMaxSteps) {
-                val vy    = circleR + vStep * minorPx
-                val isMaj = vStep % stepsPerMaj == 0
-                val tw    = if (isMaj) majTickH else minTickH
-                cv.drawLine(cx - tw, cy - vy, cx + tw, cy - vy, pTick)
-            }
-
-            // Vertical connector from circle bottom to tree start
-            cv.drawLine(cx, cy + circleR, cx, cy + treeStart * ppu, pThin)
-
-            // Christmas tree: dot grid + half-MRAD ticks between dots
-            val dotRad    = (majorPx * 0.13f).coerceAtLeast(S * 3f)
-            val halfTickH = majorPx * 0.20f
-            val pDotFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; style = Paint.Style.FILL
-            }
-            for (row in treeStart..treeDepth) {
-                val ry = cy + row * ppu
-                for (col in -row..row) {
-                    cv.drawCircle(cx + col * ppu, ry, dotRad, pDotFill)
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 6f }
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f }
+                val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
                 }
-                for (col in -row until row) {
-                    val hx = cx + (col + 0.5f) * ppu
-                    cv.drawLine(hx, ry - halfTickH, hx, ry + halfTickH, pTick)
+                val pNumL  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
                 }
-            }
-        }
-
-        Ballistics.ReticleStyle.MOA_TREE -> {
-            // Vortex EBR-7C style: numbered graduated crosshair + dot-grid tree below center.
-            val stepsPerMaj = Math.round(reticle.majorSpacing / reticle.minorSpacing).toInt() // 4
-            val minorPx     = (reticle.minorSpacing * ppu).toFloat()   // 1 MOA
-            val majorPx     = (reticle.majorSpacing * ppu).toFloat()   // 4 MOA
-            val postPx      = reticle.postStart.toFloat() * ppu         // 26 MOA
-            val treeStep    = reticle.majorSpacing.toInt()              // 4
-            val treeDepth   = reticle.vertExtent.toInt() - treeStep    // 36
-
-            val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 6f }
-            val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
-            val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 1.5f }
-            val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
-                typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
-            }
-            val pNumL  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
-                typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
-            }
-            val pNumR  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
-                typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.RIGHT
-            }
-
-            // Stadia lines
-            cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
-            cv.drawLine(cx - R.toFloat(), cy, cx - postPx, cy, pThick)
-            cv.drawLine(cx + postPx, cy, cx + R.toFloat(), cy, pThick)
-            cv.drawLine(cx, cy - R.toFloat(), cx, cy, pThin)                          // V above center
-            cv.drawLine(cx, cy, cx, cy + treeDepth * ppu, pThin)                      // V through tree
-            cv.drawLine(cx, cy + treeDepth * ppu, cx, cy + R.toFloat(), pThick)       // V bottom post
-
-            // Horizontal hash marks + labels
-            val majTickH  = majorPx * 0.45f
-            val minTickH  = majorPx * 0.22f
-            val hMaxSteps = Math.round(reticle.postStart / reticle.minorSpacing).toInt()
-            for (hStep in 1..hMaxSteps) {
-                val isMaj = hStep % stepsPerMaj == 0
-                val hx = hStep * minorPx
-                val th = if (isMaj) majTickH else minTickH
-                cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
-                cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
-                if (isMaj) {
-                    val label = (hStep / stepsPerMaj * treeStep).toString()
-                    cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
-                    cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
+                val pNumR  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.RIGHT
                 }
-            }
 
-            // Vertical hash marks + labels above center only
-            val vMaxSteps = Math.floor((R / minorPx).toDouble()).toInt()
-            for (vStep in 1..vMaxSteps) {
-                val vy = vStep * minorPx
-                if (vy > R) break
-                val isMaj = vStep % stepsPerMaj == 0
-                val tw = if (isMaj) majTickH else minTickH
-                cv.drawLine(cx - tw, cy - vy, cx + tw, cy - vy, pTick)
-                if (isMaj) {
-                    val label = (vStep / stepsPerMaj * treeStep).toString()
-                    cv.drawText(label, cx + tw + majorPx * 0.12f, cy - vy + pNumL.textSize * 0.35f, pNumL)
+                // Stadia lines
+                cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
+                cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
+                cv.drawLine(cx + postPx, cy, cx + r.toFloat(), cy, pThick)
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy, pThin)                          // V above center
+                cv.drawLine(cx, cy, cx, cy + treeDepth * ppu, pThin)                      // V through tree
+                cv.drawLine(cx, cy + treeDepth * ppu, cx, cy + r.toFloat(), pThick)       // V bottom post
+
+                // Horizontal hash marks + labels
+                val majTickH  = majorPx * 0.45f
+                val minTickH  = majorPx * 0.22f
+                val hMaxSteps = (reticle.postStart / reticle.minorSpacing).roundToInt()
+                for (hStep in 1..hMaxSteps) {
+                    val isMaj = hStep % stepsPerMaj == 0
+                    val hx = hStep * minorPx
+                    val th = if (isMaj) majTickH else minTickH
+                    cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
+                    cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
+                    if (isMaj) {
+                        val label = (hStep / stepsPerMaj * treeStep).toString()
+                        cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
+                        cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
+                    }
+                }
+
+                // Vertical hash marks + labels above center only
+                val vMaxSteps = floor((r / minorPx).toDouble()).toInt()
+                for (vStep in 1..vMaxSteps) {
+                    val vy = vStep * minorPx
+                    if (vy > r) break
+                    val isMaj = vStep % stepsPerMaj == 0
+                    val tw = if (isMaj) majTickH else minTickH
+                    cv.drawLine(cx - tw, cy - vy, cx + tw, cy - vy, pTick)
+                    if (isMaj) {
+                        val label = (vStep / stepsPerMaj * treeStep).toString()
+                        cv.drawText(label, cx + tw + majorPx * 0.12f, cy - vy + pNumL.textSize * 0.35f, pNumL)
+                    }
+                }
+
+                // Center dot (0.14 MOA)
+                cv.drawCircle(cx, cy, (ppu * 0.14f).coerceAtLeast(s * 2f),
+                    Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK })
+
+                // Dot-grid tree: rows every treeStep MOA, dots every 2 MOA within row
+                val dotRad    = (majorPx * 0.10f).coerceAtLeast(s * 2f)
+                val halfTickH = majorPx * 0.18f
+                val pDot      = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                val labelOff  = majorPx * 0.40f
+                var rowMoa    = treeStep
+                while (rowMoa <= treeDepth) {
+                    val ry = cy + rowMoa * ppu
+                    // Dots at every 2 MOA from -rowMoa to +rowMoa
+                    var colMoa = -rowMoa
+                    while (colMoa <= rowMoa) {
+                        cv.drawCircle(cx + colMoa * ppu, ry, dotRad, pDot)
+                        colMoa += 2
+                    }
+                    // 1-MOA intermediate ticks between dots
+                    colMoa = -(rowMoa - 1)
+                    while (colMoa < rowMoa) {
+                        val hx = cx + colMoa * ppu
+                        cv.drawLine(hx, ry - halfTickH, hx, ry + halfTickH, pTick)
+                        colMoa += 2
+                    }
+                    // Row labels at outermost dot ± offset
+                    val outerX = rowMoa * ppu
+                    cv.drawText(rowMoa.toString(), cx - outerX - labelOff, ry + pNumR.textSize * 0.35f, pNumR)
+                    cv.drawText(rowMoa.toString(), cx + outerX + labelOff * 0.5f, ry + pNumL.textSize * 0.35f, pNumL)
+                    rowMoa += treeStep
                 }
             }
 
-            // Center dot (0.14 MOA)
-            cv.drawCircle(cx, cy, (ppu * 0.14f).coerceAtLeast(S * 2f),
-                Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK })
+            else -> {
+                // Hash / Dot / Christmas tree
+                cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
+                cv.drawLine(cx - r.toFloat(), cy, cx + r.toFloat(), cy, pLine)
 
-            // Dot-grid tree: rows every treeStep MOA, dots every 2 MOA within row
-            val dotRad    = (majorPx * 0.10f).coerceAtLeast(S * 2f)
-            val halfTickH = majorPx * 0.18f
-            val pDot      = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
-            val labelOff  = majorPx * 0.40f
-            var rowMoa    = treeStep
-            while (rowMoa <= treeDepth) {
-                val ry = cy + rowMoa * ppu
-                // Dots at every 2 MOA from -rowMoa to +rowMoa
-                var colMoa = -rowMoa
-                while (colMoa <= rowMoa) {
-                    cv.drawCircle(cx + colMoa * ppu, ry, dotRad, pDot)
-                    colMoa += 2
-                }
-                // 1-MOA intermediate ticks between dots
-                colMoa = -(rowMoa - 1)
-                while (colMoa < rowMoa) {
-                    val hx = cx + colMoa * ppu
-                    cv.drawLine(hx, ry - halfTickH, hx, ry + halfTickH, pTick)
-                    colMoa += 2
-                }
-                // Row labels at outermost dot ± offset
-                val outerX = rowMoa * ppu
-                cv.drawText(rowMoa.toString(), cx - outerX - labelOff, ry + pNumR.textSize * 0.35f, pNumR)
-                cv.drawText(rowMoa.toString(), cx + outerX + labelOff * 0.5f, ry + pNumL.textSize * 0.35f, pNumL)
-                rowMoa += treeStep
-            }
-        }
+                val stepSz        = if (reticle.minorSpacing > 0) reticle.minorSpacing else reticle.majorSpacing
+                val stepsPerMajor = if (reticle.minorSpacing > 0) (reticle.majorSpacing / reticle.minorSpacing).roundToInt() else 1
+                val stepCount     = (reticle.vertExtent / stepSz).roundToInt()
+                val pMin = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
 
-        else -> {
-            // Hash / Dot / Christmas tree
-            cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
-            cv.drawLine(cx - R.toFloat(), cy, cx + R.toFloat(), cy, pLine)
-
-            val stepSz        = if (reticle.minorSpacing > 0) reticle.minorSpacing else reticle.majorSpacing
-            val stepsPerMajor = if (reticle.minorSpacing > 0) Math.round(reticle.majorSpacing / reticle.minorSpacing).toInt() else 1
-            val stepCount     = Math.round(reticle.vertExtent / stepSz).toInt()
-            val pMin = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
-
-            for (i in 1..stepCount) {
-                val isMaj = i % stepsPerMajor == 0
-                val hw    = if (isMaj) R * 0.44f else R * 0.22f
-                val paint = if (isMaj) pMaj else pMin
-                for (sign in listOf(1f, -1f)) {
-                    val y = cy + sign * i * stepSz.toFloat() * ppu
-                    when (reticle.style) {
-                        Ballistics.ReticleStyle.DOT ->
-                            if (isMaj) cv.drawCircle(cx, y,
-                                (ppu * stepSz * 0.28f).toFloat().coerceAtLeast(S * 2f), pDot)
-                        Ballistics.ReticleStyle.HASH ->
-                            cv.drawLine(cx - hw, y, cx + hw, y, paint)
-                        Ballistics.ReticleStyle.CHRISTMAS_TREE -> {
-                            val extra = if (sign > 0) i * stepSz.toFloat() * ppu * 0.20f else 0f
-                            cv.drawLine(cx - hw - extra, y, cx + hw + extra, y, paint)
+                for (i in 1..stepCount) {
+                    val isMaj = i % stepsPerMajor == 0
+                    val hw    = if (isMaj) r * 0.44f else r * 0.22f
+                    val paint = if (isMaj) pMaj else pMin
+                    for (sign in listOf(1f, -1f)) {
+                        val y = cy + sign * i * stepSz.toFloat() * ppu
+                        when (reticle.style) {
+                            Ballistics.ReticleStyle.DOT ->
+                                if (isMaj) cv.drawCircle(cx, y,
+                                    (ppu * stepSz * 0.28f).toFloat().coerceAtLeast(s * 2f), pDot)
+                            Ballistics.ReticleStyle.HASH ->
+                                cv.drawLine(cx - hw, y, cx + hw, y, paint)
+                            Ballistics.ReticleStyle.CHRISTMAS_TREE -> {
+                                val extra = if (sign > 0) i * stepSz.toFloat() * ppu * 0.20f else 0f
+                                cv.drawLine(cx - hw - extra, y, cx + hw + extra, y, paint)
+                            }
+                            else -> {}
                         }
-                        else -> {}
                     }
                 }
             }
         }
-    }
 
-    // Colored trajectory hash marks on the vertical stadia — drawn inside the circle
-    // so they appear as horizontal tick marks crossing the crosshair at each holdover position
-    val dotR = (R * 0.045f).coerceAtLeast(S * 3f)
-    for (c in callouts) {
-        cv.drawCircle(c.x, c.y, dotR,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; this.color = c.color })
+        // Colored trajectory hash marks on the vertical stadia — drawn inside the circle
+        // so they appear as horizontal tick marks crossing the crosshair at each holdover position
+        val dotR = (r * 0.045f).coerceAtLeast(s * 3f)
+        for (c in callouts) {
+            cv.drawCircle(c.x, c.y, dotR,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; this.color = c.color })
+        }
     }
-
-    cv.restore()
 
     // ---- colored leader lines + labels (outside circle) ----
-    val lineStartX = cx + R + S * 10f
-    val textX      = W * 0.65f
+    val lineStartX = cx + r + s * 10f
+    val textX      = w * 0.65f
     for (c in callouts) {
-        cv.drawLine(lineStartX, c.y, textX - S * 6f, c.y, Paint().apply {
-            this.color = c.color; strokeWidth = S * 1.5f
-            pathEffect = android.graphics.DashPathEffect(floatArrayOf(S * 5f, S * 3f), 0f)
+        cv.drawLine(lineStartX, c.y, textX - s * 6f, c.y, Paint().apply {
+            this.color = c.color; strokeWidth = s * 1.5f
+            pathEffect = android.graphics.DashPathEffect(floatArrayOf(s * 5f, s * 3f), 0f)
         })
         cv.drawText(c.label, textX, c.y + bsz * 0.33f,
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -978,17 +979,16 @@ private fun drawReticleSection(
 /** Renders just the reticle illustration for on-screen display (2× scale, 1100×560 px). */
 private fun buildReticleBitmap(
     result: Ballistics.MpbrResult,
-    reticle: Ballistics.ReticlePreset,
-    windSpeedMph: Double
+    reticle: Ballistics.ReticlePreset
 ): Bitmap {
-    val W   = 1100
-    val H   = 560
-    val S   = 2
-    val bsz = 12f * S
-    val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
+    val w   = 1100
+    val h   = 560
+    val s   = 2
+    val bsz = 12f * s
+    val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
     val cv  = android.graphics.Canvas(bmp)
     cv.drawColor(android.graphics.Color.WHITE)
-    drawReticleSection(cv, W, result, reticle, 0f, H.toFloat(), bsz, S)
+    drawReticleSection(cv, w, result, reticle, 0f, h.toFloat(), bsz, s)
     return bmp
 }
 
@@ -997,7 +997,6 @@ private fun buildReticleBitmap(
  * 3× scale so text is sharp when viewed or printed.
  */
 private fun buildDopeChartBitmap(
-    context: android.content.Context,
     result: Ballistics.MpbrResult,
     ammoLabel: String,
     altFt: Double,
@@ -1009,11 +1008,11 @@ private fun buildDopeChartBitmap(
     reticle: Ballistics.ReticlePreset? = null,
     cardTitle: String = "MPBR DOPE CARD"
 ): Bitmap {
-    val S   = 3
-    val W   = 400 * S
-    val pad = 14 * S
-    val tsz = 18f * S
-    val bsz = 12f * S
+    val s   = 3
+    val w   = 400 * s
+    val pad = 14 * s
+    val tsz = 18f * s
+    val bsz = 12f * s
     val lnH = (bsz + 12).toInt()
     val rwH = (bsz + 16).toInt()
 
@@ -1044,10 +1043,10 @@ private fun buildDopeChartBitmap(
 
     val reticleH = if (reticle != null) 640 else 0
     val headerH  = pad + tsz.toInt() + 14 + info.size * lnH + pad
-    val tableH   = pad + (bsz * 0.2f).toInt() + S * 2 + S + (bsz * 0.8f).toInt() + S * 2 + rwH * result.trajectoryTable.size + pad
-    val H        = headerH + S + (if (reticle != null) reticleH + S else 0) + tableH
+    val tableH   = pad + (bsz * 0.2f).toInt() + s * 2 + s + (bsz * 0.8f).toInt() + s * 2 + rwH * result.trajectoryTable.size + pad
+    val h        = headerH + s + (if (reticle != null) reticleH + s else 0) + tableH
 
-    val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
+    val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
     val cv  = android.graphics.Canvas(bmp)
     cv.drawColor(android.graphics.Color.WHITE)
 
@@ -1069,25 +1068,25 @@ private fun buildDopeChartBitmap(
     for (line in info) { y += lnH; cv.drawText(line, pad.toFloat(), y, pBody) }
     y += pad
 
-    cv.drawRect(0f, y, W.toFloat(), y + S, pRule)
-    y += S.toFloat()
+    cv.drawRect(0f, y, w.toFloat(), y + s, pRule)
+    y += s.toFloat()
 
     if (reticle != null) {
-        drawReticleSection(cv, W, result, reticle, y, reticleH.toFloat(), bsz, S)
+        drawReticleSection(cv, w, result, reticle, y, reticleH.toFloat(), bsz, s)
         y += reticleH
-        cv.drawRect(0f, y, W.toFloat(), y + S, pRule)
-        y += S.toFloat()
+        cv.drawRect(0f, y, w.toFloat(), y + s, pRule)
+        y += s.toFloat()
     }
     y += pad
 
-    val colW = (W - 2 * pad).toFloat() / cols.size
+    val colW = (w - 2 * pad).toFloat() / cols.size
     cols.forEachIndexed { i, col -> cv.drawText(col, pad + i * colW, y, pHdr) }
-    y += bsz * 0.2f + S * 2   // descent + equal gap
-    cv.drawRect(0f, y, W.toFloat(), y + S, pRule)
-    y += S + bsz * 0.8f + S * 2  // skip divider + equal gap + ascent
+    y += bsz * 0.2f + s * 2   // descent + equal gap
+    cv.drawRect(0f, y, w.toFloat(), y + s, pRule)
+    y += s + bsz * 0.8f + s * 2  // skip divider + equal gap + ascent
 
     result.trajectoryTable.forEachIndexed { idx, row ->
-        if (idx % 2 == 1) cv.drawRect(0f, y - bsz * 0.9f, W.toFloat(), y + bsz * 0.3f, pStripe)
+        if (idx % 2 == 1) cv.drawRect(0f, y - bsz * 0.9f, w.toFloat(), y + bsz * 0.3f, pStripe)
         val cells = buildList {
             add("${row.rangeYards}")
             add("%.1f".format(row.dropInches))
@@ -1134,7 +1133,7 @@ private fun saveDopeChart(
             context.contentResolver.update(uri, values, null, null)
         }
         true
-    } catch (e: Exception) { false }
+    } catch (_: Exception) { false }
 }
 
 /** Format a Double as a clean integer string when whole, else trim trailing zeros. */

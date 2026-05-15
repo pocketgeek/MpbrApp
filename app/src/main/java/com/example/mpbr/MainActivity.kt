@@ -719,12 +719,6 @@ private fun drawReticleSection(
                 val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
                 val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 5f }
                 val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
-                val pLbl   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; textSize = ppu * 2.4f
-                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
-                }
-
-                val rangeLabels = listOf("300", "400", "500", "600")
 
                 // Center dot inside the circle
                 cv.drawCircle(cx, cy, dotR, pFill)
@@ -739,12 +733,10 @@ private fun drawReticleSection(
                     cy + reticle.holdoverMarks.last().toFloat() * ppu else cy + circleR
                 cv.drawLine(cx, cy + circleR, cx, lastHy, pThin)
 
-                // BDC tick marks + labels
-                reticle.holdoverMarks.forEachIndexed { idx, h ->
+                // BDC tick marks (no labels)
+                for (h in reticle.holdoverMarks) {
                     val hy = cy + h.toFloat() * ppu
                     cv.drawLine(cx - tickHW, hy, cx + tickHW, hy, pTick)
-                    cv.drawText(rangeLabels.getOrElse(idx) { "" },
-                        cx + tickHW + ppu * 0.3f, hy + pLbl.textSize * 0.35f, pLbl)
                 }
 
                 // Thick bottom post from last BDC mark to scope edge

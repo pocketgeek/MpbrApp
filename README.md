@@ -96,6 +96,10 @@ vital zone diameter (in).
 25% RH, 0 mph). Set wind to 0 to hide the drift columns in the trajectory
 table.
 
+**Trajectory Table** — configurable start and end range (defaults 50 / 500 yd,
+range 0–2000 yd, 50 yd steps). Both on-screen table and DOPE chart use these
+values. Start must be less than end.
+
 ## Algorithm
 
 1. Bisect bore angle until trajectory peak above LOS equals exactly
@@ -114,6 +118,16 @@ ICAO troposphere pressure model, temperature, and humidity (Magnus saturation
 air-relative velocity component so it naturally affects drag magnitude and
 produces lateral drift. No spin drift, no Coriolis.
 
+## Results layout
+
+After calculating, the results screen shows (in order):
+
+1. Summary card — near/far zero, MPBR, max ordinate, bore angle, velocity/energy
+2. **Reticle illustration** (if a reticle is selected) — live on-screen scope view
+   with color-coded holdover callout dots and labels for each range in the table
+3. Trajectory table — holdover/drift/velocity/energy for each range in the configured
+   start-to-end window
+
 ## Saving a DOPE chart
 
 After calculating, tap **Save DOPE Chart** (appears below the trajectory
@@ -127,9 +141,10 @@ table). The app renders a 1200 px JPEG containing:
   label. Labels that would overlap are skipped; ranges beyond the reticle's
   extent are omitted. FFP reticles work at any magnification; SFP values are
   valid at maximum magnification only.
-- Full trajectory table at 50 yd steps to 1,000 yd (same columns as on-screen —
-  drift columns appear only when wind ≠ 0, energy only when bullet weight is set;
-  the redundant MOA or MIL column is dropped when a reticle is selected)
+- Full trajectory table at 50 yd steps over the configured range (same columns
+  as on-screen — drift columns appear only when wind ≠ 0, energy only when bullet
+  weight is set; the redundant MOA or MIL column is dropped when a reticle is
+  selected)
 - Date of generation
 
 The file is written to **Pictures/MPBR DOPE Charts/** in your gallery.

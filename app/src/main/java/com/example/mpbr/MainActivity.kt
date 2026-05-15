@@ -251,14 +251,6 @@ fun MpbrScreen() {
                 }
             }
 
-            if (r.trajectoryTable.isNotEmpty()) {
-                TrajectoryTableCard(
-                    rows       = r.trajectoryTable,
-                    showEnergy = r.energyAtMpbrFtLb > 0.0,
-                    showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
-                )
-            }
-
             // Reticle illustration (on-screen) when a reticle is selected
             selectedReticle?.let { reticle ->
                 val reticleBmp = remember(r, reticle) {
@@ -266,12 +258,20 @@ fun MpbrScreen() {
                 }
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Image(
-                        bitmap           = reticleBmp.asImageBitmap(),
+                        bitmap             = reticleBmp.asImageBitmap(),
                         contentDescription = null,
-                        contentScale     = ContentScale.FillWidth,
-                        modifier         = Modifier.fillMaxWidth()
+                        contentScale       = ContentScale.FillWidth,
+                        modifier           = Modifier.fillMaxWidth()
                     )
                 }
+            }
+
+            if (r.trajectoryTable.isNotEmpty()) {
+                TrajectoryTableCard(
+                    rows       = r.trajectoryTable,
+                    showEnergy = r.energyAtMpbrFtLb > 0.0,
+                    showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
+                )
             }
 
             Button(

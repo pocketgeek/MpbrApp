@@ -41,8 +41,8 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 **`MainActivity.kt`** — single `@Composable` function (`MpbrScreen`) with all state as `mutableStateOf` vars. No ViewModel, no architecture layers. Flow:
 1. User picks an ammo preset → `applyPreset()` populates all fields and sets `selectedPreset`; any manual field edit calls `userEdit()` which resets `selectedPreset = null` (shows "Custom" in dropdown)
 2. User optionally selects a reticle preset (`selectedReticle`) for the DOPE chart illustration
-3. Calculate button → calls `Ballistics.calculateMpbr()`, stores result in `result` state
-4. Result renders as a summary Card + `TrajectoryTableCard` + Save DOPE Chart button
+3. Calculate button → validates table start/end (0–2000 yd), calls `Ballistics.calculateMpbr()` with `tableMinYards`/`tableMaxYards`, stores result in `result` state
+4. Result renders as: summary Card → reticle illustration Card (if reticle selected, via `buildReticleBitmap()`) → `TrajectoryTableCard` → Save DOPE Chart button
 
 ## Key conventions
 

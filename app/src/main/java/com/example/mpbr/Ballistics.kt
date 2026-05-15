@@ -78,7 +78,7 @@ object Ballistics {
         // Source: Uncle Zo AR-BDC3 review + Vortex product page.
         ReticlePreset(
             "Vortex Strike Eagle AR-BDC3 (MOA, SFP)",
-            ReticleUnit.MOA, 8.3125, 0.5, 18.0,
+            ReticleUnit.MOA, 8.3125, 0.5, 25.0,
             ReticleStyle.AR_BDC3,
             holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6)
         ),

@@ -749,6 +749,13 @@ private fun drawReticleSection(
                     val lx = maxW * ppu + ppu * 0.5f
                     cv.drawText(rangeLabels.getOrElse(idx) { "" }, cx + lx, hy + pLbl.textSize * 0.35f, pLbl)
                     cv.drawText(rangeLabels.getOrElse(idx) { "" }, cx - lx, hy + pLblR.textSize * 0.35f, pLblR)
+
+                    // 600-yd row: also label the 10 mph wind-hold position (≈8.1 MOA each side)
+                    if (idx == reticle.holdoverMarks.size - 1) {
+                        val tenX = 8.1f * ppu + ppu * 0.4f
+                        cv.drawText("10", cx + tenX, hy + pLbl.textSize * 1.1f, pLbl)
+                        cv.drawText("10", cx - tenX, hy + pLblR.textSize * 1.1f, pLblR)
+                    }
                 }
             }
 

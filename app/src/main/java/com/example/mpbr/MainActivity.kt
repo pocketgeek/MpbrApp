@@ -716,7 +716,7 @@ private fun drawReticleSection(
                 // widening BDC marks below + thick bottom post.
                 val gapPx   = reticle.majorSpacing.toFloat() * ppu   // horizontal thin half-extent (~4 MOA)
                 val postHH  = reticle.minorSpacing.toFloat() * ppu   // post half-height
-                val topThin = ppu * 1.5f                               // vertical thin above center (~1.5 MOA)
+                val topThin = ppu * 2.0f                               // vertical thin above center (~2 MOA)
                 val tickH   = postHH * 0.65f
                 val notch   = postHH * 0.55f
                 val pFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }

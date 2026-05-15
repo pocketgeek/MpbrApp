@@ -80,7 +80,7 @@ object Ballistics {
         // The vertical thin section above center is hardcoded to 1.5 MOA (much shorter than horizontal).
         ReticlePreset(
             "Burris Fullfield Ballistic E3 (MOA, SFP)",
-            ReticleUnit.MOA, 4.0, 0.90, 10.0,
+            ReticleUnit.MOA, 4.0, 1.6, 20.0,
             ReticleStyle.BALLISTIC_E3,
             holdoverMarks = listOf(1.49, 4.31, 7.18),
             postStart     = 4.0

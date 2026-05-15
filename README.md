@@ -107,6 +107,9 @@ table.
 range 0–2000 yd, 50 yd steps). Both on-screen table and DOPE chart use these
 values. Start must be less than end.
 
+**DOPE Card Title** — editable heading printed at the top of the saved JPEG
+(default "MPBR DOPE CARD"). Leave blank to keep the default.
+
 ## Algorithm
 
 1. Bisect bore angle until trajectory peak above LOS equals exactly

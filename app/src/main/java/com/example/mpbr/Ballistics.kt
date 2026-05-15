@@ -79,9 +79,11 @@ object Ballistics {
         // majorSpacing = horizontal thin-section half-extent (4 MOA). Ticks at 1/2/3/4 MOA.
         // minorSpacing = post half-height (MOA). postStart = where thick horizontal posts begin (MOA).
         // vertExtent = 16 so 4 MOA gap = 25% of scope radius → thick posts dominate.
+        // majorSpacing = thin section half-width (MOA). minorSpacing = horizontal bar half-height (MOA).
+        // vertExtent = 40 → wide FOV → reticle appears as a compact cluster in lower scope area.
         ReticlePreset(
             "Burris Fullfield Ballistic E3 (MOA, SFP)",
-            ReticleUnit.MOA, 4.0, 1.4, 18.0,
+            ReticleUnit.MOA, 4.0, 2.2, 40.0,
             ReticleStyle.BALLISTIC_E3,
             holdoverMarks = listOf(1.49, 4.31, 7.18),
             postStart     = 4.0

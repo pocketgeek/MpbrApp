@@ -183,16 +183,6 @@ fun MpbrScreen() {
             NumberField("End (yd)",   tableEnd,   Modifier.weight(1f)) { tableEnd   = it }
         }
 
-        // ---- DOPE card title ----
-        SectionLabel("DOPE Card Title")
-        OutlinedTextField(
-            value         = dopeTitle,
-            onValueChange = { dopeTitle = it },
-            label         = { Text("Card Title") },
-            singleLine    = true,
-            modifier      = Modifier.fillMaxWidth()
-        )
-
         Button(
             onClick = {
                 error = null
@@ -286,6 +276,14 @@ fun MpbrScreen() {
                     showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL
                 )
             }
+
+            OutlinedTextField(
+                value         = dopeTitle,
+                onValueChange = { dopeTitle = it },
+                label         = { Text("DOPE Card Title") },
+                singleLine    = true,
+                modifier      = Modifier.fillMaxWidth()
+            )
 
             Button(
                 onClick = {

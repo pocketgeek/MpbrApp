@@ -52,7 +52,13 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **DOPE chart export** — `buildDopeChartBitmap()` draws a 1200 px wide JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). Layout: header block → optional reticle section (640 px tall) → trajectory table. `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
 
-**Reticle illustration** — `drawReticleSection()` renders a clipped scope circle with crosshair, hash/dot/Christmas-tree marks, and dashed callout lines to range+holdover labels. Marks are spaced at `minorSpacing` units; every `majorSpacing/minorSpacing`-th mark is drawn thicker. Callouts iterate the trajectory table and skip any label whose y-position is within 82% of text height of the previous drawn label (overlap prevention). Adding a new reticle preset: append to `Ballistics.RETICLE_PRESETS` — no drawing code changes needed.
+**Reticle illustration** — `drawReticleSection()` renders a clipped scope circle with crosshair, marks, and dashed callout lines to range+holdover labels. Two drawing paths:
+- *Hash/Dot/Christmas-tree*: evenly-spaced marks driven by `majorSpacing` / `minorSpacing`. Callouts skip any label within 82% of text height of the previous one.
+- *BDC*: thin inner crosshair + thick outer posts (starting at `postStart`), windage hashes at `windageMarks` positions, and filled holdover dots at `holdoverMarks` positions.
+
+**Adding a hash/dot/tree reticle preset** — append to `Ballistics.RETICLE_PRESETS` with `majorSpacing`, `minorSpacing`, `vertExtent`. No drawing code changes needed.
+
+**Adding a BDC reticle preset** — append with `style = ReticleStyle.BDC`, `holdoverMarks = listOf(...)`, `windageMarks = listOf(...)`, `postStart = <MOA>`, `majorSpacing = 0.0`, `minorSpacing = 0.0`. Source the subtension values from the manufacturer's reticle manual PDF (labeled "valid at maximum magnification" for SFP scopes). No drawing code changes needed.
 
 **Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph wind.
 

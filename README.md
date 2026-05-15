@@ -81,6 +81,11 @@ to "None" (no illustration). Available presets:
 | MOA Hash · 1.0 | MOA | 5.0 | 1.0 |
 | MOA Hash · 0.5 | MOA | 5.0 | 0.5 |
 | MOA Hash · 0.25 | MOA | 5.0 | 0.25 |
+| Vortex Dead-Hold BDC (MOA, SFP) | MOA | BDC dots: 1.5 / 4.5 / 7.5 / 11.0 | Windage: ±2 / ±4 / ±6 |
+
+The Dead-Hold BDC is used in the Vortex Viper 4-12×40, 3.5-10×50, and several
+other Vortex scopes. It is second focal plane — subtensions are only accurate
+at **maximum magnification**.
 
 **Drag model** — G1 or G7. The BC value you enter must reference the model you
 pick. Manufacturers usually publish G1; many also publish G7 for long

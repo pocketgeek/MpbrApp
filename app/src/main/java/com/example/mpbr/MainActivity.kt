@@ -519,34 +519,65 @@ private fun drawReticleSection(
     })
 
     val pLine = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
-    cv.drawLine(cx - R, cy, cx + R, cy, pLine)
+    val pMaj  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 2f }
+    val pDot  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
+
+    // Vertical stadia — always present
     cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
 
-    val stepSz        = if (reticle.minorSpacing > 0) reticle.minorSpacing else reticle.majorSpacing
-    val stepsPerMajor = if (reticle.minorSpacing > 0) Math.round(reticle.majorSpacing / reticle.minorSpacing).toInt() else 1
-    val stepCount     = Math.round(reticle.vertExtent / stepSz).toInt()
+    if (reticle.style == Ballistics.ReticleStyle.BDC) {
+        // ---- BDC: thin inner crosshair + thick outer posts ----
+        if (reticle.postStart > 0.0) {
+            val postPx = (reticle.postStart * ppu).toFloat()
+            cv.drawLine(cx - postPx, cy, cx + postPx, cy, pLine)
+            val pPost = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.BLACK; strokeWidth = S * 5f
+            }
+            cv.drawLine(cx - R.toFloat(), cy, cx - postPx, cy, pPost)
+            cv.drawLine(cx + postPx,      cy, cx + R.toFloat(), cy, pPost)
+        } else {
+            cv.drawLine(cx - R.toFloat(), cy, cx + R.toFloat(), cy, pLine)
+        }
+        // Windage hashes
+        val wh = R * 0.10f
+        for (w in reticle.windageMarks) {
+            val wx = (w * ppu).toFloat()
+            for (sign in listOf(1f, -1f)) {
+                cv.drawLine(cx + sign * wx, cy - wh, cx + sign * wx, cy + wh, pMaj)
+            }
+        }
+        // Holdover dots
+        val dotR = (R * 0.048f).coerceAtLeast(S * 3f)
+        for (h in reticle.holdoverMarks) {
+            cv.drawCircle(cx, cy + (h * ppu).toFloat(), dotR, pDot)
+        }
+    } else {
+        // ---- Hash / Dot / Christmas tree ----
+        cv.drawLine(cx - R.toFloat(), cy, cx + R.toFloat(), cy, pLine)
 
-    val pMaj = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S * 2f }
-    val pMin = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
-    val pDot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
+        val stepSz        = if (reticle.minorSpacing > 0) reticle.minorSpacing else reticle.majorSpacing
+        val stepsPerMajor = if (reticle.minorSpacing > 0) Math.round(reticle.majorSpacing / reticle.minorSpacing).toInt() else 1
+        val stepCount     = Math.round(reticle.vertExtent / stepSz).toInt()
+        val pMin = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = S.toFloat() }
 
-    for (i in 1..stepCount) {
-        val isMaj = i % stepsPerMajor == 0
-        val hw    = if (isMaj) R * 0.44f else R * 0.22f
-        val paint = if (isMaj) pMaj else pMin
+        for (i in 1..stepCount) {
+            val isMaj = i % stepsPerMajor == 0
+            val hw    = if (isMaj) R * 0.44f else R * 0.22f
+            val paint = if (isMaj) pMaj else pMin
 
-        for (sign in listOf(1f, -1f)) {
-            val y = cy + sign * i * stepSz.toFloat() * ppu
-            when (reticle.style) {
-                Ballistics.ReticleStyle.DOT ->
-                    if (isMaj) cv.drawCircle(cx, y,
-                        (ppu * stepSz * 0.28f).toFloat().coerceAtLeast(S * 2f), pDot)
-                Ballistics.ReticleStyle.HASH ->
-                    cv.drawLine(cx - hw, y, cx + hw, y, paint)
-                Ballistics.ReticleStyle.CHRISTMAS_TREE -> {
-                    // tree arms widen linearly going below center; above center stays normal
-                    val extra = if (sign > 0) i * stepSz.toFloat() * ppu * 0.20f else 0f
-                    cv.drawLine(cx - hw - extra, y, cx + hw + extra, y, paint)
+            for (sign in listOf(1f, -1f)) {
+                val y = cy + sign * i * stepSz.toFloat() * ppu
+                when (reticle.style) {
+                    Ballistics.ReticleStyle.DOT ->
+                        if (isMaj) cv.drawCircle(cx, y,
+                            (ppu * stepSz * 0.28f).toFloat().coerceAtLeast(S * 2f), pDot)
+                    Ballistics.ReticleStyle.HASH ->
+                        cv.drawLine(cx - hw, y, cx + hw, y, paint)
+                    Ballistics.ReticleStyle.CHRISTMAS_TREE -> {
+                        val extra = if (sign > 0) i * stepSz.toFloat() * ppu * 0.20f else 0f
+                        cv.drawLine(cx - hw - extra, y, cx + hw + extra, y, paint)
+                    }
+                    else -> {}
                 }
             }
         }

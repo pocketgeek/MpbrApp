@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -45,10 +45,14 @@ object Ballistics {
     data class ReticlePreset(
         val name: String,
         val unit: ReticleUnit,
-        val majorSpacing: Double,
-        val minorSpacing: Double,
-        val vertExtent: Double,
-        val style: ReticleStyle = ReticleStyle.HASH
+        val majorSpacing: Double,                       // hash reticles: units between labeled marks
+        val minorSpacing: Double,                       // hash reticles: units between fine marks (0 = major-only)
+        val vertExtent: Double,                         // units visible below center
+        val style: ReticleStyle = ReticleStyle.HASH,
+        // BDC reticles — ignored for HASH/DOT/CHRISTMAS_TREE styles:
+        val holdoverMarks: List<Double> = emptyList(),  // mark positions in units below center
+        val windageMarks: List<Double>  = emptyList(),  // hash positions in units each side of center
+        val postStart: Double = 0.0                     // unit where thin line transitions to thick outer post (0 = no posts)
     )
 
     val RETICLE_PRESETS: List<ReticlePreset> = listOf(
@@ -60,7 +64,20 @@ object Ballistics {
         // ── MOA ─────────────────────────────────────────────────────────────
         ReticlePreset("MOA Hash · 1.0",       ReticleUnit.MOA, 5.0, 1.0, 35.0),
         ReticlePreset("MOA Hash · 0.5",       ReticleUnit.MOA, 5.0, 0.5, 35.0),
-        ReticlePreset("MOA Hash · 0.25",      ReticleUnit.MOA, 5.0, 0.25, 35.0)
+        ReticlePreset("MOA Hash · 0.25",      ReticleUnit.MOA, 5.0, 0.25, 35.0),
+        // ── Real scopes — BDC ────────────────────────────────────────────────
+        // Vortex Dead-Hold BDC (MOA, SFP) — found in Viper 4-12×40, 3.5-10×50, etc.
+        // Subtensions valid at maximum magnification only (second focal plane).
+        // Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA below center.
+        // Windage hashes: ±2, ±4, ±6 MOA; thick outer posts begin at ~7 MOA.
+        ReticlePreset(
+            "Vortex Dead-Hold BDC (MOA, SFP)",
+            ReticleUnit.MOA, 0.0, 0.0, 11.0,
+            ReticleStyle.BDC,
+            holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
+            windageMarks  = listOf(2.0, 4.0, 6.0),
+            postStart     = 7.0
+        )
     )
 
     /**

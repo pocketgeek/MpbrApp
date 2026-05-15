@@ -34,7 +34,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 - `AmmoCategory` enum — `RIFLE`, `RIMFIRE`, `PISTOL`, `SHOTGUN`; defaults to `RIFLE` so only non-rifle presets need an explicit tag
 - `ReticlePreset` data class and `RETICLE_PRESETS` list — scope reticle definitions (name, unit, majorSpacing, minorSpacing, vertExtent, style)
 - `ReticleUnit` enum — `MIL`, `MOA`
-- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`, `CIRCLE_DOT`, `MOA_TREE`, `DRT`, `BRC`, `AR_BDC3`, `CIRCLE_BDC`, `DUPLEX`
+- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`, `CIRCLE_DOT`, `MOA_TREE`, `DRT`, `BRC`, `AR_BDC3`, `CIRCLE_BDC`, `DUPLEX`, `BALLISTIC_E3`
 - `RETICLE_PRESETS` list is sorted by manufacturer (Burris → EOTech → Firefield → Holosun → Viridian → Vortex)
 - `Atmosphere` data class — ICAO pressure model + Magnus humidity correction; call `.densityRatio()` and `.speedOfSound()` for scaled values
 - `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind enters the drag force naturally. Returns `List<TrajectoryPoint>`
@@ -71,6 +71,8 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 **Adding an MRAD_TREE reticle preset** — append with `style = ReticleStyle.MRAD_TREE`, `majorSpacing = 1.0`, `minorSpacing = 0.5`, `vertExtent = <tree depth>`, `postStart = <MRAD where thick posts begin>`. No drawing code changes needed.
 
 **Adding a MOA_TREE reticle preset** (Vortex EBR-7C style) — append with `style = ReticleStyle.MOA_TREE`, `majorSpacing = 4.0`, `minorSpacing = 1.0`, `vertExtent = <tree depth + majorSpacing>` (the extra majorSpacing becomes the bottom thick post gap), `postStart = <MOA where horizontal thick posts begin>`. The drawing produces: numbered H/V stadia, dot-grid tree (rows every `majorSpacing` MOA starting at `majorSpacing`; dots at 2 MOA spacing per row), and thick bottom post. No drawing code changes needed for this style.
+
+**Adding a BALLISTIC_E3 reticle preset** (Burris Ballistic E3 style) — append with `style = ReticleStyle.BALLISTIC_E3`, `majorSpacing = <horizontal thin extent / tick count MOA>`, `minorSpacing = <post half-height MOA>`, `holdoverMarks = listOf(<200yd MOA>, <300yd MOA>, <400yd MOA>)`, `postStart = <MOA where horizontal thick posts begin>`, `vertExtent = <slightly larger than last holdover>`. BDC line half-widths (1.5/2.5/3.5 MOA) and windage dot positions (1.54/2.42/3.38 MOA) are hardcoded in the drawing — update them in the code if adding a different scope variant.
 
 **Adding a DUPLEX reticle preset** (duplex/Plex, e.g. Burris Fullfield) — append with `style = ReticleStyle.DUPLEX`, `majorSpacing = <gap from center to thick post inner face in MOA>`, `minorSpacing = <post half-height in MOA>`, `vertExtent = <slightly larger than outer post extent>`. The four thick posts are drawn as filled trapezoids inside the clip (wide at scope edge, tapering to the thin crosshair width at `gapPx`). The circular clip automatically rounds the outer post corners. Source subtension values from Burris Plex diagram: A (gap), B (half-height), W (outer extent). No drawing code changes needed.
 

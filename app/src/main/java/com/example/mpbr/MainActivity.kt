@@ -710,6 +710,85 @@ private fun drawReticleSection(
                 }
             }
 
+            Ballistics.ReticleStyle.BALLISTIC_E3 -> {
+                // Duplex H crosshair with ticks, 1 MOA center dot, widening BDC marks + windage dots
+                val postHH    = reticle.minorSpacing.toFloat() * ppu   // post half-height
+                val thinEnd   = reticle.postStart.toFloat()   * ppu   // thin-to-thick transition
+                val tickH     = postHH * 0.65f
+                val notch     = postHH * 0.55f
+                val pFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                val pThin = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pTick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f }
+                val pBdc  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                val pDot  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+
+                // ── Horizontal: thin center with ticks, thick posts ──
+                cv.drawLine(cx - thinEnd, cy, cx + thinEnd, cy, pThin)
+                for (t in 1..reticle.majorSpacing.toInt()) {
+                    val tx = t * ppu
+                    cv.drawLine(cx + tx, cy - tickH, cx + tx, cy + tickH, pTick)
+                    cv.drawLine(cx - tx, cy - tickH, cx - tx, cy + tickH, pTick)
+                }
+                // Left thick post with notched inner tip
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - r.toFloat(), cy - postHH); lineTo(cx - r.toFloat(), cy + postHH)
+                    lineTo(cx - thinEnd - notch, cy + postHH); lineTo(cx - thinEnd, cy)
+                    lineTo(cx - thinEnd - notch, cy - postHH); close()
+                }, pFill)
+                // Right thick post
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx + r.toFloat(), cy - postHH); lineTo(cx + r.toFloat(), cy + postHH)
+                    lineTo(cx + thinEnd + notch, cy + postHH); lineTo(cx + thinEnd, cy)
+                    lineTo(cx + thinEnd + notch, cy - postHH); close()
+                }, pFill)
+
+                // ── Vertical: thin above center + tick marks ──
+                cv.drawLine(cx, cy - thinEnd, cx, cy, pThin)
+                for (t in 1..reticle.majorSpacing.toInt()) {
+                    val ty = t * ppu
+                    cv.drawLine(cx - tickH, cy - ty, cx + tickH, cy - ty, pTick)
+                }
+                // Short thick top post with notched inner tip
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - postHH, cy - r.toFloat()); lineTo(cx + postHH, cy - r.toFloat())
+                    lineTo(cx + postHH, cy - thinEnd - notch); lineTo(cx, cy - thinEnd)
+                    lineTo(cx - postHH, cy - thinEnd - notch); close()
+                }, pFill)
+
+                // ── Center 1 MOA dot ──
+                cv.drawCircle(cx, cy, (0.5f * ppu).coerceAtLeast(s * 2f), pDot)
+
+                // ── BDC marks: widening lines + windage dots ──
+                val bdcHW  = listOf(1.5f, 2.5f, 3.5f)   // half-width of each BDC line (MOA)
+                val wdMoa  = listOf(1.54f, 2.42f, 3.38f) // windage dot distance from center (MOA)
+                val dotR   = (ppu * 0.18f).coerceAtLeast(s * 2f)
+
+                // Thin vertical connector from center to first BDC mark
+                val firstY = cy + reticle.holdoverMarks[0].toFloat() * ppu
+                cv.drawLine(cx, cy, cx, firstY, pThin)
+
+                reticle.holdoverMarks.forEachIndexed { idx, h ->
+                    val hy  = cy + h.toFloat() * ppu
+                    val hw  = bdcHW.getOrElse(idx) { 2.0f } * ppu
+                    val wdx = wdMoa.getOrElse(idx) { 2.0f } * ppu
+                    cv.drawLine(cx - hw, hy, cx + hw, hy, pBdc)
+                    cv.drawCircle(cx + wdx, hy, dotR, pDot)
+                    cv.drawCircle(cx - wdx, hy, dotR, pDot)
+                    if (idx < reticle.holdoverMarks.size - 1) {
+                        val nextY = cy + reticle.holdoverMarks[idx + 1].toFloat() * ppu
+                        cv.drawLine(cx, hy, cx, nextY, pThin)
+                    }
+                }
+
+                // ── Thick bottom post ──
+                val lastY = cy + reticle.holdoverMarks.last().toFloat() * ppu
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - postHH, cy + r.toFloat()); lineTo(cx + postHH, cy + r.toFloat())
+                    lineTo(cx + postHH, lastY + ppu * 0.6f + notch); lineTo(cx, lastY + ppu * 0.6f)
+                    lineTo(cx - postHH, lastY + ppu * 0.6f + notch); close()
+                }, pFill)
+            }
+
             Ballistics.ReticleStyle.DUPLEX -> {
                 // Plex/duplex: large rectangular posts with a small notch at the inner tip.
                 // Horizontal posts are taller than vertical posts are wide (classic Burris look).

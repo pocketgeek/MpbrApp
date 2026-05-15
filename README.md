@@ -84,6 +84,7 @@ Presets are sorted by manufacturer:
 
 | Preset | Unit | Focal plane | Style | Details |
 |---|---|---|---|---|
+| Burris Fullfield Ballistic E3 (MOA, SFP) | MOA | SFP (12×) | Ballistic E3 | Duplex horizontal with ticks at ±1–4 MOA; 1 MOA center dot; BDC marks at 1.49/4.31/7.18 MOA (200/300/400 yd); widening lines ±1.5/2.5/3.5 MOA; windage dots ±1.54/2.42/3.38 MOA |
 | Burris Fullfield Plex (MOA, SFP) | MOA | SFP (8×) | Duplex | Classic duplex: thick tapered posts tapering to short thin center crosshair; gap 0.35 MOA, post half-height 0.93 MOA, extends to ±10.6 MOA. Source: Burris subtension diagram |
 | EOTech VUDU HC1 (MOA, SFP) | MOA | SFP (9×) | BDC | Holdover hashes 2–22 MOA in 2 MOA steps; windage ±2–±12 MOA in 2 MOA steps |
 | EOTech VUDU MR5 (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered horizontal stadia with 0.5 MRAD ticks; 1 MRAD speed ring; dot-grid Christmas tree rows 2–8 MRAD |

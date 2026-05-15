@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3 }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -69,6 +69,20 @@ object Ballistics {
             "Burris Fullfield Plex (MOA, SFP)",
             ReticleUnit.MOA, 3.85, 0.90, 11.0,
             ReticleStyle.DUPLEX
+        ),
+        // Burris Fullfield 3-12×42 SFP — Ballistic E3 reticle.
+        // Duplex horizontal crosshair + ticks at ±1–4 MOA; 1 MOA center dot;
+        // 3 BDC holdover marks at 1.49 / 4.31 / 7.18 MOA (200/300/400 yd for average calibers);
+        // BDC line half-widths: 1.5 / 2.5 / 3.5 MOA; windage dots at ±1.54 / ±2.42 / ±3.38 MOA.
+        // SFP, calibrated at 12×. Source: Burris Ballistic E3 subtension diagram.
+        // majorSpacing = horizontal thin section extent / tick limit (MOA).
+        // minorSpacing = post half-height (MOA). postStart = where thick horizontal posts begin.
+        ReticlePreset(
+            "Burris Fullfield Ballistic E3 (MOA, SFP)",
+            ReticleUnit.MOA, 4.0, 0.90, 10.0,
+            ReticleStyle.BALLISTIC_E3,
+            holdoverMarks = listOf(1.49, 4.31, 7.18),
+            postStart     = 4.5
         ),
         // ── EOTech ───────────────────────────────────────────────────────────────
         // EOTech VUDU 3-9×32 SFP HC1 — hunting crosshair. SFP, valid at 9× only.

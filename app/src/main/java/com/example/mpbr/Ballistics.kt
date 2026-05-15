@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3 }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -67,6 +67,19 @@ object Ballistics {
             holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
             windageMarks  = listOf(2.0, 4.0, 6.0),
             postStart     = 7.0
+        ),
+        // Vortex Strike Eagle 1-8×24 SFP — AR-BDC3 (MOA) reticle.
+        // SFP: subtensions valid at maximum magnification (8×) only.
+        // 16.625 MOA broken circle (4 arcs, gaps at 12/3/6/9 o'clock) + 1 MOA center dot.
+        // Holdover marks on vertical post: 2.4 / 5.6 / 9.5 / 14.6 MOA below center
+        //   (calibrated for 300 / 400 / 500 / 600 yd with common 5.56 loads).
+        // majorSpacing = broken circle radius (8.3125 MOA); minorSpacing = center dot radius (0.5 MOA).
+        // Source: Uncle Zo AR-BDC3 review + Vortex product page.
+        ReticlePreset(
+            "Vortex Strike Eagle AR-BDC3 (MOA, SFP)",
+            ReticleUnit.MOA, 8.3125, 0.5, 18.0,
+            ReticleStyle.AR_BDC3,
+            holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6)
         ),
         // Viridian MDS25 Modern Dot Sight — BRC (Bullet Rise Compensating) MOA reticle.
         // 1× red dot, always accurate. Center 3 MOA dot + 2 holdunder dots + ranging chevrons.

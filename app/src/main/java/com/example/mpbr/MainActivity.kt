@@ -566,6 +566,20 @@ private fun drawReticleSection(
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 3f
         })
+    // AR-BDC3: draw the 16.625 MOA broken circle (4 arcs) outside clip
+    if (reticle.style == Ballistics.ReticleStyle.AR_BDC3) {
+        val circleR = reticle.majorSpacing.toFloat() * ppu   // 8.3125 MOA radius
+        val oval    = android.graphics.RectF(cx - circleR, cy - circleR, cx + circleR, cy + circleR)
+        val pArc    = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+        }
+        // 4 arcs of 60° each; 30° gaps at 12/3/6/9 o'clock (Android: 0°=right, 90°=bottom)
+        cv.drawArc(oval,  15f, 60f, false, pArc)   // lower-right
+        cv.drawArc(oval, 105f, 60f, false, pArc)   // lower-left
+        cv.drawArc(oval, 195f, 60f, false, pArc)   // upper-left
+        cv.drawArc(oval, 285f, 60f, false, pArc)   // upper-right
+    }
+
     // DRT reticle: draw both rings outside clip for guaranteed visibility
     if (reticle.style == Ballistics.ReticleStyle.DRT) {
         val innerR      = reticle.majorSpacing.toFloat() * ppu           // ~25 MOA
@@ -687,7 +701,32 @@ private fun drawReticleSection(
                 }
             }
 
-            Ballistics.ReticleStyle.BRC -> {
+            Ballistics.ReticleStyle.AR_BDC3 -> {
+            // Broken circle drawn outside clip; here: center dot + vertical post + labeled holdovers
+            val dotR   = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
+            val tickHW = ppu * 2.0f   // 2 MOA half-width per tick
+            val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL;   color = android.graphics.Color.BLACK }
+            val pLine  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+            val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+            val pLbl   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.BLACK; textSize = ppu * 2.8f
+                typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
+            }
+
+            cv.drawCircle(cx, cy, dotR, pFill)                         // center dot
+            cv.drawLine(cx, cy - r.toFloat(), cx, cy, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat() }) // faint line above
+            cv.drawLine(cx, cy, cx, cy + r.toFloat(), pLine)           // vertical post below
+
+            val rangeLabels = listOf("3", "4", "5", "6")
+            reticle.holdoverMarks.forEachIndexed { idx, h ->
+                val hy = cy + h.toFloat() * ppu
+                cv.drawLine(cx - tickHW, hy, cx + tickHW, hy, pTick)
+                cv.drawText(rangeLabels.getOrElse(idx) { "" }, cx + tickHW + ppu * 0.4f, hy + pLbl.textSize * 0.35f, pLbl)
+            }
+        }
+
+        Ballistics.ReticleStyle.BRC -> {
                 // BRC: center dot, two holdunder dots below center, inward-pointing chevrons
                 val dotR  = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 3f)  // center 3 MOA dot
                 val holdR = dotR * 0.65f                                                    // smaller holdunder dots

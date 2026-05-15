@@ -34,7 +34,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 - `AmmoCategory` enum — `RIFLE`, `RIMFIRE`, `PISTOL`, `SHOTGUN`; defaults to `RIFLE` so only non-rifle presets need an explicit tag
 - `ReticlePreset` data class and `RETICLE_PRESETS` list — scope reticle definitions (name, unit, majorSpacing, minorSpacing, vertExtent, style)
 - `ReticleUnit` enum — `MIL`, `MOA`
-- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`, `CIRCLE_DOT`, `MOA_TREE`, `DRT`, `BRC`
+- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`, `CIRCLE_DOT`, `MOA_TREE`, `DRT`, `BRC`, `AR_BDC3`
 - `Atmosphere` data class — ICAO pressure model + Magnus humidity correction; call `.densityRatio()` and `.speedOfSound()` for scaled values
 - `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind enters the drag force naturally. Returns `List<TrajectoryPoint>`
 - `calculateMpbr()` — binary-searches bore angle (50 iterations) until trajectory peak = `vitalZone/2`, then re-simulates at high resolution to extract near zero, far zero, max ordinate, MPBR, and trajectory table. Entry point for the UI
@@ -70,6 +70,8 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 **Adding an MRAD_TREE reticle preset** — append with `style = ReticleStyle.MRAD_TREE`, `majorSpacing = 1.0`, `minorSpacing = 0.5`, `vertExtent = <tree depth>`, `postStart = <MRAD where thick posts begin>`. No drawing code changes needed.
 
 **Adding a MOA_TREE reticle preset** (Vortex EBR-7C style) — append with `style = ReticleStyle.MOA_TREE`, `majorSpacing = 4.0`, `minorSpacing = 1.0`, `vertExtent = <tree depth + majorSpacing>` (the extra majorSpacing becomes the bottom thick post gap), `postStart = <MOA where horizontal thick posts begin>`. The drawing produces: numbered H/V stadia, dot-grid tree (rows every `majorSpacing` MOA starting at `majorSpacing`; dots at 2 MOA spacing per row), and thick bottom post. No drawing code changes needed for this style.
+
+**Adding an AR_BDC3 reticle preset** (broken-circle BDC, e.g. Vortex Strike Eagle) — append with `style = ReticleStyle.AR_BDC3`, `majorSpacing = <circle radius MOA>`, `minorSpacing = <center dot radius MOA>`, `holdoverMarks = listOf(...)`, `vertExtent = <slightly larger than 600-yd holdover>`. The broken circle (4 × 60° arcs with 30° gaps at cardinals) is drawn outside the clip; the vertical post and labeled holdover tick marks are inside the clip. Labels are hardcoded as "3"/"4"/"5"/"6" for hundreds of yards. No drawing code changes needed for this style.
 
 **Adding a BRC reticle preset** (Bullet Rise Compensating, e.g. Viridian MDS25) — append with `style = ReticleStyle.BRC`, `minorSpacing = <center dot radius MOA>`, `holdoverMarks = listOf(<15yd holdunder MOA>, <7yd holdunder MOA>)`, `vertExtent` large enough to show all dots. The drawing hardcodes chevron geometry (tip at ±20 MOA, arms to ±35/±10 MOA). Dot positions must be sourced from manufacturer; the Viridian values are estimated from HOB physics since no official MOA spec is published. No drawing code changes needed.
 

@@ -63,7 +63,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **Adding an MRAD_TREE reticle preset** — append with `style = ReticleStyle.MRAD_TREE`, `majorSpacing = 1.0`, `minorSpacing = 0.5`, `vertExtent = <tree depth>`, `postStart = <MRAD where thick posts begin>`. No drawing code changes needed.
 
-**Adding a CIRCLE_DOT reticle preset** (red dot sights) — append with `style = ReticleStyle.CIRCLE_DOT`, `majorSpacing = <ring radius in unit>`, `minorSpacing = <dot radius in unit>`, `vertExtent = <slightly larger than ring radius so the ring fits in the scope circle>`. Subtensions on 1× sights are always accurate. No drawing code changes needed.
+**Adding a CIRCLE_DOT reticle preset** (red dot sights) — append with `style = ReticleStyle.CIRCLE_DOT`, `majorSpacing = <ring radius in unit>`, `minorSpacing = <dot radius in unit>`, `vertExtent = <~25% larger than ring radius so the ring sits at ~80% of scope radius with a visible gap from the outer border>`. The drawing automatically adds cardinal tick marks at 12/3/6/9 o'clock (±10% of ring radius each side). The ring and ticks are drawn outside the clip for guaranteed visibility. Subtensions on 1× sights are always accurate. No drawing code changes needed.
 
 **Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph wind.
 

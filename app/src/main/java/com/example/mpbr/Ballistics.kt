@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -56,16 +56,6 @@ object Ballistics {
     )
 
     val RETICLE_PRESETS: List<ReticlePreset> = listOf(
-        // ── MIL ─────────────────────────────────────────────────────────────
-        ReticlePreset("Mil-Dot",              ReticleUnit.MIL, 1.0, 0.5, 10.0, ReticleStyle.DOT),
-        ReticlePreset("Mil Hash · 0.5",       ReticleUnit.MIL, 1.0, 0.5, 10.0),
-        ReticlePreset("Mil Hash · 0.2",       ReticleUnit.MIL, 1.0, 0.2, 10.0),
-        ReticlePreset("Mil Christmas Tree",   ReticleUnit.MIL, 1.0, 0.5, 10.0, ReticleStyle.CHRISTMAS_TREE),
-        // ── MOA ─────────────────────────────────────────────────────────────
-        ReticlePreset("MOA Hash · 1.0",       ReticleUnit.MOA, 5.0, 1.0, 35.0),
-        ReticlePreset("MOA Hash · 0.5",       ReticleUnit.MOA, 5.0, 0.5, 35.0),
-        ReticlePreset("MOA Hash · 0.25",      ReticleUnit.MOA, 5.0, 0.25, 35.0),
-        // ── Real scopes — BDC ────────────────────────────────────────────────
         // Vortex Dead-Hold BDC (MOA, SFP) — found in Viper 4-12×40, 3.5-10×50, etc.
         // Subtensions valid at maximum magnification only (second focal plane).
         // Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA below center.
@@ -77,6 +67,30 @@ object Ballistics {
             holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
             windageMarks  = listOf(2.0, 4.0, 6.0),
             postStart     = 7.0
+        ),
+        // EOTech VUDU 3-9×32 SFP HC1 (MOA, SFP) — hunting crosshair with regular MOA hash marks.
+        // Subtensions valid at maximum magnification (9×) only (second focal plane).
+        // Windage hashes: ±2, ±4, ±6, ±8, ±10, ±12 MOA each side.
+        // Holdover marks: 2 MOA increments, 2–22 MOA below center (11 marks total).
+        // Source: EOTech specs — 12 MOA windage, 22 MOA elevation at 9×, 2 MOA increments.
+        ReticlePreset(
+            "EOTech VUDU HC1 (MOA, SFP)",
+            ReticleUnit.MOA, 0.0, 0.0, 22.0,
+            ReticleStyle.BDC,
+            holdoverMarks = listOf(2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0),
+            windageMarks  = listOf(2.0, 4.0, 6.0, 8.0, 10.0, 12.0),
+            postStart     = 0.0
+        ),
+        // EOTech VUDU 4-12×36 FFP MR5 — MRAD dot-grid Christmas tree, first focal plane.
+        // Horizontal: numbered hashes every 1 MRAD, minor ticks at 0.5 MRAD, thick outer
+        // posts beginning at 6 MRAD. Center 1-MRAD-radius speed ring. Short vertical stadia
+        // above center. Tree below center: rows 2-8 MRAD, dots at 1 MRAD grid, half-MRAD ticks.
+        // Subtensions valid at ALL magnifications (FFP). Source: EOTech / OpticsPlanet specs.
+        ReticlePreset(
+            "EOTech VUDU MR5 (MRAD, FFP)",
+            ReticleUnit.MIL, 1.0, 0.5, 8.0,
+            ReticleStyle.MRAD_TREE,
+            postStart = 6.0
         )
     )
 

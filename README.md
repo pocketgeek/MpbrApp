@@ -7,8 +7,9 @@ atmospheric corrections and full-value crosswind drift.
 
 Includes 168 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a trajectory table at 50 yd steps out
-to 500 yd. DOPE charts can be saved as a JPEG to your gallery, optionally
-with a scope reticle illustration showing holdover callouts for every range.
+to 1,000 yd. DOPE charts can be saved as a JPEG to your gallery, optionally
+with a scope reticle illustration showing color-coded holdover callouts for
+every range that fits within the reticle's extent.
 
 ## Opening in Android Studio
 
@@ -70,22 +71,15 @@ presets model a single pellet's ballistics with a 4" vital zone — useful for
 gauging effective range but not pattern spread.
 
 **Reticle** — optional scope reticle for the DOPE chart illustration. Defaults
-to "None" (no illustration). Available presets:
+to "None". Selecting a reticle also removes the redundant MOA or MIL column
+from the trajectory table (whichever unit the reticle doesn't use). Available
+presets are all real manufacturer scopes:
 
-| Preset | Unit | Major | Minor |
-|---|---|---|---|
-| Mil-Dot | MIL | 1.0 | 0.5 (dots) |
-| Mil Hash · 0.5 | MIL | 1.0 | 0.5 |
-| Mil Hash · 0.2 | MIL | 1.0 | 0.2 |
-| Mil Christmas Tree | MIL | 1.0 | 0.5 (widening) |
-| MOA Hash · 1.0 | MOA | 5.0 | 1.0 |
-| MOA Hash · 0.5 | MOA | 5.0 | 0.5 |
-| MOA Hash · 0.25 | MOA | 5.0 | 0.25 |
-| Vortex Dead-Hold BDC (MOA, SFP) | MOA | BDC dots: 1.5 / 4.5 / 7.5 / 11.0 | Windage: ±2 / ±4 / ±6 |
-
-The Dead-Hold BDC is used in the Vortex Viper 4-12×40, 3.5-10×50, and several
-other Vortex scopes. It is second focal plane — subtensions are only accurate
-at **maximum magnification**.
+| Preset | Unit | Focal plane | Style | Details |
+|---|---|---|---|---|
+| Vortex Dead-Hold BDC (MOA, SFP) | MOA | SFP (max mag) | BDC | Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA; windage ±2 / ±4 / ±6 MOA; thick outer posts at 7 MOA |
+| EOTech VUDU HC1 (MOA, SFP) | MOA | SFP (9×) | BDC | Holdover hashes 2–22 MOA in 2 MOA steps; windage ±2–±12 MOA in 2 MOA steps |
+| EOTech VUDU MR5 (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered horizontal stadia with 0.5 MRAD ticks; 1 MRAD speed ring; dot-grid Christmas tree rows 2–8 MRAD |
 
 **Drag model** — G1 or G7. The BC value you enter must reference the model you
 pick. Manufacturers usually publish G1; many also publish G7 for long
@@ -126,11 +120,14 @@ table). The app renders a 1200 px JPEG containing:
 - Load name, near/far zero, MPBR, max ordinate, bore angle
 - Altitude, temperature, humidity, wind conditions
 - **Reticle illustration** (if a reticle is selected) — a scope circle showing
-  crosshair + graduated marks, with a dashed callout line from each range's
-  holdover position to a "250 yd (2.34 mil)" label. Labels that would overlap
-  are skipped automatically. Points beyond the reticle's extent are omitted.
-- Full trajectory table (same columns as the on-screen table — drift columns
-  appear only when wind ≠ 0, energy column only when bullet weight is set)
+  the reticle's crosshair and marks. Each trajectory range gets a unique color:
+  a filled dot on the stadia, a dashed leader line, and a bold "250 yd (2.3 MOA)"
+  label. Labels that would overlap are skipped; ranges beyond the reticle's
+  extent are omitted. FFP reticles work at any magnification; SFP values are
+  valid at maximum magnification only.
+- Full trajectory table at 50 yd steps to 1,000 yd (same columns as on-screen —
+  drift columns appear only when wind ≠ 0, energy only when bullet weight is set;
+  the redundant MOA or MIL column is dropped when a reticle is selected)
 - Date of generation
 
 The file is written to **Pictures/MPBR DOPE Charts/** in your gallery.

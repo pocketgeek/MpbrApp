@@ -32,7 +32,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 - `AmmoCategory` enum — `RIFLE`, `RIMFIRE`, `PISTOL`, `SHOTGUN`; defaults to `RIFLE` so only non-rifle presets need an explicit tag
 - `ReticlePreset` data class and `RETICLE_PRESETS` list — scope reticle definitions (name, unit, majorSpacing, minorSpacing, vertExtent, style)
 - `ReticleUnit` enum — `MIL`, `MOA`
-- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`
+- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`
 - `Atmosphere` data class — ICAO pressure model + Magnus humidity correction; call `.densityRatio()` and `.speedOfSound()` for scaled values
 - `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind enters the drag force naturally. Returns `List<TrajectoryPoint>`
 - `calculateMpbr()` — binary-searches bore angle (50 iterations) until trajectory peak = `vitalZone/2`, then re-simulates at high resolution to extract near zero, far zero, max ordinate, MPBR, and trajectory table. Entry point for the UI
@@ -52,13 +52,16 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **DOPE chart export** — `buildDopeChartBitmap()` draws a 1200 px wide JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). Layout: header block → optional reticle section (640 px tall) → trajectory table. `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
 
-**Reticle illustration** — `drawReticleSection()` renders a clipped scope circle with crosshair, marks, and dashed callout lines to range+holdover labels. Two drawing paths:
-- *Hash/Dot/Christmas-tree*: evenly-spaced marks driven by `majorSpacing` / `minorSpacing`. Callouts skip any label within 82% of text height of the previous one.
-- *BDC*: thin inner crosshair + thick outer posts (starting at `postStart`), windage hashes at `windageMarks` positions, and filled holdover dots at `holdoverMarks` positions.
+**Trajectory table range** — `calculateMpbr()` is called with `tableMaxYards = 1000` (50 yd steps), producing 20 rows. The reticle callout code shows only ranges whose holdover fits within the reticle's `vertExtent`.
 
-**Adding a hash/dot/tree reticle preset** — append to `Ballistics.RETICLE_PRESETS` with `majorSpacing`, `minorSpacing`, `vertExtent`. No drawing code changes needed.
+**Reticle illustration** — `drawReticleSection()` renders a clipped scope circle. Callouts are pre-computed before the clip (so the same color is used both inside and outside). Three drawing paths:
+- *Hash/Dot/Christmas-tree* (`else` branch): evenly-spaced marks driven by `majorSpacing` / `minorSpacing`. Colored trajectory ticks drawn inside clip; labels outside.
+- *BDC*: thin crosshair + optional thick outer posts (`postStart`), windage hashes at `windageMarks`, holdover hash lines at `holdoverMarks`. Mark height/width = `ppu * 0.65f` (scales with unit, prevents overlap for dense mark lists).
+- *MRAD_TREE* (EOTech-style): numbered horizontal stadia with major/minor ticks + thick outer posts, 1 MRAD speed ring, short vertical stadia above center, dot-grid Christmas tree below center (rows `treeStart`..`vertExtent.toInt()`).
 
-**Adding a BDC reticle preset** — append with `style = ReticleStyle.BDC`, `holdoverMarks = listOf(...)`, `windageMarks = listOf(...)`, `postStart = <MOA>`, `majorSpacing = 0.0`, `minorSpacing = 0.0`. Source the subtension values from the manufacturer's reticle manual PDF (labeled "valid at maximum magnification" for SFP scopes). No drawing code changes needed.
+**Adding a BDC reticle preset** — append to `Ballistics.RETICLE_PRESETS` with `style = ReticleStyle.BDC`, `holdoverMarks`, `windageMarks`, `postStart` (0 = no thick posts). For SFP scopes, source subtensions from the manufacturer's reticle manual at the scope's maximum magnification. No drawing code changes needed.
+
+**Adding an MRAD_TREE reticle preset** — append with `style = ReticleStyle.MRAD_TREE`, `majorSpacing = 1.0`, `minorSpacing = 0.5`, `vertExtent = <tree depth>`, `postStart = <MRAD where thick posts begin>`. No drawing code changes needed.
 
 **Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph wind.
 

@@ -711,36 +711,53 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.DUPLEX -> {
-                // Classic duplex/Plex: thick tapered posts + short thin center crosshair.
-                // Posts drawn as filled trapezoids — wide at scope edge, tapering to thin at center.
-                val gapPx   = reticle.majorSpacing.toFloat() * ppu   // thin-to-thick transition
-                val postHH  = reticle.minorSpacing.toFloat() * ppu   // post half-height at outer end
-                val thinH   = s * 0.4f                                // thin crosshair half-width
+                // Plex/duplex: large rectangular posts with a small notch at the inner tip.
+                // Horizontal posts are taller than vertical posts are wide (classic Burris look).
+                val gapPx  = reticle.majorSpacing.toFloat() * ppu   // center to inner post tip
+                val hPostHH = reticle.minorSpacing.toFloat() * ppu   // horiz post half-height
+                val vPostHH = hPostHH * 0.70f                         // vert post half-width (narrower)
+                val notch   = hPostHH * 0.60f  // notch depth on inner tip (the pointed cutout)
                 val pFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
                 val pThin   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
 
-                // Vertical: top post (outer edge to gap, tapering wide→thin)
+                // Top post: rectangle with a small V-notch at the inner (bottom) tip
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx - postHH, cy - r.toFloat()); lineTo(cx + postHH, cy - r.toFloat())
-                    lineTo(cx + thinH,  cy - gapPx);       lineTo(cx - thinH,  cy - gapPx); close()
+                    moveTo(cx - vPostHH, cy - r.toFloat())
+                    lineTo(cx + vPostHH, cy - r.toFloat())
+                    lineTo(cx + vPostHH, cy - gapPx - notch)
+                    lineTo(cx,           cy - gapPx)          // notch tip
+                    lineTo(cx - vPostHH, cy - gapPx - notch)
+                    close()
                 }, pFill)
-                // Vertical: bottom post
+                // Bottom post
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx - postHH, cy + r.toFloat()); lineTo(cx + postHH, cy + r.toFloat())
-                    lineTo(cx + thinH,  cy + gapPx);       lineTo(cx - thinH,  cy + gapPx); close()
+                    moveTo(cx - vPostHH, cy + r.toFloat())
+                    lineTo(cx + vPostHH, cy + r.toFloat())
+                    lineTo(cx + vPostHH, cy + gapPx + notch)
+                    lineTo(cx,           cy + gapPx)          // notch tip
+                    lineTo(cx - vPostHH, cy + gapPx + notch)
+                    close()
                 }, pFill)
-                // Horizontal: left post
+                // Left post: rectangle with V-notch at the inner (right) tip
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx - r.toFloat(), cy - postHH); lineTo(cx - r.toFloat(), cy + postHH)
-                    lineTo(cx - gapPx,       cy + thinH);  lineTo(cx - gapPx,      cy - thinH); close()
+                    moveTo(cx - r.toFloat(), cy - hPostHH)
+                    lineTo(cx - r.toFloat(), cy + hPostHH)
+                    lineTo(cx - gapPx - notch, cy + hPostHH)
+                    lineTo(cx - gapPx,         cy)            // notch tip
+                    lineTo(cx - gapPx - notch, cy - hPostHH)
+                    close()
                 }, pFill)
-                // Horizontal: right post
+                // Right post
                 cv.drawPath(android.graphics.Path().apply {
-                    moveTo(cx + r.toFloat(), cy - postHH); lineTo(cx + r.toFloat(), cy + postHH)
-                    lineTo(cx + gapPx,       cy + thinH);  lineTo(cx + gapPx,      cy - thinH); close()
+                    moveTo(cx + r.toFloat(), cy - hPostHH)
+                    lineTo(cx + r.toFloat(), cy + hPostHH)
+                    lineTo(cx + gapPx + notch, cy + hPostHH)
+                    lineTo(cx + gapPx,         cy)            // notch tip
+                    lineTo(cx + gapPx + notch, cy - hPostHH)
+                    close()
                 }, pFill)
 
-                // Short thin center crosshair
+                // Thin center crosshair (the fine lines spanning the open center area)
                 cv.drawLine(cx - gapPx, cy, cx + gapPx, cy, pThin)
                 cv.drawLine(cx, cy - gapPx, cx, cy + gapPx, pThin)
             }

@@ -60,13 +60,14 @@ object Ballistics {
         // Burris Fullfield 2-8×35 SFP — Plex (duplex) reticle.
         // Classic thick outer posts tapering to thin center crosshair.
         // SFP, subtensions valid at 8× only.
-        // majorSpacing = gap from center to inner face of thick post (A ≈ 0.35 MOA at 8×).
-        // minorSpacing = half-height of thick horizontal bar (B ≈ 0.93 MOA at 8×).
-        // Outer posts extend to ≈10.6 MOA from center (W scaled from Fullfield II 3-9×40 @ 9×).
-        // Source: Burris Plex subtension diagram (Fullfield II at high mag, scaled for 8×).
+        // majorSpacing = gap from center to inner face of thick post (≈3.85 MOA = 35% of scope).
+        // minorSpacing = half-height of the horizontal thick bar (≈1.65 MOA = 15% of scope).
+        // Vertical posts use 70% of horizontal half-height for their half-width (slightly narrower).
+        // Proportions derived from Burris product image; vertExtent=11 MOA sets the scale.
+        // Source: Burris Plex product image + subtension diagram.
         ReticlePreset(
             "Burris Fullfield Plex (MOA, SFP)",
-            ReticleUnit.MOA, 0.35, 0.93, 11.0,
+            ReticleUnit.MOA, 3.85, 1.65, 11.0,
             ReticleStyle.DUPLEX
         ),
         // ── EOTech ───────────────────────────────────────────────────────────────

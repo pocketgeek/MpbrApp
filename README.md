@@ -78,6 +78,7 @@ presets are all real manufacturer scopes:
 | Preset | Unit | Focal plane | Style | Details |
 |---|---|---|---|---|
 | Vortex Dead-Hold BDC (MOA, SFP) | MOA | SFP (max mag) | BDC | Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA; windage ±2 / ±4 / ±6 MOA; thick outer posts at 7 MOA |
+| Vortex EBR-7C (MOA, FFP) | MOA | FFP (all mags) | Christmas tree | 1 MOA minor / 2 MOA major hashes; Christmas tree with windage dots 30 MOA deep; used in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II |
 | EOTech VUDU HC1 (MOA, SFP) | MOA | SFP (9×) | BDC | Holdover hashes 2–22 MOA in 2 MOA steps; windage ±2–±12 MOA in 2 MOA steps |
 | EOTech VUDU MR5 (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered horizontal stadia with 0.5 MRAD ticks; 1 MRAD speed ring; dot-grid Christmas tree rows 2–8 MRAD |
 | Holosun 510C (2 MOA / 65 MOA) | MOA | 1× (always accurate) | Circle-dot | 65 MOA ring + 2 MOA center dot + cardinal tick marks at 12/3/6/9 o'clock |

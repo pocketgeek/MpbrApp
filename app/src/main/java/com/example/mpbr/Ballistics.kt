@@ -68,6 +68,16 @@ object Ballistics {
             windageMarks  = listOf(2.0, 4.0, 6.0),
             postStart     = 7.0
         ),
+        // Vortex EBR-7C (MOA, FFP) — found in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II.
+        // Subtensions valid at ALL magnifications (first focal plane).
+        // 1 MOA minor hashes, 2 MOA major hashes (labeled). Christmas tree below center with
+        // windage reference dots at each 2 MOA drop line. Center dot 0.14 MOA.
+        // Source: Vortex EBR-7C MOA reticle manual / OpticsPlanet subtension data.
+        ReticlePreset(
+            "Vortex EBR-7C (MOA, FFP)",
+            ReticleUnit.MOA, 2.0, 1.0, 30.0,
+            ReticleStyle.CHRISTMAS_TREE
+        ),
         // EOTech VUDU 3-9×32 SFP HC1 (MOA, SFP) — hunting crosshair with regular MOA hash marks.
         // Subtensions valid at maximum magnification (9×) only (second focal plane).
         // Windage hashes: ±2, ±4, ±6, ±8, ±10, ±12 MOA each side.

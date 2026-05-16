@@ -71,19 +71,15 @@ object Ballistics {
             ReticleStyle.DUPLEX
         ),
         // Burris Fullfield 3-12×42 SFP — Ballistic E3 reticle.
-        // Duplex horizontal crosshair + ticks at ±1–4 MOA; 1 MOA center dot;
-        // 3 BDC holdover marks at 1.49 / 4.31 / 7.18 MOA (200/300/400 yd for average calibers);
-        // BDC line half-widths: 1.5 / 2.5 / 3.5 MOA; windage dots at ±1.54 / ±2.42 / ±3.38 MOA.
         // SFP, calibrated at 12×. Source: Burris Ballistic E3 subtension diagram.
-        // Source: Burris Ballistic E3 subtension diagram (exact values).
-        // majorSpacing = horizontal thin-section half-extent (4 MOA). Ticks at 1/2/3/4 MOA.
-        // minorSpacing = post half-height (MOA). postStart = where thick horizontal posts begin (MOA).
-        // vertExtent = 16 so 4 MOA gap = 25% of scope radius → thick posts dominate.
-        // majorSpacing = thin section half-width (MOA). minorSpacing = horizontal bar half-height (MOA).
-        // vertExtent = 40 → wide FOV → reticle appears as a compact cluster in lower scope area.
+        // majorSpacing = horizontal thin-section half-extent / tick count (4 MOA).
+        // minorSpacing = horizontal bar half-height (0.8 MOA → bars are ~8% of scope diameter).
+        // vertExtent = 20 → 4 MOA gap = 20% of scope radius.
+        // BDC marks at 1.49/4.31/7.18 MOA; line half-widths 1.5/2.5/3.5 MOA;
+        // windage dots at ±1.54/2.42/3.38 MOA from vertical center. D = 1 MOA thick stub above center.
         ReticlePreset(
             "Burris Fullfield Ballistic E3 (MOA, SFP)",
-            ReticleUnit.MOA, 4.0, 2.2, 40.0,
+            ReticleUnit.MOA, 4.0, 0.8, 20.0,
             ReticleStyle.BALLISTIC_E3,
             holdoverMarks = listOf(1.49, 4.31, 7.18),
             postStart     = 4.0

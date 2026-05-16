@@ -84,7 +84,7 @@ Presets are sorted by manufacturer:
 
 | Preset | Unit | Focal plane | Style | Details |
 |---|---|---|---|---|
-| Burris Fullfield Ballistic E3 (MOA, SFP) | MOA | SFP (12×) | Ballistic E3 | Thin vertical from scope top → D=1 MOA thick stub above center → thick horizontal bars (±4 MOA gap, ticks at 1–4 MOA) → BDC cluster at 1.49/4.31/7.18 MOA with widening lines (±1.5/2.5/3.5 MOA) and windage dots (±1.54/2.42/3.38 MOA) → thick bottom post |
+| Burris Fullfield Ballistic E3 (MOA, SFP) | MOA | SFP (12×) | Ballistic E3 | Thin vertical (scope top → D=1 MOA stub above center) → thick horizontal bars (±4 MOA gap, ticks at 1/2/3/4 MOA) → BDC marks at 1.49/4.31/7.18 MOA (line widths ±1.5/2.5/3.5 MOA, windage dots ±1.54/2.42/3.38 MOA) → thick bottom post |
 | Burris Fullfield Plex (MOA, SFP) | MOA | SFP (8×) | Duplex | Classic duplex: thick tapered posts tapering to short thin center crosshair; gap 0.35 MOA, post half-height 0.93 MOA, extends to ±10.6 MOA. Source: Burris subtension diagram |
 | EOTech VUDU HC1 (MOA, SFP) | MOA | SFP (9×) | BDC | Holdover hashes 2–22 MOA in 2 MOA steps; windage ±2–±12 MOA in 2 MOA steps |
 | EOTech VUDU MR5 (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered horizontal stadia with 0.5 MRAD ticks; 1 MRAD speed ring; dot-grid Christmas tree rows 2–8 MRAD |

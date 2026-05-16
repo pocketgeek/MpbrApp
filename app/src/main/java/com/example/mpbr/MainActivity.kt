@@ -711,39 +711,58 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.BALLISTIC_E3 -> {
-                // Exact values from Burris subtension diagram.
-                // D = 1 MOA thick stub above center; thin vertical from scope top to stub.
+                // Burris Ballistic E3: duplex horizontal posts, short upper stadia,
+                // three lower BDC bars, and cascading 10 mph wind dots.
                 val gap    = reticle.majorSpacing.toFloat() * ppu   // 4 MOA thin section half-width
                 val barHH  = reticle.minorSpacing.toFloat() * ppu   // horizontal bar half-height
-                val stubH  = 1.0f * ppu                              // D = 1 MOA thick stub above center
-                val tickH  = barHH * 0.55f
+                val topLen = 3.2f * ppu
+                val topSub = 1.0f * ppu
+                val tickH  = (barHH * 0.70f).coerceAtLeast(s * 3f)
                 val bdcHW  = listOf(1.5f, 2.5f, 3.5f)
                 val wdMoa  = listOf(1.54f, 2.42f, 3.38f)
-                val dotR   = (ppu * 0.22f).coerceAtLeast(s * 2f)
+                val dotR   = (ppu * 0.13f).coerceAtLeast(s * 1.2f)
 
-                val pBlk  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
-                val pBar  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = barHH * 2f }
-                val pStub = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = barHH * 2f }
+                val pBlk  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.15f }
+                val pFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
                 val pTick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f }
                 val pBdc  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
                 val pDot  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                val pNum  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK
+                    textSize = (ppu * 0.72f).coerceAtLeast(s * 6f)
+                    typeface = Typeface.DEFAULT_BOLD
+                    textAlign = Paint.Align.CENTER
+                }
 
-                // Thin vertical from scope top down to D above center
-                cv.drawLine(cx, cy - r.toFloat(), cx, cy - stubH, pBlk)
-                // D = 1 MOA thick stub immediately above center crosshair
-                cv.drawLine(cx, cy - stubH, cx, cy, pStub)
+                // Short upper vertical stadia with the small D = 1 MOA subtension bar.
+                cv.drawLine(cx, cy - topLen, cx, cy - s * 0.5f, pBlk)
+                cv.drawLine(cx - ppu * 0.35f, cy - topSub, cx + ppu * 0.35f, cy - topSub, pBdc)
 
-                // Thick horizontal bars from scope edge to ±4 MOA gap
-                cv.drawLine(cx - r.toFloat(), cy, cx - gap, cy, pBar)
-                cv.drawLine(cx + gap,         cy, cx + r.toFloat(), cy, pBar)
+                // Heavy horizontal duplex posts taper into the fine center section.
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - r.toFloat(), cy - barHH)
+                    lineTo(cx - gap, cy - s * 0.55f)
+                    lineTo(cx - gap, cy + s * 0.55f)
+                    lineTo(cx - r.toFloat(), cy + barHH)
+                    close()
+                }, pFill)
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx + gap, cy - s * 0.55f)
+                    lineTo(cx + r.toFloat(), cy - barHH)
+                    lineTo(cx + r.toFloat(), cy + barHH)
+                    lineTo(cx + gap, cy + s * 0.55f)
+                    close()
+                }, pFill)
 
-                // Thin horizontal line through gap with tick marks at 1/2/3/4 MOA
+                // Thin horizontal line through the 4 MOA gap, with interior ticks at 1/2/3 MOA.
                 cv.drawLine(cx - gap, cy, cx + gap, cy, pBlk)
-                for (t in 1..reticle.majorSpacing.toInt()) {
+                for (t in 1 until reticle.majorSpacing.toInt()) {
                     val tx = t * ppu
                     cv.drawLine(cx + tx, cy - tickH, cx + tx, cy + tickH, pTick)
                     cv.drawLine(cx - tx, cy - tickH, cx - tx, cy + tickH, pTick)
                 }
+                cv.drawText("4", cx - gap * 0.52f, cy - tickH - s * 2f, pNum)
+                cv.drawText("4", cx + gap * 0.52f, cy - tickH - s * 2f, pNum)
 
                 // Thin vertical from center to first BDC mark
                 cv.drawLine(cx, cy, cx, cy + reticle.holdoverMarks[0].toFloat() * ppu, pBlk)
@@ -762,7 +781,13 @@ private fun drawReticleSection(
 
                 // Thick bottom post from below last BDC to scope edge
                 val bottomStart = cy + reticle.holdoverMarks.last().toFloat() * ppu + ppu * 0.5f
-                cv.drawLine(cx, bottomStart, cx, cy + r.toFloat(), pBar)
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx - s * 0.75f, bottomStart)
+                    lineTo(cx + s * 0.75f, bottomStart)
+                    lineTo(cx + barHH * 0.60f, cy + r.toFloat())
+                    lineTo(cx - barHH * 0.60f, cy + r.toFloat())
+                    close()
+                }, pFill)
             }
 
             Ballistics.ReticleStyle.DUPLEX -> {

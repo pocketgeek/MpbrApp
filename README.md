@@ -13,6 +13,26 @@ color-coded holdover callouts — positioned at the bullet's actual 2D location
 on the reticle (elevation + crosswind drift) for every range that fits within
 the reticle's extent.
 
+## Screenshots
+
+<table>
+<tr>
+<td align="center"><img src="screenshots/Screenshot_20260516-001331.MPBR%20Calculator.png" width="190"><br><em>Main input screen (M80 preset)</em></td>
+<td align="center"><img src="screenshots/Screenshot_20260516-001344.MPBR%20Calculator.png" width="190"><br><em>Ammo preset dropdown (rimfire section)</em></td>
+<td align="center"><img src="screenshots/Screenshot_20260516-001338.MPBR%20Calculator.png" width="190"><br><em>Reticle preset dropdown by manufacturer</em></td>
+</tr>
+<tr>
+<td align="center"><img src="screenshots/Screenshot_20260516-001404.MPBR%20Calculator.png" width="190"><br><em>Inputs with EOTech VUDU HC1 selected</em></td>
+<td align="center"><img src="screenshots/Screenshot_20260516-001408.MPBR%20Calculator.png" width="190"><br><em>Atmosphere and trajectory table settings</em></td>
+<td align="center"><img src="screenshots/Screenshot_20260516-001417.MPBR%20Calculator.png" width="190"><br><em>Results: MPBR summary + reticle illustration</em></td>
+</tr>
+<tr>
+<td align="center"><img src="screenshots/Screenshot_20260516-001422.MPBR%20Calculator.png" width="190"><br><em>Trajectory table and Save DOPE Chart</em></td>
+<td align="center"><img src="screenshots/DOPE_M80__7_62_51_NATO__20260516_001435.jpg" width="190"><br><em>Exported DOPE chart JPEG</em></td>
+<td></td>
+</tr>
+</table>
+
 ## Opening in Android Studio
 
 1. Unzip the project somewhere on your machine.

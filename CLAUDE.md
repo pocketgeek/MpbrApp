@@ -34,8 +34,8 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 - `AmmoCategory` enum — `RIFLE`, `RIMFIRE`, `PISTOL`, `SHOTGUN`; defaults to `RIFLE` so only non-rifle presets need an explicit tag
 - `ReticlePreset` data class and `RETICLE_PRESETS` list — scope reticle definitions (name, unit, majorSpacing, minorSpacing, vertExtent, style)
 - `ReticleUnit` enum — `MIL`, `MOA`
-- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`, `CIRCLE_DOT`, `MOA_TREE`, `DRT`, `BRC`, `AR_BDC3`, `CIRCLE_BDC`, `DUPLEX`, `BALLISTIC_E3`
-- `RETICLE_PRESETS` list is sorted by manufacturer (Burris → EOTech → Firefield → Holosun → Viridian → Vortex)
+- `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`, `CIRCLE_DOT`, `MOA_TREE`, `DRT`, `BRC`, `AR_BDC3`, `CIRCLE_BDC`, `DUPLEX`, `BALLISTIC_E3`, `SIG_FL4`, `ACOG_CHEVRON`, `ACOG_DONUT`
+- `RETICLE_PRESETS` list is sorted by manufacturer (Burris → EOTech → Firefield → Holosun → SIG → Trijicon → Viridian → Vortex)
 - `Atmosphere` data class — ICAO pressure model + Magnus humidity correction; call `.densityRatio()` and `.speedOfSound()` for scaled values
 - `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind enters the drag force naturally. Returns `List<TrajectoryPoint>`
 - `calculateMpbr()` — binary-searches bore angle (50 iterations) until trajectory peak = `vitalZone/2`, then re-simulates at high resolution to extract near zero, far zero, max ordinate, MPBR, and trajectory table. Entry point for the UI
@@ -65,8 +65,15 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 - *`CIRCLE_DOT`*: large ring + cardinal tick marks drawn outside clip; center dot inside clip.
 - *`DRT`*: two concentric rings (inner 6 MOA thick, outer 3 MOA thick) drawn outside clip; center dot inside clip.
 - *`BRC`*: center dot + smaller holdunder dots from `holdoverMarks` + inward chevrons, all inside clip.
+- *`SIG_FL4`*: thin crosshair; thick H posts (`postStart` = half-height, `minorSpacing` = inner gap); above-center tick marks at `minorSpacing` and `majorSpacing` MOA; BDC stadia at `holdoverMarks` (equal 0.75 MOA half-width); windage hash marks (white, over the thick arm) at `windageMarks`; narrow downward triangle (15° full apex) from last holdover mark to 20.22 MOA below center (hardcoded from SIG diagram). `vertExtent = 22.68`.
+- *`ACOG_CHEVRON`*: upward-pointing ∧ chevron (arms from tip at center to base at `minorSpacing` MOA below); thin V post above tip and below base; BDC stadia at `holdoverMarks` with widths narrowing from ±2.08 to ±1.04 MOA (hardcoded for 19" ranging). `majorSpacing` = chevron base half-width.
+- *`ACOG_DONUT`*: illuminated ring at center (`majorSpacing` = ring radius) + center fill dot (`minorSpacing` = dot radius); thin V post above and below ring; BDC stadia at `holdoverMarks` with widths narrowing from ±2.08 to ±1.04 MOA (hardcoded for 19" ranging).
 
-**Adding a BDC reticle preset** — append to `Ballistics.RETICLE_PRESETS` with `style = ReticleStyle.BDC`, `holdoverMarks`, `windageMarks`, `postStart` (0 = no thick posts). For SFP scopes, source subtensions from the manufacturer's reticle manual at the scope's maximum magnification. No drawing code changes needed.
+**Results summary card** — shows Near Zero, Far Zero, Max Ordinate, MPBR, Energy at MPBR (if bullet weight > 0), Velocity/Energy at Near Zero, Velocity/Energy at Far Zero, Bore Angle. All computed by interpolating the high-res trajectory at the crossing points.
+
+**DOPE chart header** — `buildDopeChartBitmap()` accepts `vitalZoneIn` and prints it on the Max Ordinate line. Call site passes `vitalZone.toDoubleOrNull() ?: 6.0`.
+
+**Adding a BDC reticle preset** — append to `Ballistics.RETICLE_PRESETS` with `style = ReticleStyle.BDC`, `holdoverMarks`, `windageMarks`, `postStart` (0 = no thick posts). For SFP scopes, source subtensions from the manufacturer's reticle manual at the scope's maximum magnification. If `minorSpacing > 0`, fine horizontal ticks are drawn at that spacing across the H arm up to `postStart`. No other drawing code changes needed.
 
 **Adding an MRAD_TREE reticle preset** — append with `style = ReticleStyle.MRAD_TREE`, `majorSpacing = 1.0`, `minorSpacing = 0.5`, `vertExtent = <tree depth>`, `postStart = <MRAD where thick posts begin>`. No drawing code changes needed.
 
@@ -85,6 +92,10 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 **Adding a DRT reticle preset** (dual-ring tactical, e.g. Vortex Spitfire) — append with `style = ReticleStyle.DRT`, `majorSpacing = <inner ring center radius MOA>`, `minorSpacing = <dot radius MOA>`, `postStart = <outer ring center radius MOA>`, `vertExtent = <~18% larger than outer ring center radius>`. Both rings are drawn outside the clip in `drawReticleSection()` at stroke widths derived from MOA thickness (inner = 6 MOA, outer = 3 MOA hardcoded for the DRT style). No drawing code changes needed.
 
 **Adding a CIRCLE_DOT reticle preset** (red dot sights) — append with `style = ReticleStyle.CIRCLE_DOT`, `majorSpacing = <ring radius in unit>`, `minorSpacing = <dot radius in unit>`, `vertExtent = <~25% larger than ring radius so the ring sits at ~80% of scope radius with a visible gap from the outer border>`. The drawing automatically adds cardinal tick marks at 12/3/6/9 o'clock (±10% of ring radius each side). The ring and ticks are drawn outside the clip for guaranteed visibility. Subtensions on 1× sights are always accurate. No drawing code changes needed.
+
+**Adding a SIG_FL4 reticle preset** — append with `style = ReticleStyle.SIG_FL4`, `majorSpacing = <upper above-center tick height MOA>`, `minorSpacing = <lower above-center tick height MOA>`, `vertExtent = <scope top extent above center MOA>`, `postStart = <H post half-height MOA>`, `holdoverMarks = listOf(...)` (BDC depths below center), `windageMarks = listOf(...)` (H arm windage positions). The H post inner gap (1.59 MOA), center crosshair half-height (0.90 MOA), and triangle bottom (20.22 MOA below center) are hardcoded from the SIG Tango SPR p.17 diagram. Windage marks are drawn as white notches over the thick arm. No drawing code changes needed for new presets of this style.
+
+**Adding an ACOG_DONUT reticle preset** — append with `style = ReticleStyle.ACOG_DONUT`, `majorSpacing = <ring radius MOA>`, `minorSpacing = <center dot radius MOA>`, `holdoverMarks = listOf(...)` (BDC stadia depths), `vertExtent = <large enough for all stadia>`. BDC stadia widths are hardcoded as ±2.08/1.66/1.39/1.19/1.04 MOA (derived from 19" shoulder width at 300/400/500/600/700/800m). No drawing code changes needed.
 
 **Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph wind.
 

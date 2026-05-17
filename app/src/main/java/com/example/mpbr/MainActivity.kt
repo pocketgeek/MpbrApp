@@ -245,21 +245,21 @@ fun MpbrScreen() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("Results", style = MaterialTheme.typography.titleLarge)
-                    ResultRow("Optimal Zero (Far Zero)", "%.0f yd".format(r.farZeroYards))
-                    ResultRow("Near Zero",               "%.0f yd".format(r.nearZeroYards))
+                    ResultRow("Near Zero", "%.0f yd".format(r.nearZeroYards))
+                    ResultRow("Far Zero",  "%.0f yd".format(r.farZeroYards))
                     ResultRow(
                         "Max Ordinate",
                         "%.2f in @ %.0f yd".format(r.maxOrdinateInches, r.maxOrdinateRangeYards)
                     )
                     ResultRow("Maximum Point Blank Range", "%.0f yd".format(r.mpbrYards))
+                    if (r.energyAtMpbrFtLb > 0.0)
+                        ResultRow("Energy at MPBR", "%.0f ft·lb".format(r.energyAtMpbrFtLb))
                     ResultRow("Velocity at Near Zero", "%.0f fps".format(r.velocityAtNearZeroFps))
                     if (r.energyAtNearZeroFtLb > 0.0)
                         ResultRow("Energy at Near Zero", "%.0f ft·lb".format(r.energyAtNearZeroFtLb))
                     ResultRow("Velocity at Far Zero",  "%.0f fps".format(r.velocityAtFarZeroFps))
-                    if (r.energyAtFarZeroFtLb > 0.0) {
-                        ResultRow("Energy at Far Zero",  "%.0f ft·lb".format(r.energyAtFarZeroFtLb))
-                        ResultRow("Momentum at MPBR",    "%.1f lb·ft/s".format(r.momentumAtMpbrLbFps))
-                    }
+                    if (r.energyAtFarZeroFtLb > 0.0)
+                        ResultRow("Energy at Far Zero", "%.0f ft·lb".format(r.energyAtFarZeroFtLb))
                     ResultRow("Bore Angle Above LOS", "%.2f MOA".format(r.boreAngleMoa))
                 }
             }
@@ -310,6 +310,7 @@ fun MpbrScreen() {
                             temperature.toDoubleOrNull() ?: 59.0,
                             humidity.toDoubleOrNull()    ?: 0.0,
                             windSpeed.toDoubleOrNull()   ?: 0.0,
+                            vitalZone.toDoubleOrNull()   ?: 6.0,
                             showEnergy, showDrift,
                             selectedReticle,
                             dopeTitle
@@ -1167,6 +1168,119 @@ private fun drawReticleSection(
                 }
             }
 
+            Ballistics.ReticleStyle.ACOG_CHEVRON -> {
+                // majorSpacing = 2.77: chevron base half-width (MOA) — 19" at 300m
+                // minorSpacing = 3.5:  chevron depth tip-to-base (MOA)
+                // holdoverMarks: BDC stadia depths below tip (MOA) for 400–800m
+                val chevHW = reticle.majorSpacing.toFloat() * ppu   // chevron base half-width
+                val chevH  = reticle.minorSpacing.toFloat() * ppu   // chevron tip-to-base depth
+                val baseY  = cy + chevH                              // y of chevron base
+                // Stadia half-widths for 400–800m (19" ranging, scale = 300m/range)
+                val stadiaHW = floatArrayOf(2.08f, 1.66f, 1.39f, 1.19f, 1.04f)
+                val pChev = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 3f; strokeCap = Paint.Cap.ROUND }
+                val pPost = pLine
+                val pSta  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                // Thin vertical post above chevron tip (to scope top)
+                cv.drawLine(cx, sectionTop, cx, cy, pPost)
+                // Chevron arms: tip at (cx, cy), open downward
+                cv.drawLine(cx, cy, cx - chevHW, baseY, pChev)
+                cv.drawLine(cx, cy, cx + chevHW, baseY, pChev)
+                // Vertical BDC stadia arm from chevron base to scope bottom
+                cv.drawLine(cx, baseY, cx, sectionTop + sectionH, pPost)
+                // BDC stadia marks (widths decrease with distance — ranging feature)
+                reticle.holdoverMarks.forEachIndexed { idx, h ->
+                    val hy = cy + h.toFloat() * ppu
+                    val hw = if (idx < stadiaHW.size) stadiaHW[idx] * ppu else 1.0f * ppu
+                    cv.drawLine(cx - hw, hy, cx + hw, hy, pSta)
+                }
+            }
+
+            Ballistics.ReticleStyle.ACOG_DONUT -> {
+                // majorSpacing = 2.0: donut ring radius (MOA)
+                // minorSpacing = 0.3: center dot radius (MOA)
+                // holdoverMarks: BDC stadia depths below center (MOA) for 400–800m
+                val ringR  = reticle.majorSpacing.toFloat() * ppu
+                val dotR   = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
+                val stadiaHW = floatArrayOf(2.08f, 1.66f, 1.39f, 1.19f, 1.04f)
+                val pRing  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                val pFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                val pSta   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                // Thin vertical crosshair above and below ring
+                cv.drawLine(cx, sectionTop, cx, cy - ringR, pLine)
+                cv.drawLine(cx, cy + ringR, cx, sectionTop + sectionH, pLine)
+                // Donut ring and center dot
+                cv.drawCircle(cx, cy, ringR, pRing)
+                cv.drawCircle(cx, cy, dotR, pFill)
+                // BDC stadia (widths narrow with distance — 19" ranging)
+                reticle.holdoverMarks.forEachIndexed { idx, h ->
+                    val hy = cy + h.toFloat() * ppu
+                    val hw = if (idx < stadiaHW.size) stadiaHW[idx] * ppu else 1.0f * ppu
+                    cv.drawLine(cx - hw, hy, cx + hw, hy, pSta)
+                }
+            }
+
+            Ballistics.ReticleStyle.SIG_FL4 -> {
+                // SIG manual p.17: dimensions are MOA at max magnification unless marked degrees.
+                // Open outlines/arcs in the source diagram are measurement callouts, not reticle lines.
+                val crossW    = (0.25f * ppu).coerceAtLeast(s.toFloat())
+                val lineW     = (0.45f * ppu).coerceAtLeast(s * 1.25f)
+                val markerHW  = 0.75f * ppu
+                val bdcStart  = 1.59f * ppu
+                val triLen    = 0.75f * ppu
+                val triHH     = 0.38f * ppu
+                val lowerTip  = cy + 5.73f * ppu
+                val lowerEnd  = cy + 20.22f * ppu
+                val horizontalTriangles = listOf(3.13f, 5.95f)
+                val horizontalHashes = listOf(13.48f)
+                val bdcRows = listOf(2.86f, 3.44f, 4.30f, 5.73f)
+                val pFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
+                val pCross = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = crossW }
+                val pGeom = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = lineW }
+                val pRow  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = lineW }
+
+                cv.drawLine(cx - r.toFloat(), cy, cx + r.toFloat(), cy, pCross)
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy + lowerTip, pCross)
+
+                // Two filled horizontal reference triangles per side.
+                for (triMoa in horizontalTriangles) {
+                    val tx = triMoa * ppu
+                    cv.drawPath(android.graphics.Path().apply {
+                        moveTo(cx - tx + triLen * 0.5f, cy)
+                        lineTo(cx - tx - triLen * 0.5f, cy - triHH)
+                        lineTo(cx - tx - triLen * 0.5f, cy + triHH)
+                        close()
+                    }, pFill)
+                    cv.drawPath(android.graphics.Path().apply {
+                        moveTo(cx + tx - triLen * 0.5f, cy)
+                        lineTo(cx + tx + triLen * 0.5f, cy - triHH)
+                        lineTo(cx + tx + triLen * 0.5f, cy + triHH)
+                        close()
+                    }, pFill)
+                }
+
+                // One outer horizontal hash per side; other nearby lines in the manual are dimension leaders.
+                for (hashMoa in horizontalHashes) {
+                    val wx = hashMoa * ppu
+                    cv.drawLine(cx + wx, cy - markerHW, cx + wx, cy + markerHW, pRow)
+                    cv.drawLine(cx - wx, cy - markerHW, cx - wx, cy + markerHW, pRow)
+                }
+
+                for (yMoa in bdcRows) {
+                    val hy = cy + yMoa * ppu
+                    cv.drawLine(cx - markerHW, hy, cx + markerHW, hy, pRow)
+                }
+                cv.drawLine(cx, cy + bdcStart, cx, lowerTip, pCross)
+
+                val lowerH = lowerEnd - lowerTip
+                val lowerHalf = kotlin.math.tan(Math.toRadians(7.5)).toFloat() * lowerH
+                cv.drawPath(android.graphics.Path().apply {
+                    moveTo(cx, lowerTip)
+                    lineTo(cx - lowerHalf, lowerEnd)
+                    lineTo(cx + lowerHalf, lowerEnd)
+                    close()
+                }, pFill)
+            }
+
             else -> {
                 // Hash / Dot / Christmas tree
                 cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
@@ -1251,6 +1365,7 @@ private fun buildDopeChartBitmap(
     tempF: Double,
     rhPct: Double,
     windMph: Double,
+    vitalZoneIn: Double,
     showEnergy: Boolean,
     showDrift: Boolean,
     reticle: Ballistics.ReticlePreset? = null,
@@ -1269,8 +1384,8 @@ private fun buildDopeChartBitmap(
         ammoLabel,
         "Near Zero: %.0f yd  |  Far Zero: %.0f yd  |  MPBR: %.0f yd"
             .format(result.nearZeroYards, result.farZeroYards, result.mpbrYards),
-        "Max Ordinate: %.2f\" @ %.0f yd  |  Bore Angle: %.2f MOA"
-            .format(result.maxOrdinateInches, result.maxOrdinateRangeYards, result.boreAngleMoa),
+        "Max Ordinate: %.2f\" @ %.0f yd  |  Bore Angle: %.2f MOA  |  Vital Zone: %.1f\""
+            .format(result.maxOrdinateInches, result.maxOrdinateRangeYards, result.boreAngleMoa, vitalZoneIn),
         "Alt: %.0f ft  |  Temp: %.0f°F  |  RH: %.0f%%  |  Wind: %s"
             .format(altFt, tempF, rhPct, windStr),
         "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"

@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3 }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -121,6 +121,49 @@ object Ballistics {
             "Holosun 510C (2 MOA / 65 MOA)",
             ReticleUnit.MOA, 32.5, 1.0, 40.0,
             ReticleStyle.CIRCLE_DOT
+        ),
+        // ── SIG Sauer ────────────────────────────────────────────────────────────
+        // SIG Sauer Tango SPR 1-4×24 SFP — BDC1 reticle. SFP, valid at 4× only.
+        // Thick H posts at ±10 MOA (2 MOA wide, 1.5 MOA half-height); thin crosshair
+        // with 0.25 MOA ticks; holdover marks at 3.75/6.50/9.50/14.50 MOA.
+        // Source: SIG Sauer Tango SPR owner's manual, p.16.
+        ReticlePreset(
+            "SIG Sauer Tango SPR BDC1 (MOA, SFP)",
+            ReticleUnit.MOA, 0.0, 0.0, 17.0,
+            ReticleStyle.BDC,
+            holdoverMarks = listOf(3.75, 6.50, 9.50, 14.50),
+            windageMarks  = listOf(2.0, 4.0, 6.0, 8.0),
+            postStart     = 10.0
+        ),
+        // SIG Sauer Tango SPR 1-4×24 SFP — FL-4 reticle. SFP, valid at 4× only.
+        // Main crosshair is thin; lower BDC stadia are at 2.86/3.44/4.30/5.73 MOA
+        // with 0.75 MOA half-widths; horizontal reference triangles are at
+        // ±3.13/±5.95 MOA, with outer horizontal hashes at ±13.48 MOA.
+        // Lower post is 20.22 MOA tall with a 15° included tip angle.
+        // Open outlines in the source diagram are dimensional callouts, not reticle artwork.
+        // Source: SIG Sauer Tango SPR owner's manual, p.17.
+        ReticlePreset(
+            "SIG Sauer Tango SPR FL-4 (MOA, SFP)",
+            ReticleUnit.MOA, 12.24, 6.12, 22.68,
+            ReticleStyle.SIG_FL4,
+            holdoverMarks = listOf(2.86, 3.44, 4.30, 5.73),
+            windageMarks  = listOf(13.48),
+            postStart     = 2.20
+        ),
+        // ── Trijicon ─────────────────────────────────────────────────────────────
+        // Trijicon ACOG TA31 4×32 — Donut BDC reticle (5.56mm/.223 Rem, 100m zero).
+        // Fixed 4× — subtensions always accurate. Top of donut ring = POA at 100m.
+        // Donut ring radius ≈ 2.0 MOA; center dot radius ≈ 0.3 MOA.
+        // BDC stadia below for 400–800m; widths derived from 19" ranging:
+        //   ±2.08 / ±1.66 / ±1.39 / ±1.19 / ±1.04 MOA at 400/500/600/700/800m.
+        // Holdover depths (MOA below center) from M855 trajectory at 100m zero —
+        //   approximate; verify against Trijicon subtension card for exact values.
+        // Source: Trijicon ACOG Operator's Manual (BAC models), pp.26–28.
+        ReticlePreset(
+            "Trijicon ACOG TA31 Donut (MOA, 4×)",
+            ReticleUnit.MOA, 2.0, 0.3, 35.0,
+            ReticleStyle.ACOG_DONUT,
+            holdoverMarks = listOf(7.2, 11.8, 17.0, 23.5, 31.0)
         ),
         // ── Viridian ─────────────────────────────────────────────────────────────
         // Viridian MDS25 — BRC reticle, 1×. Positions estimated from HOB physics.
@@ -531,7 +574,7 @@ object Ballistics {
         val energyAtNearZeroFtLb: Double,
         val velocityAtFarZeroFps: Double,
         val energyAtFarZeroFtLb: Double,
-        val momentumAtMpbrLbFps: Double,
+        val energyAtMpbrFtLb: Double,
         val trajectoryTable: List<TrajectoryRow>
     )
 
@@ -710,7 +753,7 @@ object Ballistics {
             energyAtNearZeroFtLb  = energyFtLb(bulletWeightGr, velAtNearZero),
             velocityAtFarZeroFps  = velAtFarZero,
             energyAtFarZeroFtLb   = energyFtLb(bulletWeightGr, velAtFarZero),
-            momentumAtMpbrLbFps   = momentumLbFps(bulletWeightGr, velAtMpbr),
+            energyAtMpbrFtLb      = energyFtLb(bulletWeightGr, velAtMpbr),
             trajectoryTable       = table
         )
     }

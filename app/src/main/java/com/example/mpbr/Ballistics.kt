@@ -527,8 +527,10 @@ object Ballistics {
         val maxOrdinateRangeYards: Double,
         val mpbrYards: Double,
         val boreAngleMoa: Double,
-        val velocityAtMpbrFps: Double,
-        val energyAtMpbrFtLb: Double,
+        val velocityAtNearZeroFps: Double,
+        val energyAtNearZeroFtLb: Double,
+        val velocityAtFarZeroFps: Double,
+        val energyAtFarZeroFtLb: Double,
         val momentumAtMpbrLbFps: Double,
         val trajectoryTable: List<TrajectoryRow>
     )
@@ -656,14 +658,16 @@ object Ballistics {
             maxRangeYards = 2000.0, dt = 0.0002
         )
 
-        var nearZero    = 0.0
-        var farZero     = 0.0
-        var peakHt      = Double.NEGATIVE_INFINITY
-        var peakRng     = 0.0
-        var mpbr        = 0.0
-        var velAtMpbr   = 0.0
-        var foundNear   = false
-        var foundFar    = false
+        var nearZero      = 0.0
+        var farZero       = 0.0
+        var peakHt        = Double.NEGATIVE_INFINITY
+        var peakRng       = 0.0
+        var mpbr          = 0.0
+        var velAtNearZero = 0.0
+        var velAtFarZero  = 0.0
+        var velAtMpbr     = 0.0
+        var foundNear     = false
+        var foundFar      = false
 
         for (i in 1 until traj.size) {
             val a = traj[i - 1]
@@ -671,19 +675,24 @@ object Ballistics {
             if (b.heightInches > peakHt) { peakHt = b.heightInches; peakRng = b.rangeYards }
 
             if (!foundNear && a.heightInches <= 0.0 && b.heightInches > 0.0) {
-                nearZero  = lerp(a.rangeYards, b.rangeYards, a.heightInches, b.heightInches, 0.0)
+                nearZero = lerp(a.rangeYards, b.rangeYards, a.heightInches, b.heightInches, 0.0)
+                val span = b.rangeYards - a.rangeYards
+                val f    = if (span > 0) (nearZero - a.rangeYards) / span else 0.0
+                velAtNearZero = a.velocityFps + f * (b.velocityFps - a.velocityFps)
                 foundNear = true
             }
             if (foundNear && !foundFar && a.heightInches >= 0.0 && b.heightInches < 0.0) {
-                farZero  = lerp(a.rangeYards, b.rangeYards, a.heightInches, b.heightInches, 0.0)
+                farZero = lerp(a.rangeYards, b.rangeYards, a.heightInches, b.heightInches, 0.0)
+                val span = b.rangeYards - a.rangeYards
+                val f    = if (span > 0) (farZero - a.rangeYards) / span else 0.0
+                velAtFarZero = a.velocityFps + f * (b.velocityFps - a.velocityFps)
                 foundFar = true
             }
             if (foundFar && a.heightInches >= -rIn && b.heightInches < -rIn) {
                 mpbr = lerp(a.rangeYards, b.rangeYards, a.heightInches, b.heightInches, -rIn)
-                // Interpolate velocity at the same point so energy/momentum line up.
                 val span = b.rangeYards - a.rangeYards
-                val tFrac = if (span > 0) (mpbr - a.rangeYards) / span else 0.0
-                velAtMpbr = a.velocityFps + tFrac * (b.velocityFps - a.velocityFps)
+                val f    = if (span > 0) (mpbr - a.rangeYards) / span else 0.0
+                velAtMpbr = a.velocityFps + f * (b.velocityFps - a.velocityFps)
                 break
             }
         }
@@ -697,8 +706,10 @@ object Ballistics {
             maxOrdinateRangeYards = peakRng,
             mpbrYards             = mpbr,
             boreAngleMoa          = angle * (180.0 / PI) * 60.0,
-            velocityAtMpbrFps     = velAtMpbr,
-            energyAtMpbrFtLb      = energyFtLb(bulletWeightGr, velAtMpbr),
+            velocityAtNearZeroFps = velAtNearZero,
+            energyAtNearZeroFtLb  = energyFtLb(bulletWeightGr, velAtNearZero),
+            velocityAtFarZeroFps  = velAtFarZero,
+            energyAtFarZeroFtLb   = energyFtLb(bulletWeightGr, velAtFarZero),
             momentumAtMpbrLbFps   = momentumLbFps(bulletWeightGr, velAtMpbr),
             trajectoryTable       = table
         )

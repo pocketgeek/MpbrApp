@@ -252,10 +252,13 @@ fun MpbrScreen() {
                         "%.2f in @ %.0f yd".format(r.maxOrdinateInches, r.maxOrdinateRangeYards)
                     )
                     ResultRow("Maximum Point Blank Range", "%.0f yd".format(r.mpbrYards))
-                    ResultRow("Velocity at MPBR",          "%.0f fps".format(r.velocityAtMpbrFps))
-                    if (r.energyAtMpbrFtLb > 0.0) {
-                        ResultRow("Energy at MPBR",   "%.0f ft·lb".format(r.energyAtMpbrFtLb))
-                        ResultRow("Momentum at MPBR", "%.1f lb·ft/s".format(r.momentumAtMpbrLbFps))
+                    ResultRow("Velocity at Near Zero", "%.0f fps".format(r.velocityAtNearZeroFps))
+                    if (r.energyAtNearZeroFtLb > 0.0)
+                        ResultRow("Energy at Near Zero", "%.0f ft·lb".format(r.energyAtNearZeroFtLb))
+                    ResultRow("Velocity at Far Zero",  "%.0f fps".format(r.velocityAtFarZeroFps))
+                    if (r.energyAtFarZeroFtLb > 0.0) {
+                        ResultRow("Energy at Far Zero",  "%.0f ft·lb".format(r.energyAtFarZeroFtLb))
+                        ResultRow("Momentum at MPBR",    "%.1f lb·ft/s".format(r.momentumAtMpbrLbFps))
                     }
                     ResultRow("Bore Angle Above LOS", "%.2f MOA".format(r.boreAngleMoa))
                 }
@@ -279,7 +282,7 @@ fun MpbrScreen() {
             if (r.trajectoryTable.isNotEmpty()) {
                 TrajectoryTableCard(
                     rows       = r.trajectoryTable,
-                    showEnergy = r.energyAtMpbrFtLb > 0.0,
+                    showEnergy = r.energyAtNearZeroFtLb > 0.0,
                     showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
                     showMoa    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
                     showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL
@@ -297,7 +300,7 @@ fun MpbrScreen() {
             Button(
                 onClick = {
                     val label      = selectedPreset?.name ?: "Custom"
-                    val showEnergy = r.energyAtMpbrFtLb > 0.0
+                    val showEnergy = r.energyAtNearZeroFtLb > 0.0
                     val showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
 
                     fun doSave() {

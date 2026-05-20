@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -164,6 +164,21 @@ object Ballistics {
             ReticleUnit.MOA, 2.0, 0.3, 35.0,
             ReticleStyle.ACOG_DONUT,
             holdoverMarks = listOf(7.2, 11.8, 17.0, 23.5, 31.0)
+        ),
+        // ── UUQ ──────────────────────────────────────────────────────────────────
+        // UUQ Ranger ER 3×32 Tri-Color Fiber Prism Scope — Arrow/Chevron BDC reticle.
+        // Fixed 3× prism — subtensions always accurate.
+        // Center: red upward-pointing arrow/chevron above the BDC stem.
+        // Horizontal arms: separated side stadia with endpoint/interior ticks.
+        // BDC post below arrow: 1 MOA ticks from 4–11 MOA, labeled 4 / 6 / 8 / 10.
+        // Calibrated for .22LR / .223 Rem / .308 Win (nominal 100 yd zero).
+        // Source: UUQ product page reticle diagram.
+        ReticlePreset(
+            "UUQ Ranger ER Arrow BDC (MOA, 3×)",
+            ReticleUnit.MOA, 0.8, 1.2, 12.0,
+            ReticleStyle.CHEVRON_BDC,
+            holdoverMarks = listOf(4.0, 6.0, 8.0, 10.0),
+            windageMarks  = listOf(5.0, 7.5, 10.0, 13.0)
         ),
         // ── Viridian ─────────────────────────────────────────────────────────────
         // Viridian MDS25 — BRC reticle, 1×. Positions estimated from HOB physics.

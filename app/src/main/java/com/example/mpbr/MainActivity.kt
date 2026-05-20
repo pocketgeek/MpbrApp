@@ -1219,6 +1219,63 @@ private fun drawReticleSection(
                 }
             }
 
+            Ballistics.ReticleStyle.CHEVRON_BDC -> {
+                // UUQ Ranger ER Arrow BDC: separated side bars, red arrow, and lower BDC ladder.
+                // windageMarks: [innerEdge, interiorTick..., outerEdge] for H arm segments each side
+                // holdoverMarks: labeled BDC tick positions (MOA below center); etched as numbers in glass
+                val chevHW  = reticle.majorSpacing.toFloat() * ppu
+                val chevH   = reticle.minorSpacing.toFloat() * ppu
+                val armY    = cy
+                val tipY    = cy - chevH
+                val baseY   = cy + ppu * 0.15f
+                val stemTop = cy + ppu * 0.55f
+                val armTHH  = ppu * 0.48f
+                val armSHH  = ppu * 0.28f
+                val bdcMHW  = ppu * 0.58f
+                val bdcmHW  = ppu * 0.42f
+                val pChev   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.rgb(225, 35, 35)
+                    strokeWidth = (s * 2.2f).coerceAtLeast(ppu * 0.10f)
+                    strokeCap = Paint.Cap.SQUARE
+                    strokeJoin = Paint.Join.MITER
+                }
+                val pArm    = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.4f }
+                val pPost   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.35f }
+                val pLbl    = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK
+                    textSize = (ppu * 0.58f).coerceAtLeast(s * 5f)
+                    textAlign = Paint.Align.LEFT
+                }
+                // Two separate H arm segments with no line through the arrow.
+                if (reticle.windageMarks.size >= 2) {
+                    val innerMoa = reticle.windageMarks.first().toFloat()
+                    val outerMoa = reticle.windageMarks.last().toFloat()
+                    for (sign in listOf(1f, -1f)) {
+                        cv.drawLine(cx + sign * innerMoa * ppu, armY, cx + sign * outerMoa * ppu, armY, pArm)
+                        reticle.windageMarks.forEachIndexed { idx, wm ->
+                            val wx = cx + sign * wm.toFloat() * ppu
+                            val halfH = if (idx == 0 || idx == 2) armTHH else armSHH
+                            cv.drawLine(wx, armY - halfH, wx, armY + halfH, pArm)
+                        }
+                    }
+                }
+
+                // BDC stem starts below the red arrow. The visible ladder begins at 4 MOA.
+                val maxTick = 11
+                cv.drawLine(cx, stemTop, cx, cy + maxTick * ppu, pPost)
+                val labelSet = reticle.holdoverMarks.map { it.toInt() }.toHashSet()
+                for (i in 4..maxTick) {
+                    val ty = cy + i * ppu
+                    val hw = if (i in labelSet) bdcMHW else bdcmHW
+                    cv.drawLine(cx - hw, ty, cx + hw, ty, pPost)
+                    if (i in labelSet) cv.drawText(i.toString(), cx + bdcMHW + s * 2f, ty + pLbl.textSize * 0.35f, pLbl)
+                }
+
+                // Red arrow/chevron above the stem, open at the bottom.
+                cv.drawLine(cx, tipY, cx - chevHW, baseY, pChev)
+                cv.drawLine(cx, tipY, cx + chevHW, baseY, pChev)
+            }
+
             Ballistics.ReticleStyle.SIG_FL4 -> {
                 // SIG manual p.17: dimensions are MOA at max magnification unless marked degrees.
                 // Open outlines/arcs in the source diagram are measurement callouts, not reticle lines.

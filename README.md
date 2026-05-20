@@ -79,7 +79,7 @@ App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 (Parma, ID defaults), 6" vital zone:
 
 - Near zero ≈ 25 yd
-- Optimal zero (far zero) ≈ 229 yd
+- Far zero ≈ 229 yd
 - Max ordinate ≈ 3.0" @ 128 yd
 - MPBR ≈ 270 yd
 
@@ -110,10 +110,10 @@ Presets are sorted by manufacturer:
 | EOTech VUDU MR5 (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered horizontal stadia with 0.5 MRAD ticks; 1 MRAD speed ring; dot-grid Christmas tree rows 2–8 MRAD |
 | Firefield RapidStrike Circle Dot (MOA, SFP) | MOA | SFP (6×) | Circle BDC | 9.95 MOA circle + 1.34 MOA center dot; thin BDC post 300–600 yd below circle; thick bottom post. Positions estimated — exact MOA not published |
 | Holosun 510C (2 MOA / 65 MOA) | MOA | 1× (always accurate) | Circle-dot | 65 MOA ring + 2 MOA center dot + cardinal tick marks at 12/3/6/9 o'clock |
-| Trijicon ACOG TA31 Donut (MOA, 4×) | MOA | 4× fixed (always accurate) | ACOG Donut | ~2 MOA radius illuminated ring + center dot; top of ring = 100m POA; BDC stadia at 400/500/600/700/800m (widths ±2.08/1.66/1.39/1.19/1.04 MOA for 19" shoulder ranging). Holdover depths from M855 at 100m zero — verify against Trijicon subtension card. Source: ACOG Operator's Manual pp.26–28 |
-| UUQ Ranger ER Arrow BDC (MOA, 3×) | MOA | 3× fixed (always accurate) | Chevron BDC | Red upward arrow/chevron above the BDC stem; separated horizontal side bars with endpoint/interior ticks; BDC ladder starts at 4 MOA with 1 MOA ticks and labels at 4/6/8/10. Calibrated for .22LR/.223/.308 at 100 yd zero. Source: UUQ product page reticle diagram |
 | SIG Sauer Tango SPR BDC1 (MOA, SFP) | MOA | SFP (4×) | BDC | Thick H posts at ±10 MOA; holdover marks at 3.75/6.50/9.50/14.50 MOA; thin crosshair with 0.25 MOA ticks. Source: Tango SPR manual p.16 |
 | SIG Sauer Tango SPR FL-4 (MOA, SFP) | MOA | SFP (4×) | FL-4 | Thin crosshair with two filled horizontal reference triangles per side at ±3.13/±5.95 MOA; one outer horizontal hash per side at ±13.48 MOA; lower BDC stadia at 2.86/3.44/4.30/5.73 MOA with 0.75 MOA half-widths; lower post to 20.22 MOA with 15° included tip angle. Open outlines in the source diagram are dimensional callouts, not reticle artwork. Source: Tango SPR manual p.17 |
+| Trijicon ACOG TA31 Donut (MOA, 4×) | MOA | 4× fixed (always accurate) | ACOG Donut | ~2 MOA radius illuminated ring + center dot; top of ring = 100m POA; BDC stadia at 400/500/600/700/800m (widths ±2.08/1.66/1.39/1.19/1.04 MOA for 19" shoulder ranging). Holdover depths from M855 at 100m zero — verify against Trijicon subtension card. Source: ACOG Operator's Manual pp.26–28 |
+| UUQ Ranger ER Arrow BDC (MOA, 3×) | MOA | 3× fixed (always accurate) | Chevron BDC | Upward fiber-optic chevron (∧) at center; separated H arm segments at ±5/7.5/10/13 MOA with I-beam ticks; V post below chevron only with 1 MOA minor ticks labeled at 4/6/8/10 MOA. Calibrated for .22LR/.223/.308 at 100 yd zero. Source: UUQ product page reticle diagram |
 | Viridian MDS25 BRC (MOA, 1×) | MOA | 1× (always accurate) | BRC | 3 MOA center dot (50/200 yd); holdunder dots ≈7 MOA (15 yd) and ≈25 MOA (7 yd) below; inward chevrons for ranging. Dot positions estimated — exact MOA not published by Viridian |
 | Vortex Dead-Hold BDC (MOA, SFP) | MOA | SFP (max mag) | BDC | Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA; windage ±2 / ±4 / ±6 MOA; thick outer posts at 7 MOA |
 | Vortex EBR-7C (MOA, FFP) | MOA | FFP (all mags) | MOA tree | Numbered H/V stadia (1 MOA minor / 4 MOA major, labeled 4–24/32), thick posts at ±26 MOA; dot-grid tree below center rows 4→36 MOA at 2 MOA dot spacing; thick bottom post. Used in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II |

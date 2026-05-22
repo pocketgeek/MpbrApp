@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -164,6 +164,20 @@ object Ballistics {
             ReticleUnit.MOA, 2.0, 0.3, 35.0,
             ReticleStyle.ACOG_DONUT,
             holdoverMarks = listOf(7.2, 11.8, 17.0, 23.5, 31.0)
+        ),
+        // ── U.S. Army ─────────────────────────────────────────────────────────────
+        // U.S. 2.36" Bazooka (M9/M9A1) — D7161556 Reflecting Sight Assembly, 1×.
+        // Reticle: thin crosshair + 4 concentric lead rings for 10/20/30/40 mph crossing targets.
+        // Ring radii derived from rocket muzzle velocity (265 ft/s):
+        //   lead_mils = V_mph × 1.4667 / 265 × 1000 = V_mph × 5.536 mils (range-independent).
+        //   Converted to MOA (×3.4377): rings at ~190/380/570/760 MOA.
+        // Note: exact values from TB 9-294-9 not available; these are physics estimates.
+        // Source: TM 9-294, SARCO D7161556 product description, physics calculation.
+        ReticlePreset(
+            "U.S. 2.36\" Bazooka D7161556 (MOA, 1×)",
+            ReticleUnit.MOA, 10.0, 0.0, 840.0,
+            ReticleStyle.LEAD_RINGS,
+            holdoverMarks = listOf(190.0, 380.0, 570.0, 760.0)
         ),
         // ── UUQ ──────────────────────────────────────────────────────────────────
         // UUQ Ranger ER 3×32 Tri-Color Fiber Prism Scope — Arrow/Chevron BDC reticle.

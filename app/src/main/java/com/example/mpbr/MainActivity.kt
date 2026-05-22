@@ -1276,6 +1276,32 @@ private fun drawReticleSection(
                 cv.drawLine(cx, tipY, cx + chevHW, baseY, pChev)
             }
 
+            Ballistics.ReticleStyle.LEAD_RINGS -> {
+                // holdoverMarks: ring radii in MOA for each lead ring (10/20/30/40 mph, or custom)
+                // majorSpacing: mph per ring step — used to generate "N mph" labels (10 = 10/20/30/40)
+                val pRing = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+                }
+                val pLbl = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK
+                    textSize = (ppu * 8f).coerceAtLeast(s * 5f).coerceAtMost(ppu * 18f)
+                    textAlign = Paint.Align.LEFT
+                }
+                val mphStep = reticle.majorSpacing.toInt().coerceAtLeast(1)
+                // Thin full crosshair
+                cv.drawLine(cx - r.toFloat(), cy, cx + r.toFloat(), cy, pLine)
+                cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)
+                // Concentric lead rings with speed labels at top-right of each ring
+                reticle.holdoverMarks.forEachIndexed { idx, rm ->
+                    val rr = rm.toFloat() * ppu
+                    cv.drawCircle(cx, cy, rr, pRing)
+                    val mph = (idx + 1) * mphStep
+                    val lx = cx + rr * 0.707f + s * 2f
+                    val ly = cy - rr * 0.707f - s * 2f
+                    cv.drawText("$mph mph", lx, ly, pLbl)
+                }
+            }
+
             Ballistics.ReticleStyle.SIG_FL4 -> {
                 // SIG manual p.17: dimensions are MOA at max magnification unless marked degrees.
                 // Open outlines/arcs in the source diagram are measurement callouts, not reticle lines.

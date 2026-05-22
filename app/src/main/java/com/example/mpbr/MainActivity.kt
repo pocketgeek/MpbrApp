@@ -1300,6 +1300,45 @@ private fun drawReticleSection(
                 }
             }
 
+            Ballistics.ReticleStyle.SPIDER_SIGHT -> {
+                // majorSpacing = outer ring radius (MOA)
+                // minorSpacing = center ring radius (MOA)
+                // windageMarks[0] = bead position on all 4 spokes (MOA from center)
+                val outerR  = reticle.majorSpacing.toFloat() * ppu
+                val innerR  = reticle.minorSpacing.toFloat() * ppu
+                val beadR   = (ppu * 4f).coerceAtLeast(s * 2.5f)
+                val tickLen = outerR * 0.09f
+                val diag    = 0.70711f   // cos/sin(45°)
+                val pOuter  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 4f }
+                val pInner  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                val pSpoke  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                val pBead   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                // Outer ring (outside clip so it's always fully visible)
+                cv.drawCircle(cx, cy, outerR, pOuter)
+                // 4 diagonal tick marks at 45°/135°/225°/315° (pointing inward)
+                for (dx in listOf(diag, -diag)) {
+                    for (dy in listOf(diag, -diag)) {
+                        cv.drawLine(cx + dx * outerR, cy + dy * outerR,
+                                    cx + dx * (outerR - tickLen), cy + dy * (outerR - tickLen), pSpoke)
+                    }
+                }
+                // 4 crosshair spokes from inner ring to outer ring
+                cv.drawLine(cx + innerR, cy, cx + outerR, cy, pSpoke)
+                cv.drawLine(cx - innerR, cy, cx - outerR, cy, pSpoke)
+                cv.drawLine(cx, cy - innerR, cx, cy - outerR, pSpoke)
+                cv.drawLine(cx, cy + innerR, cx, cy + outerR, pSpoke)
+                // Center ring
+                cv.drawCircle(cx, cy, innerR, pInner)
+                // Beads on all 4 spokes at windageMarks[0] radius
+                if (reticle.windageMarks.isNotEmpty()) {
+                    val br = reticle.windageMarks[0].toFloat() * ppu
+                    cv.drawCircle(cx + br, cy, beadR, pBead)
+                    cv.drawCircle(cx - br, cy, beadR, pBead)
+                    cv.drawCircle(cx, cy - br, beadR, pBead)
+                    cv.drawCircle(cx, cy + br, beadR, pBead)
+                }
+            }
+
             Ballistics.ReticleStyle.SIG_FL4 -> {
                 // SIG manual p.17: dimensions are MOA at max magnification unless marked degrees.
                 // Open outlines/arcs in the source diagram are measurement callouts, not reticle lines.

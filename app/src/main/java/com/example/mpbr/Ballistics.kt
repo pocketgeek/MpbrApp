@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -114,6 +114,21 @@ object Ballistics {
             ReticleUnit.MOA, 4.975, 0.67, 22.0,
             ReticleStyle.CIRCLE_BDC,
             holdoverMarks = listOf(7.0, 10.0, 13.5, 17.5)
+        ),
+        // ── German/Czech ──────────────────────────────────────────────────────────
+        // ZB26/ZB30 anti-aircraft front spider sight (German WWII issue).
+        // Iron ring sight: outer ring, 4 crosshair spokes, small center ring,
+        // beads on all 4 spokes at ~45% radius, diagonal ticks at 45° on outer ring.
+        // Angular values from 7.92mm Mauser physics (775 m/s) for aircraft at
+        // 300 km/h: lead_mils = 83.3/775 × 1000 = 107.5 mils ≈ 370 MOA outer ring.
+        // Proportions (inner ring ~16%, beads ~45%) from IMA/Aubrey product photos.
+        // Exact values unconfirmed — TB/DV for ZB26 AA sight not located.
+        // Source: IMA product photos, physics calculation.
+        ReticlePreset(
+            "German ZB26/ZB30 AA Spider Sight (MOA, 1×)",
+            ReticleUnit.MOA, 370.0, 60.0, 450.0,
+            ReticleStyle.SPIDER_SIGHT,
+            windageMarks = listOf(165.0)
         ),
         // ── Holosun ──────────────────────────────────────────────────────────────
         // Holosun HS510C — 2 MOA center dot + 65 MOA ring, 1× red dot.

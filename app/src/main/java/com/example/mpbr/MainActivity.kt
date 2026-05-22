@@ -1308,7 +1308,7 @@ private fun drawReticleSection(
                 val innerR  = reticle.minorSpacing.toFloat() * ppu
                 val beadR   = (ppu * 4f).coerceAtLeast(s * 2.5f)
                 val tickLen = outerR * 0.09f
-                val diag    = 0.70711f   // cos/sin(45°)
+                val diagonal = 0.70711f   // cos/sin(45°)
                 val pOuter  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 4f }
                 val pInner  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
                 val pSpoke  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
@@ -1316,8 +1316,8 @@ private fun drawReticleSection(
                 // Outer ring (outside clip so it's always fully visible)
                 cv.drawCircle(cx, cy, outerR, pOuter)
                 // 4 diagonal tick marks at 45°/135°/225°/315° (pointing inward)
-                for (dx in listOf(diag, -diag)) {
-                    for (dy in listOf(diag, -diag)) {
+                for (dx in listOf(diagonal, -diagonal)) {
+                    for (dy in listOf(diagonal, -diagonal)) {
                         cv.drawLine(cx + dx * outerR, cy + dy * outerR,
                                     cx + dx * (outerR - tickLen), cy + dy * (outerR - tickLen), pSpoke)
                     }

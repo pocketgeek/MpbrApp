@@ -1178,15 +1178,14 @@ private fun drawReticleSection(
                 // Stadia half-widths for 400–800m (19" ranging, scale = 300m/range)
                 val stadiaHW = floatArrayOf(2.08f, 1.66f, 1.39f, 1.19f, 1.04f)
                 val pChev = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 3f; strokeCap = Paint.Cap.ROUND }
-                val pPost = pLine
                 val pSta  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
                 // Thin vertical post above chevron tip (to scope top)
-                cv.drawLine(cx, sectionTop, cx, cy, pPost)
+                cv.drawLine(cx, sectionTop, cx, cy, pLine)
                 // Chevron arms: tip at (cx, cy), open downward
                 cv.drawLine(cx, cy, cx - chevHW, baseY, pChev)
                 cv.drawLine(cx, cy, cx + chevHW, baseY, pChev)
                 // Vertical BDC stadia arm from chevron base to scope bottom
-                cv.drawLine(cx, baseY, cx, sectionTop + sectionH, pPost)
+                cv.drawLine(cx, baseY, cx, sectionTop + sectionH, pLine)
                 // BDC stadia marks (widths decrease with distance — ranging feature)
                 reticle.holdoverMarks.forEachIndexed { idx, h ->
                     val hy = cy + h.toFloat() * ppu
@@ -1220,19 +1219,18 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.CHEVRON_BDC -> {
-                // UUQ Ranger ER Arrow BDC: separated side bars, red arrow, and lower BDC ladder.
+                // UUQ Ranger ER Arrow BDC: separated sidebars, red arrow, and lower BDC ladder.
                 // windageMarks: [innerEdge, interiorTick..., outerEdge] for H arm segments each side
                 // holdoverMarks: labeled BDC tick positions (MOA below center); etched as numbers in glass
-                val chevHW  = reticle.majorSpacing.toFloat() * ppu
-                val chevH   = reticle.minorSpacing.toFloat() * ppu
-                val armY    = cy
-                val tipY    = cy - chevH
-                val baseY   = cy + ppu * 0.15f
-                val stemTop = cy + ppu * 0.55f
-                val armTHH  = ppu * 0.48f
-                val armSHH  = ppu * 0.28f
-                val bdcMHW  = ppu * 0.58f
-                val bdcmHW  = ppu * 0.42f
+                val chevHW   = reticle.majorSpacing.toFloat() * ppu
+                val chevH    = reticle.minorSpacing.toFloat() * ppu
+                val tipY     = cy - chevH
+                val baseY    = cy + ppu * 0.15f
+                val stemTop  = cy + ppu * 0.55f
+                val armTHH   = ppu * 0.48f
+                val armSHH   = ppu * 0.28f
+                val bdcMHW   = ppu * 0.58f
+                val bdcMinHW = ppu * 0.42f
                 val pChev   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = android.graphics.Color.rgb(225, 35, 35)
                     strokeWidth = (s * 2.2f).coerceAtLeast(ppu * 0.10f)
@@ -1251,11 +1249,11 @@ private fun drawReticleSection(
                     val innerMoa = reticle.windageMarks.first().toFloat()
                     val outerMoa = reticle.windageMarks.last().toFloat()
                     for (sign in listOf(1f, -1f)) {
-                        cv.drawLine(cx + sign * innerMoa * ppu, armY, cx + sign * outerMoa * ppu, armY, pArm)
+                        cv.drawLine(cx + sign * innerMoa * ppu, cy, cx + sign * outerMoa * ppu, cy, pArm)
                         reticle.windageMarks.forEachIndexed { idx, wm ->
                             val wx = cx + sign * wm.toFloat() * ppu
                             val halfH = if (idx == 0 || idx == 2) armTHH else armSHH
-                            cv.drawLine(wx, armY - halfH, wx, armY + halfH, pArm)
+                            cv.drawLine(wx, cy - halfH, wx, cy + halfH, pArm)
                         }
                     }
                 }
@@ -1266,7 +1264,7 @@ private fun drawReticleSection(
                 val labelSet = reticle.holdoverMarks.map { it.toInt() }.toHashSet()
                 for (i in 4..maxTick) {
                     val ty = cy + i * ppu
-                    val hw = if (i in labelSet) bdcMHW else bdcmHW
+                    val hw = if (i in labelSet) bdcMHW else bdcMinHW
                     cv.drawLine(cx - hw, ty, cx + hw, ty, pPost)
                     if (i in labelSet) cv.drawText(i.toString(), cx + bdcMHW + s * 2f, ty + pLbl.textSize * 0.35f, pLbl)
                 }
@@ -1318,7 +1316,6 @@ private fun drawReticleSection(
                 val bdcRows = listOf(2.86f, 3.44f, 4.30f, 5.73f)
                 val pFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
                 val pCross = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = crossW }
-                val pGeom = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = lineW }
                 val pRow  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = lineW }
 
                 cv.drawLine(cx - r.toFloat(), cy, cx + r.toFloat(), cy, pCross)

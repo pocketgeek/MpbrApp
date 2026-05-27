@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.activity.ComponentActivity
+import androidx.print.PrintHelper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -335,6 +336,29 @@ fun MpbrScreen() {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Save DOPE Chart") }
+
+            Button(
+                onClick = {
+                    val label      = selectedPreset?.name ?: "Custom"
+                    val showEnergy = r.energyAtNearZeroFtLb > 0.0
+                    val showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
+                    val bmp = buildDopeChartBitmap(
+                        r, label,
+                        altitude.toDoubleOrNull()    ?: 0.0,
+                        temperature.toDoubleOrNull() ?: 59.0,
+                        humidity.toDoubleOrNull()    ?: 0.0,
+                        windSpeed.toDoubleOrNull()   ?: 0.0,
+                        vitalZone.toDoubleOrNull()   ?: 6.0,
+                        showEnergy, showDrift,
+                        selectedReticle,
+                        dopeTitle
+                    )
+                    val helper = PrintHelper(context as android.app.Activity)
+                    helper.scaleMode = PrintHelper.SCALE_MODE_FIT
+                    helper.printBitmap("MPBR DOPE Chart — $label", bmp)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Print DOPE Chart") }
         }
     }
 }
@@ -609,23 +633,21 @@ private fun drawReticleSection(
 
     // Circle-dot reticles: draw the large ring + cardinal tick marks outside the clip
     if (reticle.style == Ballistics.ReticleStyle.CIRCLE_DOT) {
-        val ringR    = reticle.majorSpacing.toFloat() * ppu
-        val halfTick = ringR * 0.10f   // tick extends 10% of ring radius each side of the ring
+        val rings = reticle.holdoverMarks.ifEmpty { listOf(reticle.majorSpacing) }
+        val outerR   = rings.last().toFloat() * ppu
+        val halfTick = outerR * 0.10f
         val pRing = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 4f
         }
         val pTick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = android.graphics.Color.BLACK; strokeWidth = s * 3f
         }
-        cv.drawCircle(cx, cy, ringR, pRing)
-        // 12 o'clock
-        cv.drawLine(cx, cy - ringR - halfTick, cx, cy - ringR + halfTick, pTick)
-        // 6 o'clock
-        cv.drawLine(cx, cy + ringR - halfTick, cx, cy + ringR + halfTick, pTick)
-        // 3 o'clock
-        cv.drawLine(cx + ringR - halfTick, cy, cx + ringR + halfTick, cy, pTick)
-        // 9 o'clock
-        cv.drawLine(cx - ringR - halfTick, cy, cx - ringR + halfTick, cy, pTick)
+        for (rMoa in rings) cv.drawCircle(cx, cy, rMoa.toFloat() * ppu, pRing)
+        // cardinal ticks on outermost ring only
+        cv.drawLine(cx, cy - outerR - halfTick, cx, cy - outerR + halfTick, pTick)
+        cv.drawLine(cx, cy + outerR - halfTick, cx, cy + outerR + halfTick, pTick)
+        cv.drawLine(cx + outerR - halfTick, cy, cx + outerR + halfTick, cy, pTick)
+        cv.drawLine(cx - outerR - halfTick, cy, cx - outerR + halfTick, cy, pTick)
     }
 
     // reticle name label above circle

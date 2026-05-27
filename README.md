@@ -110,6 +110,7 @@ Presets are sorted by manufacturer:
 | EOTech VUDU MR5 (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered horizontal stadia with 0.5 MRAD ticks; 1 MRAD speed ring; dot-grid Christmas tree rows 2–8 MRAD |
 | German ZB26/ZB30 AA Spider Sight (MOA, 1×) | MOA | 1× (always accurate) | Spider Sight | Outer ring + 4 crosshair spokes + small center ring + beads on all 4 spokes at ~45% radius + 4 diagonal tick marks at 45° on outer ring. Outer ring ≈ 370 MOA (7.92mm at 775 m/s, 300 km/h aircraft). Values estimated from physics and product photos — source document not located. Source: IMA/Aubrey product photos |
 | Firefield RapidStrike Circle Dot (MOA, SFP) | MOA | SFP (6×) | Circle BDC | 9.95 MOA circle + 1.34 MOA center dot; thin BDC post 300–600 yd below circle; thick bottom post. Positions estimated — exact MOA not published |
+| Holosun 507 COMP (2 MOA / 8-20-32 MOA CRS) | MOA | 1× (always accurate) | Circle-dot | Three concentric rings at 8/20/32 MOA + 2 MOA center dot; cardinal tick marks on outermost ring. CRS lets shooter select any single ring or combine all three |
 | Holosun 510C (2 MOA / 65 MOA) | MOA | 1× (always accurate) | Circle-dot | 65 MOA ring + 2 MOA center dot + cardinal tick marks at 12/3/6/9 o'clock |
 | SIG Sauer Tango SPR BDC1 (MOA, SFP) | MOA | SFP (4×) | BDC | Thick H posts at ±10 MOA; holdover marks at 3.75/6.50/9.50/14.50 MOA; thin crosshair with 0.25 MOA ticks. Source: Tango SPR manual p.16 |
 | SIG Sauer Tango SPR FL-4 (MOA, SFP) | MOA | SFP (4×) | FL-4 | Thin crosshair with two filled horizontal reference triangles per side at ±3.13/±5.95 MOA; one outer horizontal hash per side at ±13.48 MOA; lower BDC stadia at 2.86/3.44/4.30/5.73 MOA with 0.75 MOA half-widths; lower post to 20.22 MOA with 15° included tip angle. Open outlines in the source diagram are dimensional callouts, not reticle artwork. Source: Tango SPR manual p.17 |
@@ -172,8 +173,11 @@ After calculating, the results screen shows (in order):
 
 ## Saving a DOPE chart
 
-After calculating, tap **Save DOPE Chart** (appears below the trajectory
-table). The app renders a 1200 px JPEG containing:
+After calculating, tap **Save DOPE Chart** or **Print DOPE Chart** (appear below
+the trajectory table). **Save** renders a 1200 px JPEG and writes it to
+**Pictures/MPBR DOPE Charts/** in your gallery (on Android 8 or earlier the app
+will ask for storage permission the first time). **Print** sends the same image
+to the system print dialog (AirPrint, PDF, etc.). Both render:
 
 - Load name, near/far zero, MPBR, max ordinate, bore angle
 - Altitude, temperature, humidity, wind conditions
@@ -189,9 +193,6 @@ table). The app renders a 1200 px JPEG containing:
   weight is set; the redundant MOA or MIL column is dropped when a reticle is
   selected)
 - Date of generation
-
-The file is written to **Pictures/MPBR DOPE Charts/** in your gallery.
-On Android 8 or earlier the app will ask for storage permission the first time.
 
 ## Things to add next
 

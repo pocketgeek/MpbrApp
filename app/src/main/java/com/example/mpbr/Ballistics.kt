@@ -137,6 +137,15 @@ object Ballistics {
             ReticleUnit.MOA, 32.5, 1.0, 40.0,
             ReticleStyle.CIRCLE_DOT
         ),
+        // Holosun HS507COMP CRS — 2 MOA dot + 8/20/32 MOA selectable circles, 1× red dot.
+        // holdoverMarks = ring radii (half-diameters): 4/10/16 MOA.
+        // majorSpacing = outermost ring radius (for vertExtent reference).
+        ReticlePreset(
+            "Holosun 507 COMP (2 MOA / 8-20-32 MOA CRS)",
+            ReticleUnit.MOA, 16.0, 1.0, 20.0,
+            ReticleStyle.CIRCLE_DOT,
+            holdoverMarks = listOf(4.0, 10.0, 16.0)
+        ),
         // ── SIG Sauer ────────────────────────────────────────────────────────────
         // SIG Sauer Tango SPR 1-4×24 SFP — BDC1 reticle. SFP, valid at 4× only.
         // Thick H posts at ±10 MOA (2 MOA wide, 1.5 MOA half-height); thin crosshair

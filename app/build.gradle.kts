@@ -12,8 +12,8 @@ android {
         applicationId = "us.pgnet.mpbr"
         minSdk = 24
         targetSdk = 35
-        versionCode = 53
-        versionName = "1.51"
+        versionCode = 54
+        versionName = "1.52"
     }
 
     buildTypes {
@@ -49,6 +49,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.print:print:1.1.0-beta01")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

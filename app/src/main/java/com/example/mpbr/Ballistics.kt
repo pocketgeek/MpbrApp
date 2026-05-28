@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -117,15 +117,15 @@ object Ballistics {
         ),
         // Firefield RapidStrike 1-10×24 SFP — CR1 reticle.
         // SFP, valid at 10× only. Calibrated for 5.56x45/.223 Rem 55gr FMJ, 100-yd zero.
-        // 1.34 MOA center dot (0–200 yd); circle for IPSC ranging at 300 yd (18"/300 yd =
-        // 5.73 MOA diameter → 2.87 MOA radius); 300-yd holdover at circle exit (tip of
-        // vertical subtension); 3 hashes for 400/500/600 yd.
+        // Horseshoe arc (300° arc, 60° gap at bottom) + 1.34 MOA center dot (0–200 yd);
+        // circle radius from IPSC 18" target at 300 yd (18"/300 yd = 5.73 MOA dia → 2.87 MOA r);
+        // 300-yd holdover at arc gap exit (tip of vertical subtension); hashes at 400/500/600 yd.
         // holdoverMark depths estimated from .223 55gr FMJ ballistics at 100-yd zero.
         // Source: Firefield FF13075 user manual pp.14–15.
         ReticlePreset(
             "Firefield RapidStrike CR1 1-10x24 (MOA, SFP)",
             ReticleUnit.MOA, 2.87, 0.67, 22.0,
-            ReticleStyle.CIRCLE_BDC,
+            ReticleStyle.HORSESHOE_BDC,
             holdoverMarks = listOf(6.0, 11.0, 17.0)
         ),
         // ── German/Czech ──────────────────────────────────────────────────────────

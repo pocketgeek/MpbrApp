@@ -602,6 +602,15 @@ private fun drawReticleSection(
         })
     }
 
+    // HORSESHOE_BDC: arc with 60° gap at bottom (120°→60° clockwise = 300° sweep)
+    if (reticle.style == Ballistics.ReticleStyle.HORSESHOE_BDC) {
+        val circleR = reticle.majorSpacing.toFloat() * ppu
+        val oval = android.graphics.RectF(cx - circleR, cy - circleR, cx + circleR, cy + circleR)
+        cv.drawArc(oval, 120f, 300f, false, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+        })
+    }
+
     // AR-BDC3: horseshoe (large top arc + two side hooks) drawn outside clip
     if (reticle.style == Ballistics.ReticleStyle.AR_BDC3) {
         val circleR = reticle.majorSpacing.toFloat() * ppu
@@ -897,6 +906,36 @@ private fun drawReticleSection(
                 }
 
                 // Thick bottom post from last BDC mark to scope edge
+                cv.drawLine(cx, lastHy + ppu * 0.5f, cx, cy + r.toFloat(), pThick)
+            }
+
+            Ballistics.ReticleStyle.HORSESHOE_BDC -> {
+                // Arc drawn outside clip; inside: center dot, thin post from arc gap, BDC ticks, thick post
+                val dotR    = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
+                val circleR = reticle.majorSpacing.toFloat() * ppu
+                val tickHW  = ppu * 1.8f
+                val pFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL;   color = android.graphics.Color.BLACK }
+                val pThin   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pThick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 5f }
+                val pTick   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+
+                cv.drawCircle(cx, cy, dotR, pFill)
+
+                // Faint reference above arc for trajectory callouts
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy - circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()
+                })
+
+                // Thin post from arc gap bottom to last holdover mark
+                val lastHy = if (reticle.holdoverMarks.isNotEmpty())
+                    cy + reticle.holdoverMarks.last().toFloat() * ppu else cy + circleR
+                cv.drawLine(cx, cy + circleR, cx, lastHy, pThin)
+
+                for (h in reticle.holdoverMarks) {
+                    val hy = cy + h.toFloat() * ppu
+                    cv.drawLine(cx - tickHW, hy, cx + tickHW, hy, pTick)
+                }
+
                 cv.drawLine(cx, lastHy + ppu * 0.5f, cx, cy + r.toFloat(), pThick)
             }
 

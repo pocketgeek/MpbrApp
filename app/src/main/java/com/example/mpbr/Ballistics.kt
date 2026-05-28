@@ -151,6 +151,12 @@ object Ballistics {
             ReticleUnit.MOA, 32.5, 1.0, 40.0,
             ReticleStyle.CIRCLE_DOT
         ),
+        // Holosun HS510C — 65 MOA ring only, no dot.
+        ReticlePreset(
+            "Holosun 510C (65 MOA ring only)",
+            ReticleUnit.MOA, 32.5, 0.0, 40.0,
+            ReticleStyle.CIRCLE_DOT
+        ),
         // Holosun HS507COMP CRS — 2 MOA dot + 8/20/32 MOA selectable circles, 1× red dot.
         // holdoverMarks = ring radii (half-diameters): 4/10/16 MOA.
         // majorSpacing = outermost ring radius (for vertExtent reference).

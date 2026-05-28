@@ -1040,10 +1040,12 @@ private fun drawReticleSection(
 
             Ballistics.ReticleStyle.CIRCLE_DOT -> {
                 // Ring drawn outside clip above; here just the center dot + faint reference line
-                val aDotR = reticle.minorSpacing.toFloat() * ppu
-                cv.drawCircle(cx, cy, aDotR.coerceAtLeast(s * 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    style = Paint.Style.FILL; color = android.graphics.Color.BLACK
-                })
+                if (reticle.minorSpacing > 0) {
+                    val aDotR = reticle.minorSpacing.toFloat() * ppu
+                    cv.drawCircle(cx, cy, aDotR.coerceAtLeast(s * 3f), Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        style = Paint.Style.FILL; color = android.graphics.Color.BLACK
+                    })
+                }
                 cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH,
                     Paint(Paint.ANTI_ALIAS_FLAG).apply {
                         color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()

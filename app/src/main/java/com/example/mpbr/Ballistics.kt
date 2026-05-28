@@ -160,10 +160,10 @@ object Ballistics {
             ReticleStyle.CIRCLE_DOT,
             holdoverMarks = listOf(4.0, 10.0, 16.0)
         ),
-        // Holosun HS507COMP — 2 MOA dot + 32 MOA ring only.
+        // Holosun HS507COMP — 32 MOA ring only, no dot.
         ReticlePreset(
-            "Holosun 507 COMP (2 MOA / 32 MOA)",
-            ReticleUnit.MOA, 16.0, 1.0, 20.0,
+            "Holosun 507 COMP (32 MOA ring only)",
+            ReticleUnit.MOA, 16.0, 0.0, 20.0,
             ReticleStyle.CIRCLE_DOT
         ),
         // ── SIG Sauer ────────────────────────────────────────────────────────────

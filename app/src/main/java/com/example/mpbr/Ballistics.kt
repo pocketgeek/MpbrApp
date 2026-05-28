@@ -115,6 +115,19 @@ object Ballistics {
             ReticleStyle.CIRCLE_BDC,
             holdoverMarks = listOf(7.0, 10.0, 13.5, 17.5)
         ),
+        // Firefield RapidStrike 1-10×24 SFP — CR1 reticle.
+        // SFP, valid at 10× only. Calibrated for 5.56x45/.223 Rem 55gr FMJ, 100-yd zero.
+        // 1.34 MOA center dot (0–200 yd); circle for IPSC ranging at 300 yd (18"/300 yd =
+        // 5.73 MOA diameter → 2.87 MOA radius); 300-yd holdover at circle exit (tip of
+        // vertical subtension); 3 hashes for 400/500/600 yd.
+        // holdoverMark depths estimated from .223 55gr FMJ ballistics at 100-yd zero.
+        // Source: Firefield FF13075 user manual pp.14–15.
+        ReticlePreset(
+            "Firefield RapidStrike CR1 1-10x24 (MOA, SFP)",
+            ReticleUnit.MOA, 2.87, 0.67, 22.0,
+            ReticleStyle.CIRCLE_BDC,
+            holdoverMarks = listOf(6.0, 11.0, 17.0)
+        ),
         // ── German/Czech ──────────────────────────────────────────────────────────
         // ZB26/ZB30 anti-aircraft front spider sight (German WWII issue).
         // Iron ring sight: outer ring, 4 crosshair spokes, small center ring,

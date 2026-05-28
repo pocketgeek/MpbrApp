@@ -160,6 +160,12 @@ object Ballistics {
             ReticleStyle.CIRCLE_DOT,
             holdoverMarks = listOf(4.0, 10.0, 16.0)
         ),
+        // Holosun HS507COMP — 2 MOA dot + 32 MOA ring only.
+        ReticlePreset(
+            "Holosun 507 COMP (2 MOA / 32 MOA)",
+            ReticleUnit.MOA, 16.0, 1.0, 20.0,
+            ReticleStyle.CIRCLE_DOT
+        ),
         // ── SIG Sauer ────────────────────────────────────────────────────────────
         // SIG Sauer Tango SPR 1-4×24 SFP — BDC1 reticle. SFP, valid at 4× only.
         // Thick H posts at ±10 MOA (2 MOA wide, 1.5 MOA half-height); thin crosshair

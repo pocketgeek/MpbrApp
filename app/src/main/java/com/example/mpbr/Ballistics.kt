@@ -126,7 +126,8 @@ object Ballistics {
             "Firefield RapidStrike CR1 1-10x24 (MOA, SFP)",
             ReticleUnit.MOA, 2.87, 0.67, 22.0,
             ReticleStyle.HORSESHOE_BDC,
-            holdoverMarks = listOf(6.0, 11.0, 17.0)
+            holdoverMarks = listOf(6.0, 11.0, 17.0),
+            windageMarks  = listOf(2.15, 1.72, 1.43)
         ),
         // ── German/Czech ──────────────────────────────────────────────────────────
         // ZB26/ZB30 anti-aircraft front spider sight (German WWII issue).

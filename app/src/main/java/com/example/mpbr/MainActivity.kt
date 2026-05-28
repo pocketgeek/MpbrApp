@@ -931,9 +931,12 @@ private fun drawReticleSection(
                     cy + reticle.holdoverMarks.last().toFloat() * ppu else cy + circleR
                 cv.drawLine(cx, cy + circleR, cx, lastHy, pThin)
 
-                for (h in reticle.holdoverMarks) {
-                    val hy = cy + h.toFloat() * ppu
-                    cv.drawLine(cx - tickHW, hy, cx + tickHW, hy, pTick)
+                // Each hash uses its own half-width from windageMarks if provided, else fixed fallback
+                reticle.holdoverMarks.forEachIndexed { i, h ->
+                    val hy  = cy + h.toFloat() * ppu
+                    val hw  = if (i < reticle.windageMarks.size)
+                        reticle.windageMarks[i].toFloat() * ppu else tickHW
+                    cv.drawLine(cx - hw, hy, cx + hw, hy, pTick)
                 }
 
                 cv.drawLine(cx, lastHy + ppu * 0.5f, cx, cy + r.toFloat(), pThick)

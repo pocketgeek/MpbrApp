@@ -113,6 +113,8 @@ Presets are sorted by manufacturer:
 | Firefield RapidStrike CR1 1-10x24 (MOA, SFP) | MOA | SFP (10×) | Horseshoe BDC | 5.73 MOA horseshoe arc (300°, 60° gap at bottom; = 18" IPSC target at 300 yd) + 1.34 MOA center dot (0–200 yd); 300-yd holdover at arc gap; hashes at 400/500/600 yd (depths estimated from .223 55gr FMJ ballistics at 100-yd zero). Source: FF13075 user manual pp.14–15 |
 | Holosun 507 COMP (2 MOA / 8-20-32 MOA CRS) | MOA | 1× (always accurate) | Circle-dot | Three concentric rings at 8/20/32 MOA + 2 MOA center dot; cardinal tick marks on outermost ring. CRS lets shooter select any single ring or combine all three |
 | Holosun 507 COMP (32 MOA ring only) | MOA | 1× (always accurate) | Circle-dot | 32 MOA ring only, no center dot; cardinal tick marks at 12/3/6/9 o'clock |
+| Holosun 507K (2 MOA / 32 MOA) | MOA | 1× (always accurate) | Circle-dot | 32 MOA ring + 2 MOA center dot; cardinal tick marks at 12/3/6/9 o'clock |
+| Holosun 507K (32 MOA ring only) | MOA | 1× (always accurate) | Circle-dot | 32 MOA ring only, no center dot; cardinal tick marks at 12/3/6/9 o'clock |
 | Holosun 510C (2 MOA / 65 MOA) | MOA | 1× (always accurate) | Circle-dot | 65 MOA ring + 2 MOA center dot + cardinal tick marks at 12/3/6/9 o'clock |
 | Holosun 510C (65 MOA ring only) | MOA | 1× (always accurate) | Circle-dot | 65 MOA ring only, no center dot; cardinal tick marks at 12/3/6/9 o'clock |
 | SIG Sauer Tango SPR BDC1 (MOA, SFP) | MOA | SFP (4×) | BDC | Thick H posts at ±10 MOA; holdover marks at 3.75/6.50/9.50/14.50 MOA; thin crosshair with 0.25 MOA ticks. Source: Tango SPR manual p.16 |
@@ -220,7 +222,6 @@ Tap the **Ammunition** section label five times quickly to play a synthesized gu
 
 ## Things to add next
 
-- Custom drag function (CDM) for users with manufacturer Doppler radar curves.
 - Custom drag function (CDM) for users with manufacturer Doppler radar curves.
 
 ## Code quality

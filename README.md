@@ -143,6 +143,14 @@ table.
 0 / 50 / 500 yd; start 0–2000, step 1–500, end 0–2000). Both on-screen
 table and DOPE chart use these values. Start must be less than end.
 
+**Metric toggle** — tap the **Metric** chip at the top right to switch all
+displayed units to SI. Inputs show m/s, mm, cm, m, °C, km/h; results and
+trajectory table show m, cm, m/s, J; DOPE chart exports in metric too.
+Internal calculations always use imperial — sessions save and load in imperial
+regardless of the toggle state. Bullet weight stays in grains (universal in
+the ammunition world). BC is dimensionless. Angular values (MOA, MIL) are
+unit-system-independent and never change.
+
 **DOPE Card Title** — editable heading printed at the top of the saved JPEG
 (default "MPBR DOPE CARD"). Leave blank to keep the default.
 
@@ -211,7 +219,7 @@ Tap the **Ammunition** section label five times quickly to play a synthesized gu
 
 ## Things to add next
 
-- Metric units toggle.
+- Custom drag function (CDM) for users with manufacturer Doppler radar curves.
 - Custom drag function (CDM) for users with manufacturer Doppler radar curves.
 
 ## Code quality

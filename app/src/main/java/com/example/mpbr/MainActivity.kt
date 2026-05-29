@@ -130,6 +130,20 @@ fun MpbrScreen() {
     var saveDialogName   by remember { mutableStateOf("") }
     var loadedSessions   by remember { mutableStateOf(listOf<SessionData>()) }
 
+    var metricMode by remember { mutableStateOf(false) }
+
+    // Display an imperial string in metric units (no-op when metricMode is false)
+    fun toMetric(s: String, convert: (Double) -> Double, fmt: String = "%.1f"): String =
+        if (metricMode) s.toDoubleOrNull()?.let { fmt.format(convert(it)) } ?: s else s
+
+    // Convert metric user input back to imperial for storage (no-op when metricMode is false)
+    fun fromMetric(s: String, convert: (Double) -> Double): String =
+        if (metricMode) s.toDoubleOrNull()?.let { formatNum(convert(it)) } ?: s else s
+
+    // Same as fromMetric but rounds to integer (for yard fields parsed with toIntOrNull)
+    fun fromMetricInt(s: String, convert: (Double) -> Double): String =
+        if (metricMode) s.toDoubleOrNull()?.let { convert(it).roundToInt().toString() } ?: s else s
+
     // When the user types in a field, we want the dropdown label to flip to "Custom"
     // so it doesn't lie about what's loaded. These wrap the raw setters.
     fun userEdit(setter: (String) -> Unit, value: String) {
@@ -263,6 +277,14 @@ fun MpbrScreen() {
             }
         }
 
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            FilterChip(
+                selected = metricMode,
+                onClick  = { metricMode = !metricMode },
+                label    = { Text("Metric") }
+            )
+        }
+
         // ---- Ammunition preset ----
         SectionLabel("Ammunition", onSecret = { playGunshot() })
         AmmoPresetDropdown(
@@ -294,25 +316,61 @@ fun MpbrScreen() {
 
         // ---- Bullet & sight ----
         SectionLabel("Bullet & Sight")
-        NumberField("Muzzle Velocity (fps)",    muzzleVel,    Modifier.fillMaxWidth()) { v -> userEdit({ muzzleVel = it }, v) }
-        NumberField("Ballistic Coefficient",    bc,           Modifier.fillMaxWidth()) { v -> userEdit({ bc = it }, v) }
-        NumberField("Bullet Weight (gr)",       bulletWeight, Modifier.fillMaxWidth()) { v -> userEdit({ bulletWeight = it }, v) }
-        NumberField("Sight Height (in)",        sightHeight,  Modifier.fillMaxWidth()) { v -> userEdit({ sightHeight = it }, v) }
-        NumberField("Vital Zone Diameter (in)", vitalZone,    Modifier.fillMaxWidth()) { v -> userEdit({ vitalZone = it }, v) }
+        NumberField(
+            if (metricMode) "Muzzle Velocity (m/s)" else "Muzzle Velocity (fps)",
+            toMetric(muzzleVel, { it * 0.3048 }),
+            Modifier.fillMaxWidth()
+        ) { v -> userEdit({ muzzleVel = it }, fromMetric(v, { it / 0.3048 })) }
+        NumberField("Ballistic Coefficient", bc, Modifier.fillMaxWidth()) { v -> userEdit({ bc = it }, v) }
+        NumberField("Bullet Weight (gr)",    bulletWeight, Modifier.fillMaxWidth()) { v -> userEdit({ bulletWeight = it }, v) }
+        NumberField(
+            if (metricMode) "Sight Height (mm)" else "Sight Height (in)",
+            toMetric(sightHeight, { it * 25.4 }),
+            Modifier.fillMaxWidth()
+        ) { v -> userEdit({ sightHeight = it }, fromMetric(v, { it / 25.4 })) }
+        NumberField(
+            if (metricMode) "Vital Zone Diameter (cm)" else "Vital Zone Diameter (in)",
+            toMetric(vitalZone, { it * 2.54 }),
+            Modifier.fillMaxWidth()
+        ) { v -> userEdit({ vitalZone = it }, fromMetric(v, { it / 2.54 })) }
 
         // ---- Atmosphere ----
         SectionLabel("Atmosphere")
-        NumberField("Altitude (ft)",           altitude,     Modifier.fillMaxWidth()) { altitude = it }
-        NumberField("Temperature (°F)",        temperature,  Modifier.fillMaxWidth()) { temperature = it }
-        NumberField("Humidity (%)",            humidity,     Modifier.fillMaxWidth()) { humidity = it }
-        NumberField("Wind Speed (mph, full value crosswind)", windSpeed, Modifier.fillMaxWidth()) { windSpeed = it }
+        NumberField(
+            if (metricMode) "Altitude (m)" else "Altitude (ft)",
+            toMetric(altitude, { it * 0.3048 }, "%.0f"),
+            Modifier.fillMaxWidth()
+        ) { altitude = fromMetric(it, { it / 0.3048 }) }
+        NumberField(
+            if (metricMode) "Temperature (°C)" else "Temperature (°F)",
+            toMetric(temperature, { (it - 32.0) * 5.0 / 9.0 }),
+            Modifier.fillMaxWidth()
+        ) { temperature = fromMetric(it, { it * 9.0 / 5.0 + 32.0 }) }
+        NumberField("Humidity (%)", humidity, Modifier.fillMaxWidth()) { humidity = it }
+        NumberField(
+            if (metricMode) "Wind Speed (km/h, full value crosswind)" else "Wind Speed (mph, full value crosswind)",
+            toMetric(windSpeed, { it * 1.60934 }),
+            Modifier.fillMaxWidth()
+        ) { windSpeed = fromMetric(it, { it / 1.60934 }) }
 
         // ---- Trajectory table range ----
         SectionLabel("Trajectory Table")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            NumberField("Start (yd)", tableStart, Modifier.weight(1f)) { tableStart = it }
-            NumberField("Step (yd)",  tableStep,  Modifier.weight(1f)) { tableStep  = it }
-            NumberField("End (yd)",   tableEnd,   Modifier.weight(1f)) { tableEnd   = it }
+            NumberField(
+                if (metricMode) "Start (m)" else "Start (yd)",
+                toMetric(tableStart, { it * 0.9144 }, "%.0f"),
+                Modifier.weight(1f)
+            ) { tableStart = fromMetricInt(it, { it / 0.9144 }) }
+            NumberField(
+                if (metricMode) "Step (m)" else "Step (yd)",
+                toMetric(tableStep, { it * 0.9144 }, "%.0f"),
+                Modifier.weight(1f)
+            ) { tableStep = fromMetricInt(it, { it / 0.9144 }) }
+            NumberField(
+                if (metricMode) "End (m)" else "End (yd)",
+                toMetric(tableEnd, { it * 0.9144 }, "%.0f"),
+                Modifier.weight(1f)
+            ) { tableEnd = fromMetricInt(it, { it / 0.9144 }) }
         }
 
         Button(
@@ -329,21 +387,33 @@ fun MpbrScreen() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("Results", style = MaterialTheme.typography.titleLarge)
-                    ResultRow("Near Zero", "%.0f yd".format(r.nearZeroYards))
-                    ResultRow("Far Zero",  "%.0f yd".format(r.farZeroYards))
-                    ResultRow(
-                        "Max Ordinate",
-                        "%.2f in @ %.0f yd".format(r.maxOrdinateInches, r.maxOrdinateRangeYards)
-                    )
-                    ResultRow("Maximum Point Blank Range", "%.0f yd".format(r.mpbrYards))
-                    if (r.energyAtMpbrFtLb > 0.0)
-                        ResultRow("Energy at MPBR", "%.0f ft·lb".format(r.energyAtMpbrFtLb))
-                    ResultRow("Velocity at Near Zero", "%.0f fps".format(r.velocityAtNearZeroFps))
-                    if (r.energyAtNearZeroFtLb > 0.0)
-                        ResultRow("Energy at Near Zero", "%.0f ft·lb".format(r.energyAtNearZeroFtLb))
-                    ResultRow("Velocity at Far Zero",  "%.0f fps".format(r.velocityAtFarZeroFps))
-                    if (r.energyAtFarZeroFtLb > 0.0)
-                        ResultRow("Energy at Far Zero", "%.0f ft·lb".format(r.energyAtFarZeroFtLb))
+                    if (metricMode) {
+                        ResultRow("Near Zero", "%.0f m".format(r.nearZeroYards * 0.9144))
+                        ResultRow("Far Zero",  "%.0f m".format(r.farZeroYards  * 0.9144))
+                        ResultRow("Max Ordinate", "%.2f cm @ %.0f m".format(r.maxOrdinateInches * 2.54, r.maxOrdinateRangeYards * 0.9144))
+                        ResultRow("Maximum Point Blank Range", "%.0f m".format(r.mpbrYards * 0.9144))
+                        if (r.energyAtMpbrFtLb > 0.0)
+                            ResultRow("Energy at MPBR", "%.0f J".format(r.energyAtMpbrFtLb * 1.35582))
+                        ResultRow("Velocity at Near Zero", "%.0f m/s".format(r.velocityAtNearZeroFps * 0.3048))
+                        if (r.energyAtNearZeroFtLb > 0.0)
+                            ResultRow("Energy at Near Zero", "%.0f J".format(r.energyAtNearZeroFtLb * 1.35582))
+                        ResultRow("Velocity at Far Zero",  "%.0f m/s".format(r.velocityAtFarZeroFps * 0.3048))
+                        if (r.energyAtFarZeroFtLb > 0.0)
+                            ResultRow("Energy at Far Zero", "%.0f J".format(r.energyAtFarZeroFtLb * 1.35582))
+                    } else {
+                        ResultRow("Near Zero", "%.0f yd".format(r.nearZeroYards))
+                        ResultRow("Far Zero",  "%.0f yd".format(r.farZeroYards))
+                        ResultRow("Max Ordinate", "%.2f in @ %.0f yd".format(r.maxOrdinateInches, r.maxOrdinateRangeYards))
+                        ResultRow("Maximum Point Blank Range", "%.0f yd".format(r.mpbrYards))
+                        if (r.energyAtMpbrFtLb > 0.0)
+                            ResultRow("Energy at MPBR", "%.0f ft·lb".format(r.energyAtMpbrFtLb))
+                        ResultRow("Velocity at Near Zero", "%.0f fps".format(r.velocityAtNearZeroFps))
+                        if (r.energyAtNearZeroFtLb > 0.0)
+                            ResultRow("Energy at Near Zero", "%.0f ft·lb".format(r.energyAtNearZeroFtLb))
+                        ResultRow("Velocity at Far Zero",  "%.0f fps".format(r.velocityAtFarZeroFps))
+                        if (r.energyAtFarZeroFtLb > 0.0)
+                            ResultRow("Energy at Far Zero", "%.0f ft·lb".format(r.energyAtFarZeroFtLb))
+                    }
                     ResultRow("Bore Angle Above LOS", "%.2f MOA".format(r.boreAngleMoa))
                 }
             }
@@ -369,7 +439,8 @@ fun MpbrScreen() {
                     showEnergy = r.energyAtNearZeroFtLb > 0.0,
                     showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
                     showMoa    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
-                    showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL
+                    showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL,
+                    metricMode = metricMode
                 )
             }
 
@@ -397,7 +468,8 @@ fun MpbrScreen() {
                             vitalZone.toDoubleOrNull()   ?: 6.0,
                             showEnergy, showDrift,
                             selectedReticle,
-                            dopeTitle
+                            dopeTitle,
+                            metricMode
                         )
                         val ok = saveDopeChart(context, bmp, label)
                         android.widget.Toast.makeText(
@@ -434,7 +506,8 @@ fun MpbrScreen() {
                         vitalZone.toDoubleOrNull()   ?: 6.0,
                         showEnergy, showDrift,
                         selectedReticle,
-                        dopeTitle
+                        dopeTitle,
+                        metricMode
                     )
                     val helper = PrintHelper(context as android.app.Activity)
                     helper.scaleMode = PrintHelper.SCALE_MODE_FIT
@@ -517,7 +590,8 @@ private fun TrajectoryTableCard(
     showEnergy: Boolean,
     showDrift: Boolean,
     showMoa: Boolean = true,
-    showMil: Boolean = true
+    showMil: Boolean = true,
+    metricMode: Boolean = false
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -527,31 +601,32 @@ private fun TrajectoryTableCard(
             Text("Trajectory Table", style = MaterialTheme.typography.titleLarge)
 
             val header = buildList {
-                add("Range"); add("Drop")
+                add(if (metricMode) "Rng (m)" else "Range")
+                add(if (metricMode) "Drop (cm)" else "Drop")
                 if (showMoa) add("MOA")
                 if (showMil) add("MIL")
                 if (showDrift) {
                     if (showMoa) add("W.MOA")
                     if (showMil) add("W.MIL")
                 }
-                add("Vel")
-                if (showEnergy) add("Energy")
+                add(if (metricMode) "Vel (m/s)" else "Vel")
+                if (showEnergy) add(if (metricMode) "E (J)" else "Energy")
             }
             TrajRow(cells = header, style = MaterialTheme.typography.labelMedium, bold = true)
             HorizontalDivider()
 
             for (row in rows) {
                 val cells = buildList {
-                    add("${row.rangeYards} yd")
-                    add("%.1f in".format(row.dropInches))
+                    add(if (metricMode) "%.0f m".format(row.rangeYards * 0.9144) else "${row.rangeYards} yd")
+                    add(if (metricMode) "%.1f cm".format(row.dropInches * 2.54)  else "%.1f in".format(row.dropInches))
                     if (showMoa) add("%.1f".format(row.holdoverMoa))
                     if (showMil) add("%.2f".format(row.holdoverMil))
                     if (showDrift) {
                         if (showMoa) add("%.1f".format(row.driftMoa))
                         if (showMil) add("%.2f".format(row.driftMil))
                     }
-                    add("%.0f fps".format(row.velocityFps))
-                    if (showEnergy) add("%.0f ft·lb".format(row.energyFtLb))
+                    add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f fps".format(row.velocityFps))
+                    if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f ft·lb".format(row.energyFtLb))
                 }
                 TrajRow(cells = cells, style = MaterialTheme.typography.bodyMedium)
             }
@@ -1712,7 +1787,8 @@ private fun buildDopeChartBitmap(
     showEnergy: Boolean,
     showDrift: Boolean,
     reticle: Ballistics.ReticlePreset? = null,
-    cardTitle: String = "MPBR DOPE CARD"
+    cardTitle: String = "MPBR DOPE CARD",
+    metricMode: Boolean = false
 ): Bitmap {
     val s   = 3
     val w   = 400 * s
@@ -1722,29 +1798,44 @@ private fun buildDopeChartBitmap(
     val lnH = (bsz + 12).toInt()
     val rwH = (bsz + 16).toInt()
 
-    val windStr = if (windMph == 0.0) "calm" else "%.0f mph".format(windMph)
-    val info = listOf(
-        ammoLabel,
-        "Near Zero: %.0f yd  |  Far Zero: %.0f yd  |  MPBR: %.0f yd"
-            .format(result.nearZeroYards, result.farZeroYards, result.mpbrYards),
-        "Max Ordinate: %.2f\" @ %.0f yd  |  Bore Angle: %.2f MOA  |  Vital Zone: %.1f\""
-            .format(result.maxOrdinateInches, result.maxOrdinateRangeYards, result.boreAngleMoa, vitalZoneIn),
-        "Alt: %.0f ft  |  Temp: %.0f°F  |  RH: %.0f%%  |  Wind: %s"
-            .format(altFt, tempF, rhPct, windStr),
-        "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
-    )
+    val info = if (metricMode) {
+        val windStr = if (windMph == 0.0) "calm" else "%.0f km/h".format(windMph * 1.60934)
+        listOf(
+            ammoLabel,
+            "Near Zero: %.0f m  |  Far Zero: %.0f m  |  MPBR: %.0f m"
+                .format(result.nearZeroYards * 0.9144, result.farZeroYards * 0.9144, result.mpbrYards * 0.9144),
+            "Max Ordinate: %.2f cm @ %.0f m  |  Bore Angle: %.2f MOA  |  Vital Zone: %.1f cm"
+                .format(result.maxOrdinateInches * 2.54, result.maxOrdinateRangeYards * 0.9144, result.boreAngleMoa, vitalZoneIn * 2.54),
+            "Alt: %.0f m  |  Temp: %.1f°C  |  RH: %.0f%%  |  Wind: %s"
+                .format(altFt * 0.3048, (tempF - 32.0) * 5.0 / 9.0, rhPct, windStr),
+            "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
+        )
+    } else {
+        val windStr = if (windMph == 0.0) "calm" else "%.0f mph".format(windMph)
+        listOf(
+            ammoLabel,
+            "Near Zero: %.0f yd  |  Far Zero: %.0f yd  |  MPBR: %.0f yd"
+                .format(result.nearZeroYards, result.farZeroYards, result.mpbrYards),
+            "Max Ordinate: %.2f\" @ %.0f yd  |  Bore Angle: %.2f MOA  |  Vital Zone: %.1f\""
+                .format(result.maxOrdinateInches, result.maxOrdinateRangeYards, result.boreAngleMoa, vitalZoneIn),
+            "Alt: %.0f ft  |  Temp: %.0f°F  |  RH: %.0f%%  |  Wind: %s"
+                .format(altFt, tempF, rhPct, windStr),
+            "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
+        )
+    }
     val showMoa = reticle == null || reticle.unit == Ballistics.ReticleUnit.MOA
     val showMil = reticle == null || reticle.unit == Ballistics.ReticleUnit.MIL
     val cols = buildList {
-        add("Rng (yd)"); add("Drop (in)")
+        add(if (metricMode) "Rng (m)" else "Rng (yd)")
+        add(if (metricMode) "Drop (cm)" else "Drop (in)")
         if (showMoa) add("MOA")
         if (showMil) add("MIL")
         if (showDrift) {
             if (showMoa) add("W.MOA")
             if (showMil) add("W.MIL")
         }
-        add("Vel (fps)")
-        if (showEnergy) add("E (ft·lb)")
+        add(if (metricMode) "Vel (m/s)" else "Vel (fps)")
+        if (showEnergy) add(if (metricMode) "E (J)" else "E (ft·lb)")
     }
 
     val reticleH = if (reticle != null) 640 else 0
@@ -1794,16 +1885,16 @@ private fun buildDopeChartBitmap(
     result.trajectoryTable.forEachIndexed { idx, row ->
         if (idx % 2 == 1) cv.drawRect(0f, y - bsz * 0.9f, w.toFloat(), y + bsz * 0.3f, pStripe)
         val cells = buildList {
-            add("${row.rangeYards}")
-            add("%.1f".format(row.dropInches))
+            add(if (metricMode) "%.0f".format(row.rangeYards * 0.9144)  else "${row.rangeYards}")
+            add(if (metricMode) "%.1f".format(row.dropInches  * 2.54)   else "%.1f".format(row.dropInches))
             if (showMoa) add("%.1f".format(row.holdoverMoa))
             if (showMil) add("%.2f".format(row.holdoverMil))
             if (showDrift) {
                 if (showMoa) add("%.1f".format(row.driftMoa))
                 if (showMil) add("%.2f".format(row.driftMil))
             }
-            add("%.0f".format(row.velocityFps))
-            if (showEnergy) add("%.0f".format(row.energyFtLb))
+            add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f".format(row.velocityFps))
+            if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f".format(row.energyFtLb))
         }
         cells.forEachIndexed { i, cell -> cv.drawText(cell, pad + i * colW, y, pBody) }
         y += rwH

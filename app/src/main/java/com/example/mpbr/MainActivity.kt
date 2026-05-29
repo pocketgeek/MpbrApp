@@ -307,7 +307,7 @@ fun MpbrScreen() {
                 )
             }
             FilterChip(
-                selected = metricMode,
+                selected = false,
                 onClick  = { metricMode = !metricMode },
                 label    = { Text(if (metricMode) "Metric" else "Not Metric") }
             )

@@ -13,7 +13,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import android.media.AudioFormat
+import android.media.AudioManager
+import android.media.AudioTrack
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Arrangement
@@ -63,9 +67,12 @@ import androidx.core.graphics.withClip
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -257,7 +264,7 @@ fun MpbrScreen() {
         }
 
         // ---- Ammunition preset ----
-        SectionLabel("Ammunition")
+        SectionLabel("Ammunition", onSecret = { playGunshot() })
         AmmoPresetDropdown(
             selected = selectedPreset,
             presets  = Ballistics.PRESETS,
@@ -574,8 +581,18 @@ private fun TrajRow(
 }
 
 @Composable
-private fun SectionLabel(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun SectionLabel(text: String, onSecret: (() -> Unit)? = null) {
+    var tapCount     by remember { mutableStateOf(0) }
+    var firstTapTime by remember { mutableStateOf(0L) }
+    val mod = if (onSecret != null) Modifier.clickable {
+        val now = System.currentTimeMillis()
+        if (tapCount == 0 || now - firstTapTime > 2000L) {
+            tapCount = 1; firstTapTime = now
+        } else if (++tapCount >= 5) {
+            tapCount = 0; onSecret()
+        }
+    } else Modifier
+    Column(modifier = mod, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(text, style = MaterialTheme.typography.titleMedium)
         HorizontalDivider()
     }
@@ -1915,6 +1932,39 @@ private fun deleteSession(context: android.content.Context, name: String) {
     sessions.forEach { arr.put(it.toJson()) }
     context.getSharedPreferences("mpbr_sessions", android.content.Context.MODE_PRIVATE)
         .edit().putString("sessions", arr.toString()).apply()
+}
+
+private fun playGunshot() {
+    Thread {
+        val sampleRate = 44100
+        val numSamples = sampleRate / 2          // 500 ms
+        val buf = ShortArray(numSamples)
+        val rng = java.util.Random()
+        for (i in buf.indices) {
+            val t     = i.toDouble() / sampleRate
+            // sharp crack: white noise with fast decay
+            val crack = rng.nextGaussian() * exp(-t * 40.0)
+            // low-frequency boom underneath
+            val boom  = sin(2 * PI * 65.0 * t) * exp(-t * 10.0) * 0.55
+            val s     = ((crack + boom) * Short.MAX_VALUE * 0.85)
+                .toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            buf[i] = s.toShort()
+        }
+        val minBuf = AudioTrack.getMinBufferSize(
+            sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT
+        )
+        @Suppress("DEPRECATION")
+        val track = AudioTrack(
+            AudioManager.STREAM_MUSIC, sampleRate,
+            AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
+            maxOf(minBuf, buf.size * 2), AudioTrack.MODE_STATIC
+        )
+        track.write(buf, 0, buf.size)
+        track.play()
+        Thread.sleep(600)
+        track.stop()
+        track.release()
+    }.start()
 }
 
 private fun buildSessionName(presetName: String?, date: Date): String {

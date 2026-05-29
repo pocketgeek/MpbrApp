@@ -50,6 +50,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -67,6 +69,7 @@ import androidx.core.graphics.withClip
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.content.edit
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.exp
@@ -133,7 +136,7 @@ fun MpbrScreen() {
     var metricMode by remember { mutableStateOf(false) }
 
     // Display an imperial string in metric units (no-op when metricMode is false)
-    fun toMetric(s: String, convert: (Double) -> Double, fmt: String = "%.1f"): String =
+    fun toMetric(s: String, fmt: String = "%.1f", convert: (Double) -> Double): String =
         if (metricMode) s.toDoubleOrNull()?.let { fmt.format(convert(it)) } ?: s else s
 
     // Convert metric user input back to imperial for storage (no-op when metricMode is false)
@@ -321,59 +324,59 @@ fun MpbrScreen() {
         SectionLabel("Bullet & Sight")
         NumberField(
             if (metricMode) "Muzzle Velocity (m/s)" else "Muzzle Velocity (fps)",
-            toMetric(muzzleVel, { it * 0.3048 }),
+            toMetric(muzzleVel) { it * 0.3048 },
             Modifier.fillMaxWidth()
-        ) { v -> userEdit({ muzzleVel = it }, fromMetric(v, { it / 0.3048 })) }
+        ) { v -> userEdit({ muzzleVel = it }, fromMetric(v) { it / 0.3048 }) }
         NumberField("Ballistic Coefficient", bc, Modifier.fillMaxWidth()) { v -> userEdit({ bc = it }, v) }
         NumberField("Bullet Weight (gr)",    bulletWeight, Modifier.fillMaxWidth()) { v -> userEdit({ bulletWeight = it }, v) }
         NumberField(
             if (metricMode) "Sight Height (mm)" else "Sight Height (in)",
-            toMetric(sightHeight, { it * 25.4 }),
+            toMetric(sightHeight) { it * 25.4 },
             Modifier.fillMaxWidth()
-        ) { v -> userEdit({ sightHeight = it }, fromMetric(v, { it / 25.4 })) }
+        ) { v -> userEdit({ sightHeight = it }, fromMetric(v) { it / 25.4 }) }
         NumberField(
             if (metricMode) "Vital Zone Diameter (cm)" else "Vital Zone Diameter (in)",
-            toMetric(vitalZone, { it * 2.54 }),
+            toMetric(vitalZone) { it * 2.54 },
             Modifier.fillMaxWidth()
-        ) { v -> userEdit({ vitalZone = it }, fromMetric(v, { it / 2.54 })) }
+        ) { v -> userEdit({ vitalZone = it }, fromMetric(v) { it / 2.54 }) }
 
         // ---- Atmosphere ----
         SectionLabel("Atmosphere")
         NumberField(
             if (metricMode) "Altitude (m)" else "Altitude (ft)",
-            toMetric(altitude, { it * 0.3048 }, "%.0f"),
+            toMetric(altitude, "%.0f") { it * 0.3048 },
             Modifier.fillMaxWidth()
-        ) { altitude = fromMetric(it, { it / 0.3048 }) }
+        ) { v -> altitude = fromMetric(v) { it / 0.3048 } }
         NumberField(
             if (metricMode) "Temperature (°C)" else "Temperature (°F)",
-            toMetric(temperature, { (it - 32.0) * 5.0 / 9.0 }),
+            toMetric(temperature) { (it - 32.0) * 5.0 / 9.0 },
             Modifier.fillMaxWidth()
-        ) { temperature = fromMetric(it, { it * 9.0 / 5.0 + 32.0 }) }
+        ) { v -> temperature = fromMetric(v) { it * 9.0 / 5.0 + 32.0 } }
         NumberField("Humidity (%)", humidity, Modifier.fillMaxWidth()) { humidity = it }
         NumberField(
             if (metricMode) "Wind Speed (km/h, full value crosswind)" else "Wind Speed (mph, full value crosswind)",
-            toMetric(windSpeed, { it * 1.60934 }),
+            toMetric(windSpeed) { it * 1.60934 },
             Modifier.fillMaxWidth()
-        ) { windSpeed = fromMetric(it, { it / 1.60934 }) }
+        ) { v -> windSpeed = fromMetric(v) { it / 1.60934 } }
 
         // ---- Trajectory table range ----
         SectionLabel("Trajectory Table")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NumberField(
                 if (metricMode) "Start (m)" else "Start (yd)",
-                toMetric(tableStart, { it * 0.9144 }, "%.0f"),
+                toMetric(tableStart, "%.0f") { it * 0.9144 },
                 Modifier.weight(1f)
-            ) { tableStart = fromMetricInt(it, { it / 0.9144 }) }
+            ) { v -> tableStart = fromMetricInt(v) { it / 0.9144 } }
             NumberField(
                 if (metricMode) "Step (m)" else "Step (yd)",
-                toMetric(tableStep, { it * 0.9144 }, "%.0f"),
+                toMetric(tableStep, "%.0f") { it * 0.9144 },
                 Modifier.weight(1f)
-            ) { tableStep = fromMetricInt(it, { it / 0.9144 }) }
+            ) { v -> tableStep = fromMetricInt(v) { it / 0.9144 } }
             NumberField(
                 if (metricMode) "End (m)" else "End (yd)",
-                toMetric(tableEnd, { it * 0.9144 }, "%.0f"),
+                toMetric(tableEnd, "%.0f") { it * 0.9144 },
                 Modifier.weight(1f)
-            ) { tableEnd = fromMetricInt(it, { it / 0.9144 }) }
+            ) { v -> tableEnd = fromMetricInt(v) { it / 0.9144 } }
         }
 
         Button(
@@ -512,9 +515,9 @@ fun MpbrScreen() {
                         dopeTitle,
                         metricMode
                     )
-                    val helper = PrintHelper(context as android.app.Activity)
-                    helper.scaleMode = PrintHelper.SCALE_MODE_FIT
-                    helper.printBitmap("MPBR DOPE Chart — $label", bmp)
+                    PrintHelper(context as android.app.Activity).apply {
+                        scaleMode = PrintHelper.SCALE_MODE_FIT
+                    }.printBitmap("MPBR DOPE Chart — $label", bmp)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Print DOPE Chart") }
@@ -660,8 +663,8 @@ private fun TrajRow(
 
 @Composable
 private fun SectionLabel(text: String, onSecret: (() -> Unit)? = null) {
-    var tapCount     by remember { mutableStateOf(0) }
-    var firstTapTime by remember { mutableStateOf(0L) }
+    var tapCount     by remember { mutableIntStateOf(0) }
+    var firstTapTime by remember { mutableLongStateOf(0L) }
     val mod = if (onSecret != null) Modifier.clickable {
         val now = System.currentTimeMillis()
         if (tapCount == 0 || now - firstTapTime > 2000L) {
@@ -2003,8 +2006,17 @@ private fun org.json.JSONObject.toSessionData() = SessionData(
     reticleName  = optString("reticleName").ifEmpty { null }
 )
 
+private const val PREFS_NAME = "mpbr_sessions"
+
+private fun persistSessions(context: android.content.Context, sessions: List<SessionData>) {
+    val arr = org.json.JSONArray()
+    sessions.forEach { arr.put(it.toJson()) }
+    context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
+        .edit { putString("sessions", arr.toString()) }
+}
+
 private fun loadSessions(context: android.content.Context): List<SessionData> {
-    val prefs = context.getSharedPreferences("mpbr_sessions", android.content.Context.MODE_PRIVATE)
+    val prefs = context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
     val json  = prefs.getString("sessions", "[]") ?: "[]"
     val arr   = org.json.JSONArray(json)
     return (0 until arr.length()).map { arr.getJSONObject(it).toSessionData() }
@@ -2014,21 +2026,17 @@ private fun saveSession(context: android.content.Context, session: SessionData) 
     val sessions = loadSessions(context).toMutableList()
     val idx = sessions.indexOfFirst { it.name == session.name }
     if (idx >= 0) sessions[idx] = session else sessions.add(session)
-    val arr = org.json.JSONArray()
-    sessions.forEach { arr.put(it.toJson()) }
-    context.getSharedPreferences("mpbr_sessions", android.content.Context.MODE_PRIVATE)
-        .edit().putString("sessions", arr.toString()).apply()
+    persistSessions(context, sessions)
 }
 
 private fun deleteSession(context: android.content.Context, name: String) {
-    val sessions = loadSessions(context).filter { it.name != name }
-    val arr = org.json.JSONArray()
-    sessions.forEach { arr.put(it.toJson()) }
-    context.getSharedPreferences("mpbr_sessions", android.content.Context.MODE_PRIVATE)
-        .edit().putString("sessions", arr.toString()).apply()
+    persistSessions(context, loadSessions(context).filter { it.name != name })
 }
 
+private val gunshotPlaying = java.util.concurrent.atomic.AtomicBoolean(false)
+
 private fun playGunshot() {
+    if (!gunshotPlaying.compareAndSet(false, true)) return
     Thread {
         val sampleRate = 44100
         val numSamples = sampleRate / 2          // 500 ms
@@ -2058,6 +2066,7 @@ private fun playGunshot() {
         Thread.sleep(600)
         track.stop()
         track.release()
+        gunshotPlaying.set(false)
     }.start()
 }
 

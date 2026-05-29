@@ -222,7 +222,7 @@ Tap the **Ammunition** section label five times quickly to play a synthesized gu
 
 ## Things to add next
 
-- Custom drag function (CDM) for users with manufacturer Doppler radar curves.
+- Frickin Laser Beams.
 
 ## Code quality
 

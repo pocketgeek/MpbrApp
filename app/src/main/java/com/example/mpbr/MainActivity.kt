@@ -277,14 +277,6 @@ fun MpbrScreen() {
             }
         }
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            FilterChip(
-                selected = metricMode,
-                onClick  = { metricMode = !metricMode },
-                label    = { Text("Metric") }
-            )
-        }
-
         // ---- Ammunition preset ----
         SectionLabel("Ammunition", onSecret = { playGunshot() })
         AmmoPresetDropdown(
@@ -297,16 +289,27 @@ fun MpbrScreen() {
 
         // ---- Drag model selector ----
         SectionLabel("Drag Model")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier              = Modifier.fillMaxWidth(),
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = dragModel == Ballistics.DragModel.G1,
+                    onClick  = { dragModel = Ballistics.DragModel.G1; selectedPreset = null },
+                    label    = { Text("G1") }
+                )
+                FilterChip(
+                    selected = dragModel == Ballistics.DragModel.G7,
+                    onClick  = { dragModel = Ballistics.DragModel.G7; selectedPreset = null },
+                    label    = { Text("G7") }
+                )
+            }
             FilterChip(
-                selected = dragModel == Ballistics.DragModel.G1,
-                onClick  = { dragModel = Ballistics.DragModel.G1; selectedPreset = null },
-                label    = { Text("G1") }
-            )
-            FilterChip(
-                selected = dragModel == Ballistics.DragModel.G7,
-                onClick  = { dragModel = Ballistics.DragModel.G7; selectedPreset = null },
-                label    = { Text("G7") }
+                selected = metricMode,
+                onClick  = { metricMode = !metricMode },
+                label    = { Text("Metric") }
             )
         }
 

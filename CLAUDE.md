@@ -47,6 +47,8 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 3. Calculate button → validates table start/end (0–2000 yd), calls `Ballistics.calculateMpbr()` with `tableMinYards`/`tableMaxYards`, stores result in `result` state
 4. Result renders as: summary Card → reticle illustration Card (if reticle selected, via `buildReticleBitmap()`) → `TrajectoryTableCard` → Save DOPE Chart button
 
+**Session save/load** — Save icon (floppy disk) and Load icon (folder) appear in the title row. Sessions persist all input state (ammo fields, reticle, atmosphere, table range, DOPE title) to `SharedPreferences` ("mpbr_sessions" key) as a JSON array. `SessionData` data class and `saveSession`/`loadSessions`/`deleteSession`/`buildSessionName` helpers live at the bottom of `MainActivity.kt`. Save dialog pre-fills name as `"<PresetName> — MM/dd"` (editable); saving a session with an existing name overwrites it. Load dialog lists all sessions — tap a name to restore all fields (result is cleared), tap ✕ to delete.
+
 ## Key conventions
 
 **Adding ammo presets** — append to `Ballistics.PRESETS`. G7 model is specified as the 7th constructor argument (`DragModel.G7`); G1 is the default. BC passed to the constructor must match the drag model (do not mix G1 BCs with G7 model or vice versa). Always set the appropriate `category =` for non-rifle rounds (`RIMFIRE`, `PISTOL`, `SHOTGUN`); `RIFLE` is the default and needs no explicit tag. Keep presets grouped by category in the list — the dropdown inserts section headers by detecting category changes in order. Shotgun slugs use `sightHeightIn = 0.5` (bead) for smoothbore loads and `1.5` (scoped rifled barrel) for sabots; `vitalZoneIn = 8.0` for deer, `4.0` for buckshot/defensive.

@@ -15,6 +15,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
@@ -32,15 +37,19 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
@@ -109,6 +118,11 @@ fun MpbrScreen() {
 
     var selectedReticle by remember { mutableStateOf<Ballistics.ReticlePreset?>(null) }
 
+    var showSaveDialog   by remember { mutableStateOf(false) }
+    var showLoadDialog   by remember { mutableStateOf(false) }
+    var saveDialogName   by remember { mutableStateOf("") }
+    var loadedSessions   by remember { mutableStateOf(listOf<SessionData>()) }
+
     // When the user types in a field, we want the dropdown label to flip to "Custom"
     // so it doesn't lie about what's loaded. These wrap the raw setters.
     fun userEdit(setter: (String) -> Unit, value: String) {
@@ -126,18 +140,121 @@ fun MpbrScreen() {
         dragModel    = p.dragModel
     }
 
+    fun currentSession(name: String) = SessionData(
+        name         = name,
+        muzzleVel    = muzzleVel,
+        bc           = bc,
+        bulletWeight = bulletWeight,
+        sightHeight  = sightHeight,
+        vitalZone    = vitalZone,
+        dragModel    = dragModel.name,
+        presetName   = selectedPreset?.name,
+        altitude     = altitude,
+        temperature  = temperature,
+        humidity     = humidity,
+        windSpeed    = windSpeed,
+        tableStart   = tableStart,
+        tableEnd     = tableEnd,
+        tableStep    = tableStep,
+        dopeTitle    = dopeTitle,
+        reticleName  = selectedReticle?.name
+    )
+
+    fun calculate() {
+        error = null
+        try {
+            val mv    = muzzleVel.toDouble()
+            val b     = bc.toDouble()
+            val bw    = bulletWeight.toDouble()
+            val sh    = sightHeight.toDouble()
+            val vz    = vitalZone.toDouble()
+            val tMin  = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
+            val tMax  = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
+            val tStep = (tableStep.toIntOrNull()  ?: 50).coerceIn(1, 500)
+            if (tMin >= tMax) {
+                error  = "Table start must be less than table end"
+                result = null
+                return
+            }
+            val atm = Ballistics.Atmosphere(
+                altitudeFt   = altitude.toDouble(),
+                temperatureF = temperature.toDouble(),
+                humidityPct  = humidity.toDouble()
+            )
+            result = Ballistics.calculateMpbr(
+                muzzleVelocity      = mv,
+                ballisticCoeff      = b,
+                sightHeightIn       = sh,
+                vitalZoneDiameterIn = vz,
+                bulletWeightGr      = bw,
+                dragModel           = dragModel,
+                atmosphere          = atm,
+                windSpeedMph        = windSpeed.toDoubleOrNull() ?: 0.0,
+                tableStepYards      = tStep,
+                tableMinYards       = tMin,
+                tableMaxYards       = tMax
+            )
+        } catch (_: NumberFormatException) {
+            error  = "All fields must be numbers"
+            result = null
+        } catch (e: IllegalArgumentException) {
+            error  = e.message
+            result = null
+        }
+    }
+
+    fun applySession(s: SessionData) {
+        muzzleVel       = s.muzzleVel
+        bc              = s.bc
+        bulletWeight    = s.bulletWeight
+        sightHeight     = s.sightHeight
+        vitalZone       = s.vitalZone
+        dragModel       = if (s.dragModel == "G7") Ballistics.DragModel.G7 else Ballistics.DragModel.G1
+        selectedPreset  = s.presetName?.let { n -> Ballistics.PRESETS.find { it.name == n } }
+        altitude        = s.altitude
+        temperature     = s.temperature
+        humidity        = s.humidity
+        windSpeed       = s.windSpeed
+        tableStart      = s.tableStart
+        tableEnd        = s.tableEnd
+        tableStep       = s.tableStep
+        dopeTitle       = s.dopeTitle
+        selectedReticle = s.reticleName?.let { n -> Ballistics.RETICLE_PRESETS.find { it.name == n } }
+        calculate()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
             .padding(16.dp)
             .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            "Maximum Point Blank Range",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Row(
+            modifier              = Modifier.fillMaxWidth(),
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                "Maximum Point Blank Range",
+                style    = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = {
+                saveDialogName = buildSessionName(selectedPreset?.name, Date())
+                showSaveDialog = true
+            }) {
+                Icon(Icons.Default.Save, contentDescription = "Save session")
+            }
+            IconButton(onClick = {
+                loadedSessions = loadSessions(context)
+                showLoadDialog = true
+            }) {
+                Icon(Icons.Default.FolderOpen, contentDescription = "Load session")
+            }
+        }
 
         // ---- Ammunition preset ----
         SectionLabel("Ammunition")
@@ -192,48 +309,7 @@ fun MpbrScreen() {
         }
 
         Button(
-            onClick = {
-                error = null
-                try {
-                    val mv   = muzzleVel.toDouble()
-                    val b    = bc.toDouble()
-                    val bw   = bulletWeight.toDouble()
-                    val sh   = sightHeight.toDouble()
-                    val vz   = vitalZone.toDouble()
-                    val tMin  = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
-                    val tMax  = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
-                    val tStep = (tableStep.toIntOrNull()  ?: 50).coerceIn(1, 500)
-                    if (tMin >= tMax) {
-                        error  = "Table start must be less than table end"
-                        result = null
-                        return@Button
-                    }
-                    val atm = Ballistics.Atmosphere(
-                        altitudeFt   = altitude.toDouble(),
-                        temperatureF = temperature.toDouble(),
-                        humidityPct  = humidity.toDouble()
-                    )
-                    result = Ballistics.calculateMpbr(
-                        muzzleVelocity      = mv,
-                        ballisticCoeff      = b,
-                        sightHeightIn       = sh,
-                        vitalZoneDiameterIn = vz,
-                        bulletWeightGr      = bw,
-                        dragModel           = dragModel,
-                        atmosphere          = atm,
-                        windSpeedMph        = windSpeed.toDoubleOrNull() ?: 0.0,
-                        tableStepYards      = tStep,
-                        tableMinYards       = tMin,
-                        tableMaxYards       = tMax
-                    )
-                } catch (_: NumberFormatException) {
-                    error  = "All fields must be numbers"
-                    result = null
-                } catch (e: IllegalArgumentException) {
-                    error  = e.message
-                    result = null
-                }
-            },
+            onClick  = { calculate() },
             modifier = Modifier.fillMaxWidth()
         ) { Text("Calculate") }
 
@@ -360,6 +436,71 @@ fun MpbrScreen() {
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Print DOPE Chart") }
         }
+    }
+
+    // ---- Save session dialog ----
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title   = { Text("Save Session") },
+            text    = {
+                OutlinedTextField(
+                    value         = saveDialogName,
+                    onValueChange = { saveDialogName = it },
+                    label         = { Text("Session name") },
+                    singleLine    = true,
+                    modifier      = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick  = {
+                        if (saveDialogName.isNotBlank()) {
+                            saveSession(context, currentSession(saveDialogName.trim()))
+                            showSaveDialog = false
+                        }
+                    },
+                    enabled = saveDialogName.isNotBlank()
+                ) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSaveDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    // ---- Load session dialog ----
+    if (showLoadDialog) {
+        AlertDialog(
+            onDismissRequest = { showLoadDialog = false },
+            title   = { Text("Load Session") },
+            text    = {
+                if (loadedSessions.isEmpty()) {
+                    Text("No saved sessions yet.")
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        for (s in loadedSessions) {
+                            Row(
+                                modifier          = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextButton(
+                                    onClick  = { applySession(s); showLoadDialog = false },
+                                    modifier = Modifier.weight(1f)
+                                ) { Text(s.name) }
+                                TextButton(onClick = {
+                                    deleteSession(context, s.name)
+                                    loadedSessions = loadSessions(context)
+                                }) { Text("✕") }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLoadDialog = false }) { Text("Close") }
+            }
+        )
     }
 }
 
@@ -1688,3 +1829,95 @@ private fun saveDopeChart(
 private fun formatNum(d: Double): String =
     if (d == d.toLong().toDouble()) d.toLong().toString()
     else "%g".format(d).trimEnd('0').trimEnd('.')
+
+// ---- Session persistence ----
+
+data class SessionData(
+    val name: String,
+    val muzzleVel: String,
+    val bc: String,
+    val bulletWeight: String,
+    val sightHeight: String,
+    val vitalZone: String,
+    val dragModel: String,
+    val presetName: String?,
+    val altitude: String,
+    val temperature: String,
+    val humidity: String,
+    val windSpeed: String,
+    val tableStart: String,
+    val tableEnd: String,
+    val tableStep: String,
+    val dopeTitle: String,
+    val reticleName: String?
+)
+
+private fun SessionData.toJson(): org.json.JSONObject = org.json.JSONObject().apply {
+    put("name",        name)
+    put("muzzleVel",   muzzleVel)
+    put("bc",          bc)
+    put("bulletWeight",bulletWeight)
+    put("sightHeight", sightHeight)
+    put("vitalZone",   vitalZone)
+    put("dragModel",   dragModel)
+    putOpt("presetName",  presetName)
+    put("altitude",    altitude)
+    put("temperature", temperature)
+    put("humidity",    humidity)
+    put("windSpeed",   windSpeed)
+    put("tableStart",  tableStart)
+    put("tableEnd",    tableEnd)
+    put("tableStep",   tableStep)
+    put("dopeTitle",   dopeTitle)
+    putOpt("reticleName", reticleName)
+}
+
+private fun org.json.JSONObject.toSessionData() = SessionData(
+    name         = getString("name"),
+    muzzleVel    = getString("muzzleVel"),
+    bc           = getString("bc"),
+    bulletWeight = getString("bulletWeight"),
+    sightHeight  = getString("sightHeight"),
+    vitalZone    = getString("vitalZone"),
+    dragModel    = getString("dragModel"),
+    presetName   = optString("presetName").ifEmpty { null },
+    altitude     = getString("altitude"),
+    temperature  = getString("temperature"),
+    humidity     = getString("humidity"),
+    windSpeed    = getString("windSpeed"),
+    tableStart   = getString("tableStart"),
+    tableEnd     = getString("tableEnd"),
+    tableStep    = getString("tableStep"),
+    dopeTitle    = getString("dopeTitle"),
+    reticleName  = optString("reticleName").ifEmpty { null }
+)
+
+private fun loadSessions(context: android.content.Context): List<SessionData> {
+    val prefs = context.getSharedPreferences("mpbr_sessions", android.content.Context.MODE_PRIVATE)
+    val json  = prefs.getString("sessions", "[]") ?: "[]"
+    val arr   = org.json.JSONArray(json)
+    return (0 until arr.length()).map { arr.getJSONObject(it).toSessionData() }
+}
+
+private fun saveSession(context: android.content.Context, session: SessionData) {
+    val sessions = loadSessions(context).toMutableList()
+    val idx = sessions.indexOfFirst { it.name == session.name }
+    if (idx >= 0) sessions[idx] = session else sessions.add(session)
+    val arr = org.json.JSONArray()
+    sessions.forEach { arr.put(it.toJson()) }
+    context.getSharedPreferences("mpbr_sessions", android.content.Context.MODE_PRIVATE)
+        .edit().putString("sessions", arr.toString()).apply()
+}
+
+private fun deleteSession(context: android.content.Context, name: String) {
+    val sessions = loadSessions(context).filter { it.name != name }
+    val arr = org.json.JSONArray()
+    sessions.forEach { arr.put(it.toJson()) }
+    context.getSharedPreferences("mpbr_sessions", android.content.Context.MODE_PRIVATE)
+        .edit().putString("sessions", arr.toString()).apply()
+}
+
+private fun buildSessionName(presetName: String?, date: Date): String {
+    val datePart = SimpleDateFormat("MM/dd", Locale.US).format(date)
+    return "${presetName ?: "Custom"} — $datePart"
+}

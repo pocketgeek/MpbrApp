@@ -146,6 +146,14 @@ table and DOPE chart use these values. Start must be less than end.
 **DOPE Card Title** — editable heading printed at the top of the saved JPEG
 (default "MPBR DOPE CARD"). Leave blank to keep the default.
 
+**Sessions** — tap the 💾 (Save) icon in the title bar to save the current
+setup (all inputs: ammo, reticle, atmosphere, table range, DOPE title) under
+a name. The name pre-fills as `"<Preset> — MM/dd"` and can be edited. Saving
+with an existing name overwrites it. Tap the 📂 (Load) icon to open the
+sessions list — tap a name to restore all inputs and auto-calculate, tap ✕
+to delete a session. Sessions persist across app restarts (stored in
+SharedPreferences).
+
 ## Algorithm
 
 1. Bisect bore angle until trajectory peak above LOS equals exactly
@@ -199,7 +207,6 @@ to the system print dialog (AirPrint, PDF, etc.). Both render:
 
 ## Things to add next
 
-- Save/recall custom loads — Room or DataStore.
 - Metric units toggle.
 - Custom drag function (CDM) for users with manufacturer Doppler radar curves.
 

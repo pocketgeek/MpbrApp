@@ -205,6 +205,10 @@ to the system print dialog (AirPrint, PDF, etc.). Both render:
   selected)
 - Date of generation
 
+## Easter eggs
+
+Tap the **Ammunition** section label five times quickly to play a synthesized gunshot sound.
+
 ## Things to add next
 
 - Metric units toggle.

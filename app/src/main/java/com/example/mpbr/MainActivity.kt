@@ -92,6 +92,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// State assignments inside AlertDialog named-lambda slots (onDismissRequest, confirmButton, etc.)
+// trigger Compose recomposition on write — AS can't see the "read" through the snapshot system.
+@Suppress("UNUSED_VALUE")
 @Composable
 fun MpbrScreen() {
     val defaultPreset = Ballistics.PRESETS.first { it.name.startsWith("M80") }

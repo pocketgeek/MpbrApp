@@ -92,9 +92,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// State assignments inside AlertDialog named-lambda slots (onDismissRequest, confirmButton, etc.)
-// trigger Compose recomposition on write — AS can't see the "read" through the snapshot system.
-@Suppress("UNUSED_VALUE")
 @Composable
 fun MpbrScreen() {
     val defaultPreset = Ballistics.PRESETS.first { it.name.startsWith("M80") }
@@ -131,8 +128,8 @@ fun MpbrScreen() {
 
     var selectedReticle by remember { mutableStateOf<Ballistics.ReticlePreset?>(null) }
 
-    var showSaveDialog   by remember { mutableStateOf(false) }
-    var showLoadDialog   by remember { mutableStateOf(false) }
+    val showSaveDialog   = remember { mutableStateOf(false) }
+    val showLoadDialog   = remember { mutableStateOf(false) }
     var saveDialogName   by remember { mutableStateOf("") }
     var loadedSessions   by remember { mutableStateOf(listOf<SessionData>()) }
 
@@ -271,13 +268,13 @@ fun MpbrScreen() {
             )
             IconButton(onClick = {
                 saveDialogName = buildSessionName(selectedPreset?.name, Date())
-                showSaveDialog = true
+                showSaveDialog.value = true
             }) {
                 Icon(Icons.Default.Save, contentDescription = "Save session")
             }
             IconButton(onClick = {
                 loadedSessions = loadSessions(context)
-                showLoadDialog = true
+                showLoadDialog.value = true
             }) {
                 Icon(Icons.Default.FolderOpen, contentDescription = "Load session")
             }
@@ -528,9 +525,9 @@ fun MpbrScreen() {
     }
 
     // ---- Save session dialog ----
-    if (showSaveDialog) {
+    if (showSaveDialog.value) {
         AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
+            onDismissRequest = { showSaveDialog.value = false },
             title   = { Text("Save Session") },
             text    = {
                 OutlinedTextField(
@@ -546,22 +543,22 @@ fun MpbrScreen() {
                     onClick  = {
                         if (saveDialogName.isNotBlank()) {
                             saveSession(context, currentSession(saveDialogName.trim()))
-                            showSaveDialog = false
+                            showSaveDialog.value = false
                         }
                     },
                     enabled = saveDialogName.isNotBlank()
                 ) { Text("Save") }
             },
             dismissButton = {
-                TextButton(onClick = { showSaveDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showSaveDialog.value = false }) { Text("Cancel") }
             }
         )
     }
 
     // ---- Load session dialog ----
-    if (showLoadDialog) {
+    if (showLoadDialog.value) {
         AlertDialog(
-            onDismissRequest = { showLoadDialog = false },
+            onDismissRequest = { showLoadDialog.value = false },
             title   = { Text("Load Session") },
             text    = {
                 if (loadedSessions.isEmpty()) {
@@ -574,7 +571,7 @@ fun MpbrScreen() {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 TextButton(
-                                    onClick  = { applySession(s); showLoadDialog = false },
+                                    onClick  = { applySession(s); showLoadDialog.value = false },
                                     modifier = Modifier.weight(1f)
                                 ) { Text(s.name) }
                                 TextButton(onClick = {
@@ -587,7 +584,7 @@ fun MpbrScreen() {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLoadDialog = false }) { Text("Close") }
+                TextButton(onClick = { showLoadDialog.value = false }) { Text("Close") }
             }
         )
     }

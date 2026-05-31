@@ -23,12 +23,10 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Added 40 new factory ammo presets (v1.68)
+Added 4 rimfire presets; library now at 217 loads (v1.69)
 
-New calibers: 6mm Creedmoor, 6.5 Grendel, 6.8 Western, 7mm PRC, \
-25-06 Rem, 30-30 Win, 300 WSM, 338 Win Mag, 375 H&H, 50 Beowulf, \
-32 ACP, 327 Federal Magnum, 454 Casull, 500 S&W Magnum. \
-Library now includes 213 factory loads.\
+New: 17 HMR 17gr TNT HP, 22 LR 36gr HP, 22 LR 38gr HP, \
+22 WMR 45gr JHP Super-X.\
 """
 
 def main():

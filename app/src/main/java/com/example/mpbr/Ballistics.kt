@@ -474,6 +474,7 @@ object Ballistics {
         // ── Rimfire ───────────────────────────────────────────────────────────────
         // .17 HMR
         AmmoPreset("17 HMR 17gr A17",             2650.0, 0.128,  17.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("17 HMR 17gr TNT HP",          2550.0, 0.126,  17.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("17 HMR 17gr V-MAX",           2550.0, 0.128,  17.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("17 HMR 20gr XTP",             2375.0, 0.125,  20.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         // .17 WSM
@@ -481,6 +482,8 @@ object Ballistics {
         AmmoPreset("17 WSM 25gr",                 2600.0, 0.230,  25.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         // .22 LR
         AmmoPreset("22 LR 32gr Stinger",           1640.0, 0.103,  32.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 36gr HP",                1280.0, 0.112,  36.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 38gr HP",                1260.0, 0.118,  38.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 LR 40gr Mini-Mag",          1235.0, 0.124,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 LR 40gr Std Velocity",      1070.0, 0.120,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 LR 40gr Velocitor",         1435.0, 0.125,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
@@ -489,6 +492,7 @@ object Ballistics {
         AmmoPreset("22 WMR 30gr VNT",              2200.0, 0.116,  30.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 WMR 40gr JHP Maxi-Mag",    1875.0, 0.114,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 WMR 40gr JHP Super-X",     1910.0, 0.116,  40.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 WMR 45gr JHP Super-X",     1550.0, 0.140,  45.0, 1.5, 2.0, category = AmmoCategory.RIMFIRE),
         // ── Pistol ────────────────────────────────────────────────────────────────
         // 5.7×28mm
         AmmoPreset("5.7×28mm 27gr SS195LF",     1965.0, 0.095,  27.0, 0.7, 4.0, category = AmmoCategory.PISTOL),

@@ -833,8 +833,9 @@ private fun drawReticleSection(
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 3f
         })
-    // CIRCLE_BDC: draw the full circle outside clip
-    if (reticle.style == Ballistics.ReticleStyle.CIRCLE_BDC) {
+    // CIRCLE_BDC / RING_BDC: draw the full ring outside clip
+    if (reticle.style == Ballistics.ReticleStyle.CIRCLE_BDC ||
+        reticle.style == Ballistics.ReticleStyle.RING_BDC) {
         val circleR = reticle.majorSpacing.toFloat() * ppu
         cv.drawCircle(cx, cy, circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f
@@ -1703,6 +1704,54 @@ private fun drawReticleSection(
                     lineTo(cx + lowerHalf, lowerEnd)
                     close()
                 }, pFill)
+            }
+
+            Ballistics.ReticleStyle.RING_BDC -> {
+                // Ring drawn outside clip; inside: full crosshair, center circle,
+                // lead tick marks on H arm, fine BDC ticks, tapered thick post below postStart
+                val cRingR = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pMed   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+                val pPost  = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+
+                // Full thin crosshair
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy + r.toFloat(), pThin)
+                cv.drawLine(cx - r.toFloat(), cy, cx + r.toFloat(), cy, pThin)
+
+                // Small center circle (open)
+                cv.drawCircle(cx, cy, cRingR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s.toFloat()
+                })
+
+                // Lead/moving-target tick marks on H arm
+                val leadHW = ppu * 0.65f
+                for (wm in reticle.windageMarks) {
+                    val wx = wm.toFloat() * ppu
+                    cv.drawLine(cx + wx, cy - leadHW, cx + wx, cy + leadHW, pMed)
+                    cv.drawLine(cx - wx, cy - leadHW, cx - wx, cy + leadHW, pMed)
+                }
+
+                // Fine BDC ticks (0.8 MOA half-width each side)
+                val fineHW = 0.8f * ppu
+                for (h in reticle.holdoverMarks) {
+                    val hy = cy + h.toFloat() * ppu
+                    cv.drawLine(cx - fineHW, hy, cx + fineHW, hy, pMed)
+                }
+
+                // Tapered thick post: 4.5 MOA half-width at postStart, 8.9 MOA at scope edge
+                if (reticle.postStart > 0.0) {
+                    val postY  = cy + reticle.postStart.toFloat() * ppu
+                    val topHW  = 4.5f * ppu
+                    val botHW  = 8.9f * ppu
+                    val edgeY  = cy + r.toFloat()
+                    cv.drawPath(android.graphics.Path().apply {
+                        moveTo(cx - topHW, postY)
+                        lineTo(cx + topHW, postY)
+                        lineTo(cx + botHW, edgeY)
+                        lineTo(cx - botHW, edgeY)
+                        close()
+                    }, pPost)
+                }
             }
 
             else -> {

@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -183,6 +183,22 @@ object Ballistics {
             "Holosun 507K (32 MOA ring only)",
             ReticleUnit.MOA, 16.0, 0.0, 20.0,
             ReticleStyle.CIRCLE_DOT
+        ),
+        // ── Leupold ──────────────────────────────────────────────────────────────
+        // Leupold VX-Freedom 1.5-4x20 SFP — MOA-Ring reticle.
+        // Large 40 MOA diameter ring for fast close-range target acquisition.
+        // Thin crosshair with 3.4 MOA center circle; fine BDC ticks at 5 MOA spacing
+        // from 5–35 MOA; tapered heavy post begins at 40 MOA (4.5 MOA wide → 8.9 MOA wide).
+        // Lead/windage markers at ±6.5 MOA and ±13.0 MOA on H arm.
+        // SFP: all subtensions valid at 4× (max) magnification only.
+        // Source: Leupold MOA-Ring reticle diagram (leupold.com, 2021).
+        ReticlePreset(
+            "Leupold VX-Freedom MOA-Ring 1.5-4x20 (MOA, SFP)",
+            ReticleUnit.MOA, 20.0, 1.7, 55.0,
+            ReticleStyle.RING_BDC,
+            holdoverMarks = listOf(5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0),
+            windageMarks  = listOf(6.5, 13.0),
+            postStart     = 40.0
         ),
         // ── SIG Sauer ────────────────────────────────────────────────────────────
         // SIG Sauer Tango SPR 1-4×24 SFP — BDC1 reticle. SFP, valid at 4× only.

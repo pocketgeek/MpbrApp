@@ -357,7 +357,16 @@ object Ballistics {
         AmmoPreset("6mm ARC 105gr FMJ Frontier",  2700.0, 0.530, 105.0, 1.5, 6.0),
         AmmoPreset("6mm ARC 106gr TAP ELD-M",       2610.0, 0.580, 106.0, 1.5, 6.0),
         AmmoPreset("6mm ARC 108gr ELD-M",         2750.0, 0.270, 108.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("6mm CM 103gr ELD-X",          3050.0, 0.258, 103.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("6mm CM 108gr ELD-M",          2960.0, 0.270, 108.0, 1.5, 6.0, DragModel.G7),
+        // .257/25 cal
+        AmmoPreset("25-06 Rem 87gr V-MAX",        3440.0, 0.400,  87.0, 1.5, 6.0),
+        AmmoPreset("25-06 Rem 100gr BT",          3210.0, 0.418, 100.0, 1.5, 6.0),
+        AmmoPreset("25-06 Rem 117gr SST",         2990.0, 0.370, 117.0, 1.5, 6.0),
         // .260/6.5mm
+        AmmoPreset("6.5 Grendel 90gr TNT HP",     2880.0, 0.270,  90.0, 1.5, 6.0),
+        AmmoPreset("6.5 Grendel 123gr ELD-M",     2580.0, 0.263, 123.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("6.5 Grendel 130gr Hybrid",    2500.0, 0.284, 130.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("260 Rem 120gr AccuTip",       2890.0, 0.480, 120.0, 1.5, 6.0),
         AmmoPreset("260 Rem 130gr ELD-M",         2875.0, 0.554, 130.0, 1.5, 6.0),
         AmmoPreset("260 Rem 140gr Core-Lokt",     2750.0, 0.435, 140.0, 1.5, 6.0),
@@ -375,6 +384,9 @@ object Ballistics {
         AmmoPreset("270 WSM 130gr BT",            3300.0, 0.433, 130.0, 1.5, 6.0),
         AmmoPreset("270 WSM 140gr AccuBond",      3100.0, 0.496, 140.0, 1.5, 6.0),
         AmmoPreset("270 WSM 150gr Silvertip",     3120.0, 0.496, 150.0, 1.5, 6.0),
+        AmmoPreset("6.8 Western 165gr AccuBond LR", 2970.0, 0.344, 165.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("6.8 Western 170gr BST",       2920.0, 0.327, 170.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("6.8 Western 175gr SGK",       2835.0, 0.361, 175.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("6.8 SPC 100gr GMX",           2700.0, 0.138, 100.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("6.8 SPC 110gr V-MAX",         2600.0, 0.186, 110.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("6.8 SPC 115gr SMK OTM",       2625.0, 0.162, 115.0, 1.5, 6.0, DragModel.G7),
@@ -383,6 +395,9 @@ object Ballistics {
         AmmoPreset("7mm Rem Mag 139gr",           3150.0, 0.235, 139.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("7mm Rem Mag 150gr BT",        3100.0, 0.250, 150.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("7mm Rem Mag 162gr ELD-X",     3084.0, 0.295, 162.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("7mm PRC 160gr CX",            2925.0, 0.315, 160.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("7mm PRC 175gr ELD-X",         2860.0, 0.343, 175.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("7mm PRC 180gr ELD-M",         2800.0, 0.352, 180.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("7mm-08 139gr SST",            2950.0, 0.486, 139.0, 1.5, 6.0),
         AmmoPreset("7mm-08 140gr BT",             2825.0, 0.319, 140.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("7mm-08 140gr Fusion",         2850.0, 0.390, 140.0, 1.5, 6.0),
@@ -393,6 +408,9 @@ object Ballistics {
         AmmoPreset("30 Carbine 110gr FMJ",        1990.0, 0.166, 110.0, 1.5, 6.0),
         AmmoPreset("30 Carbine 110gr FTX",        2000.0, 0.166, 110.0, 1.5, 6.0),
         AmmoPreset("30 Carbine 125gr HC",         1950.0, 0.126, 125.0, 1.5, 6.0),
+        AmmoPreset("30-30 Win 150gr FP",          2390.0, 0.186, 150.0, 1.5, 6.0),
+        AmmoPreset("30-30 Win 160gr FTX",         2400.0, 0.330, 160.0, 1.5, 6.0),
+        AmmoPreset("30-30 Win 170gr FP",          2200.0, 0.227, 170.0, 1.5, 6.0),
         AmmoPreset("30-06 150gr SP",              2910.0, 0.310, 150.0, 1.5, 6.0),
         AmmoPreset("30-06 165gr BT",              2800.0, 0.225, 165.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("30-06 180gr SP",              2700.0, 0.205, 180.0, 1.5, 6.0, DragModel.G7),
@@ -414,6 +432,9 @@ object Ballistics {
         AmmoPreset("300 Win Mag 168gr SMK",       3000.0, 0.235, 168.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("300 Win Mag 180gr AccuBond",  2950.0, 0.250, 180.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("300 Win Mag 200gr Partition", 2930.0, 0.245, 200.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("300 WSM 150gr BT",            3300.0, 0.435, 150.0, 1.5, 6.0),
+        AmmoPreset("300 WSM 180gr AccuBond",      2970.0, 0.250, 180.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("300 WSM 180gr Power Point",   2970.0, 0.474, 180.0, 1.5, 6.0),
         AmmoPreset("M80 (7.62×51 NATO)",          2750.0, 0.398, 147.0, 1.5, 6.0),
         AmmoPreset("308 Win 150gr FMJ",           2820.0, 0.409, 150.0, 1.5, 6.0),
         AmmoPreset("308 Win 165gr BT",            2700.0, 0.450, 165.0, 1.5, 6.0),
@@ -421,9 +442,16 @@ object Ballistics {
         AmmoPreset("308 Win 175gr SMK",           2600.0, 0.250, 175.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("308 Win 180gr SP",            2600.0, 0.383, 180.0, 1.5, 6.0),
         // .338
+        AmmoPreset("338 Win Mag 200gr AccuBond",  2960.0, 0.225, 200.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("338 Win Mag 225gr AccuBond",  2785.0, 0.249, 225.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("338 Win Mag 250gr Partition", 2650.0, 0.473, 250.0, 1.5, 6.0),
         AmmoPreset("338 Lapua 250gr SMK",         2950.0, 0.340, 250.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("338 Lapua 285gr ELD-M",       2900.0, 0.405, 285.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("338 Lapua 300gr SMK",         2650.0, 0.390, 300.0, 1.5, 6.0, DragModel.G7),
+        // .375
+        AmmoPreset("375 H&H 250gr BT",            2900.0, 0.385, 250.0, 1.5, 6.0),
+        AmmoPreset("375 H&H 270gr SP",            2690.0, 0.366, 270.0, 1.5, 6.0),
+        AmmoPreset("375 H&H 300gr FMJ",           2530.0, 0.338, 300.0, 1.5, 6.0),
         // .35 cal
         AmmoPreset("350 Legend 150gr",            2325.0, 0.223, 150.0, 1.5, 6.0),
         AmmoPreset("350 Legend 180gr",            2100.0, 0.200, 180.0, 1.5, 6.0),
@@ -434,6 +462,10 @@ object Ballistics {
         AmmoPreset("458 SOCOM 300gr BT",          1900.0, 0.250, 300.0, 1.5, 6.0),
         AmmoPreset("458 SOCOM 325gr FTX",         1800.0, 0.240, 325.0, 1.5, 6.0),
         AmmoPreset("458 SOCOM 350gr FMJ",         1650.0, 0.200, 350.0, 1.5, 6.0),
+        // .50 Beowulf
+        AmmoPreset("50 Beowulf 300gr GD JHP",     1870.0, 0.185, 300.0, 1.5, 6.0),
+        AmmoPreset("50 Beowulf 325gr JHP",        1800.0, 0.178, 325.0, 1.5, 6.0),
+        AmmoPreset("50 Beowulf 400gr JFP",        1800.0, 0.193, 400.0, 1.5, 6.0),
         // .50 BMG
         AmmoPreset("50 BMG A-MAX 750gr",          2820.0, 1.050, 750.0, 2.0, 6.0),
         AmmoPreset("50 BMG API 649gr",            2800.0, 0.650, 649.0, 2.0, 6.0),
@@ -461,6 +493,12 @@ object Ballistics {
         // 5.7×28mm
         AmmoPreset("5.7×28mm 27gr SS195LF",     1965.0, 0.095,  27.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("5.7×28mm 40gr V-MAX",       1600.0, 0.200,  40.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        // .32 cal
+        AmmoPreset("32 ACP 60gr JHP",              1000.0, 0.100,  60.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("32 ACP 71gr FMJ",               905.0, 0.112,  71.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("327 Fed Mag 85gr FTX",          1400.0, 0.195,  85.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("327 Fed Mag 100gr JHP",         1400.0, 0.150, 100.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("327 Fed Mag 115gr SP",          1200.0, 0.165, 115.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // .380 ACP
         AmmoPreset("380 ACP 90gr FTX",           990.0, 0.099,  90.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("380 ACP 90gr Gold Dot",     1040.0, 0.101,  90.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
@@ -515,6 +553,13 @@ object Ballistics {
         AmmoPreset("45 Colt 200gr JHP",         1100.0, 0.130, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 Colt 250gr JHP",          780.0, 0.146, 250.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 Colt 255gr LRN",         1000.0, 0.155, 255.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        // .454/.500
+        AmmoPreset("454 Casull 240gr XTP",         1900.0, 0.150, 240.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("454 Casull 300gr XTP",         1650.0, 0.195, 300.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("454 Casull 335gr WFN",         1600.0, 0.170, 335.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("500 S&W 300gr FTX",            2075.0, 0.200, 300.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("500 S&W 350gr XTP",            1912.0, 0.230, 350.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("500 S&W 500gr XTP",            1425.0, 0.280, 500.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         // ── Shotgun ───────────────────────────────────────────────────────────────
         // 12ga slugs — smoothbore (sight height 0.5" bead; vital zone 8" for deer)
         AmmoPreset("12ga Foster 1oz 2¾\"",           1560.0, 0.068, 437.5, 0.5, 8.0, category = AmmoCategory.SHOTGUN),

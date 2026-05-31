@@ -12,8 +12,8 @@ android {
         applicationId = "us.pgnet.mpbr"
         minSdk = 24
         targetSdk = 35
-        versionCode = 67
-        versionName = "1.67"
+        versionCode = 68
+        versionName = "1.68"
     }
 
     buildTypes {

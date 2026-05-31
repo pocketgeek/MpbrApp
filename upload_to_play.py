@@ -23,11 +23,12 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-New ammo preset: Hornady 6mm ARC 106gr TAP ELD-M
+Added 40 new factory ammo presets (v1.68)
 
-Added factory ballistic data for the Hornady 6mm ARC 106gr TAP \
-(Heat Shield tipped match grade, #81605). MV 2610 fps from a 24\" \
-barrel, G1 BC 0.580. Source: Hornady TAP spec sheet.\
+New calibers: 6mm Creedmoor, 6.5 Grendel, 6.8 Western, 7mm PRC, \
+25-06 Rem, 30-30 Win, 300 WSM, 338 Win Mag, 375 H&H, 50 Beowulf, \
+32 ACP, 327 Federal Magnum, 454 Casull, 500 S&W Magnum. \
+Library now includes 213 factory loads.\
 """
 
 def main():

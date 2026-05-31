@@ -522,7 +522,9 @@ object Ballistics {
         // .38 Spl / .357
         AmmoPreset("38 Spl 110gr JHP",           990.0, 0.125, 110.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("38 Spl 125gr JHP",           950.0, 0.150, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("38 Spl 125gr JHP +P",       975.0, 0.150, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("38 Spl 158gr LRN",           770.0, 0.165, 158.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("38 Spl 158gr LSWCHP +P",     890.0, 0.165, 158.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("357 Mag 125gr Gold Dot",   1450.0, 0.141, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("357 Mag 125gr XTP",        1500.0, 0.151, 125.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("357 Mag 158gr JSP",        1235.0, 0.163, 158.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
@@ -553,6 +555,8 @@ object Ballistics {
         AmmoPreset("45 ACP 185gr JHP",       1000.0, 0.130, 185.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 ACP 200gr JHP",       1080.0, 0.140, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 ACP 230gr FMJ",        855.0, 0.162, 230.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 ACP 230gr Gold Dot",   890.0, 0.162, 230.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
+        AmmoPreset("45 ACP 230gr HST",        890.0, 0.162, 230.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 ACP 230gr JHP +P",     950.0, 0.162, 230.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 Colt 200gr JHP",         1100.0, 0.130, 200.0, 0.7, 4.0, category = AmmoCategory.PISTOL),
         AmmoPreset("45 Colt 250gr JHP",          780.0, 0.146, 250.0, 0.7, 4.0, category = AmmoCategory.PISTOL),

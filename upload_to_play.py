@@ -9,6 +9,8 @@ Update RELEASE_NOTES below before each release.
 import sys
 from pathlib import Path
 
+import httplib2
+import google_auth_httplib2
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -21,14 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-New reticle: Leupold VX-Freedom MOA-Ring 1.5-4×20
+New ammo preset: Hornady 6mm ARC 106gr TAP ELD-M
 
-Added the Leupold MOA-Ring scope reticle preset. Features the distinctive \
-40 MOA ring for fast close-range target acquisition, full crosshair with \
-3.4 MOA center circle, lead/windage markers at ±6.5 and ±13 MOA for moving \
-targets, BDC tick marks at 5 MOA spacing, and a tapered thick post below. \
-Subtensions sourced from the official Leupold reticle diagram; valid at 4× \
-(max magnification).\
+Added factory ballistic data for the Hornady 6mm ARC 106gr TAP \
+(Heat Shield tipped match grade, #81605). MV 2610 fps from a 24\" \
+barrel, G1 BC 0.580. Source: Hornady TAP spec sheet.\
 """
 
 def main():
@@ -46,7 +45,8 @@ def main():
     print()
 
     creds   = service_account.Credentials.from_service_account_file(str(KEY_FILE), scopes=SCOPES)
-    service = build("androidpublisher", "v3", credentials=creds)
+    auth_http = google_auth_httplib2.AuthorizedHttp(creds, http=httplib2.Http(timeout=300))
+    service = build("androidpublisher", "v3", http=auth_http)
     edits   = service.edits()
 
     # 1 — open an edit

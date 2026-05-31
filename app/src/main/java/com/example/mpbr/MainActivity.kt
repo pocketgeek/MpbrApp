@@ -130,7 +130,10 @@ fun MpbrScreen() {
 
     val showSaveDialog   = remember { mutableStateOf(false) }
     val showLoadDialog   = remember { mutableStateOf(false) }
+    val showRenameDialog = remember { mutableStateOf(false) }
     var saveDialogName   by remember { mutableStateOf("") }
+    var renameTarget     by remember { mutableStateOf("") }
+    var renameText       by remember { mutableStateOf("") }
     var loadedSessions   by remember { mutableStateOf(listOf<SessionData>()) }
 
     var metricMode by remember { mutableStateOf(false) }
@@ -574,6 +577,17 @@ fun MpbrScreen() {
                                     onClick  = { applySession(s); showLoadDialog.value = false },
                                     modifier = Modifier.weight(1f)
                                 ) { Text(s.name) }
+                                IconButton(onClick = {
+                                    renameTarget = s.name
+                                    renameText   = s.name
+                                    showRenameDialog.value = true
+                                }) {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = "Rename",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
                                 TextButton(onClick = {
                                     deleteSession(context, s.name)
                                     loadedSessions = loadSessions(context)
@@ -585,6 +599,35 @@ fun MpbrScreen() {
             },
             confirmButton = {
                 TextButton(onClick = { showLoadDialog.value = false }) { Text("Close") }
+            }
+        )
+    }
+
+    if (showRenameDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showRenameDialog.value = false },
+            title   = { Text("Rename Session") },
+            text    = {
+                OutlinedTextField(
+                    value         = renameText,
+                    onValueChange = { renameText = it },
+                    label         = { Text("Name") },
+                    singleLine    = true,
+                    modifier      = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = renameText.isNotBlank() && renameText.trim() != renameTarget,
+                    onClick = {
+                        renameSession(context, renameTarget, renameText.trim())
+                        loadedSessions = loadSessions(context)
+                        showRenameDialog.value = false
+                    }
+                ) { Text("Rename") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRenameDialog.value = false }) { Text("Cancel") }
             }
         )
     }
@@ -2080,6 +2123,13 @@ private fun saveSession(context: android.content.Context, session: SessionData) 
 
 private fun deleteSession(context: android.content.Context, name: String) {
     persistSessions(context, loadSessions(context).filter { it.name != name })
+}
+
+private fun renameSession(context: android.content.Context, oldName: String, newName: String) {
+    val sessions = loadSessions(context).toMutableList()
+    val idx = sessions.indexOfFirst { it.name == oldName }
+    if (idx >= 0) sessions[idx] = sessions[idx].copy(name = newName)
+    persistSessions(context, sessions)
 }
 
 private val gunshotPlaying = java.util.concurrent.atomic.AtomicBoolean(false)

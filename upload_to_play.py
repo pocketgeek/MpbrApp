@@ -23,10 +23,10 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Added 4 pistol presets; library now at 223 loads (v1.71)
+Sessions can now be renamed (v1.72)
 
-New: 38 Spl 125gr JHP +P, 38 Spl 158gr LSWCHP +P (FBI load), \
-45 ACP 230gr Gold Dot, 45 ACP 230gr HST.\
+Tap the pencil icon next to any saved session in the Load dialog \
+to rename it.\
 """
 
 def main():

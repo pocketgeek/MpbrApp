@@ -355,6 +355,7 @@ object Ballistics {
         AmmoPreset("6mm ARC 103gr ELD-X",         2800.0, 0.258, 103.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("6mm ARC 105gr BTHP",          2750.0, 0.253, 105.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("6mm ARC 105gr FMJ Frontier",  2700.0, 0.530, 105.0, 1.5, 6.0),
+        AmmoPreset("6mm ARC 106gr TAP ELD-M",       2610.0, 0.580, 106.0, 1.5, 6.0),
         AmmoPreset("6mm ARC 108gr ELD-M",         2750.0, 0.270, 108.0, 1.5, 6.0, DragModel.G7),
         // .260/6.5mm
         AmmoPreset("260 Rem 120gr AccuTip",       2890.0, 0.480, 120.0, 1.5, 6.0),

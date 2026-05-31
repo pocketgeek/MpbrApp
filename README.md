@@ -5,7 +5,7 @@ shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections and full-value crosswind drift.
 
-Includes 169 factory ammo presets organized into color-coded categories
+Includes 173 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
 steps, default 50–500 yd, max 2,000 yd). DOPE charts can be saved as a JPEG
 to your gallery, optionally with a scope reticle illustration showing
@@ -85,7 +85,7 @@ App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 
 ## Inputs
 
-**Ammo preset** — 169 factory loads grouped into Rifle (green), Rimfire
+**Ammo preset** — 173 factory loads grouped into Rifle (green), Rimfire
 (blue), Pistol (amber), and Shotgun (purple) categories. Selecting a preset
 populates all bullet and sight fields. Editing any field manually switches the
 selector to "Custom".

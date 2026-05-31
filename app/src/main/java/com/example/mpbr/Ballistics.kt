@@ -401,6 +401,11 @@ object Ballistics {
         AmmoPreset("300 BLK 147gr FMJ",           1920.0, 0.398, 147.0, 1.5, 6.0),
         AmmoPreset("300 BLK 200gr (subsonic)",    1050.0, 0.540, 200.0, 1.5, 6.0),
         AmmoPreset("300 BLK 220gr (subsonic)",    1045.0, 0.608, 220.0, 1.5, 6.0),
+        // .338/8.6mm BLK
+        AmmoPreset("8.6 BLK 135gr CX",             2650.0, 0.193, 135.0, 1.5, 6.0, DragModel.G7),
+        AmmoPreset("8.6 BLK 210gr Barnes TSX",      2000.0, 0.430, 210.0, 1.5, 6.0),
+        AmmoPreset("8.6 BLK 250gr Sub-X (subsonic)",1050.0, 0.540, 250.0, 1.5, 6.0),
+        AmmoPreset("8.6 BLK 300gr SMK (subsonic)",  1050.0, 0.750, 300.0, 1.5, 6.0),
         AmmoPreset("300 PRC 212gr ELD-X",         2860.0, 0.334, 212.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("300 PRC 225gr ELD-M",         2810.0, 0.391, 225.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("300 PRC 245gr Elite Hunter",  2720.0, 0.413, 245.0, 1.5, 6.0, DragModel.G7),

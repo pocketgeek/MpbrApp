@@ -12,3 +12,6 @@ local.properties
 /app/build
 /app/release
 .claude/
+# Google Play service account keys — never commit these
+plexcloud-*.json
+*-service-account.json

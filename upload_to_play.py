@@ -23,10 +23,9 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Added 4 rimfire presets; library now at 217 loads (v1.69)
+Added 2 shotgun presets; library now at 219 loads (v1.70)
 
-New: 17 HMR 17gr TNT HP, 22 LR 36gr HP, 22 LR 38gr HP, \
-22 WMR 45gr JHP Super-X.\
+New: 20ga Sabot 250gr SST, 12ga #1 Buck.\
 """
 
 def main():

@@ -576,12 +576,14 @@ object Ballistics {
         AmmoPreset("12ga Sabot 385gr Partition Gold", 1900.0, 0.190, 385.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
         // 20ga slugs
         AmmoPreset("20ga Foster 7/8oz 2¾\"",          1600.0, 0.055, 383.0, 0.5, 8.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("20ga Sabot 250gr SST",            1800.0, 0.140, 250.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
         AmmoPreset("20ga Sabot 260gr AccuTip",        1900.0, 0.140, 260.0, 1.5, 8.0, category = AmmoCategory.SHOTGUN),
         // .410 slug
         AmmoPreset("410 Slug 1/5oz",                  1830.0, 0.040,  87.5, 0.5, 4.0, category = AmmoCategory.SHOTGUN),
         // Buckshot — single-pellet ballistics; vital zone 4" (defensive)
         AmmoPreset("12ga 000 Buck (per pellet)",      1325.0, 0.083,  68.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN),
         AmmoPreset("12ga 00 Buck (per pellet)",       1325.0, 0.078,  54.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN),
+        AmmoPreset("12ga #1 Buck (per pellet)",       1325.0, 0.072,  40.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN),
         AmmoPreset("12ga #4 Buck (per pellet)",       1325.0, 0.058,  21.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN)
     )
 

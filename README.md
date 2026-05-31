@@ -5,7 +5,7 @@ shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections and full-value crosswind drift.
 
-Includes 217 factory ammo presets organized into color-coded categories
+Includes 219 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
 steps, default 50–500 yd, max 2,000 yd). DOPE charts can be saved as a JPEG
 to your gallery, optionally with a scope reticle illustration showing

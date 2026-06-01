@@ -736,15 +736,12 @@ object Ballistics {
         val farZeroYards: Double,
         val maxOrdinateInches: Double,
         val maxOrdinateRangeYards: Double,
-        val minPbrYards: Double,
         val mpbrYards: Double,
         val boreAngleMoa: Double,
         val velocityAtNearZeroFps: Double,
         val energyAtNearZeroFtLb: Double,
         val velocityAtFarZeroFps: Double,
         val energyAtFarZeroFtLb: Double,
-        val velocityAtMinPbrFps: Double,
-        val energyAtMinPbrFtLb: Double,
         val energyAtMpbrFtLb: Double,
         val trajectoryTable: List<TrajectoryRow>
     )
@@ -876,28 +873,18 @@ object Ballistics {
         var farZero       = 0.0
         var peakHt        = Double.NEGATIVE_INFINITY
         var peakRng       = 0.0
-        var minPbr        = 0.0
         var mpbr          = 0.0
         var velAtNearZero = 0.0
         var velAtFarZero  = 0.0
-        var velAtMinPbr   = 0.0
         var velAtMpbr     = 0.0
         var foundNear     = false
         var foundFar      = false
-        var foundMinPbr   = sightHeightIn <= rIn  // already inside vital zone at muzzle
 
         for (i in 1 until traj.size) {
             val a = traj[i - 1]
             val b = traj[i]
             if (b.heightInches > peakHt) { peakHt = b.heightInches; peakRng = b.rangeYards }
 
-            if (!foundMinPbr && a.heightInches <= -rIn && b.heightInches > -rIn) {
-                minPbr = lerp(a.rangeYards, b.rangeYards, a.heightInches, b.heightInches, -rIn)
-                val span = b.rangeYards - a.rangeYards
-                val f    = if (span > 0) (minPbr - a.rangeYards) / span else 0.0
-                velAtMinPbr = a.velocityFps + f * (b.velocityFps - a.velocityFps)
-                foundMinPbr = true
-            }
             if (!foundNear && a.heightInches <= 0.0 && b.heightInches > 0.0) {
                 nearZero = lerp(a.rangeYards, b.rangeYards, a.heightInches, b.heightInches, 0.0)
                 val span = b.rangeYards - a.rangeYards
@@ -928,15 +915,12 @@ object Ballistics {
             farZeroYards          = farZero,
             maxOrdinateInches     = peakHt,
             maxOrdinateRangeYards = peakRng,
-            minPbrYards           = minPbr,
             mpbrYards             = mpbr,
             boreAngleMoa          = angle * (180.0 / PI) * 60.0,
             velocityAtNearZeroFps = velAtNearZero,
             energyAtNearZeroFtLb  = energyFtLb(bulletWeightGr, velAtNearZero),
             velocityAtFarZeroFps  = velAtFarZero,
             energyAtFarZeroFtLb   = energyFtLb(bulletWeightGr, velAtFarZero),
-            velocityAtMinPbrFps   = velAtMinPbr,
-            energyAtMinPbrFtLb    = energyFtLb(bulletWeightGr, velAtMinPbr),
             energyAtMpbrFtLb      = energyFtLb(bulletWeightGr, velAtMpbr),
             trajectoryTable       = table
         )

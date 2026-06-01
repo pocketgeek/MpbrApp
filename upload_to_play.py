@@ -23,11 +23,7 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Results now show Minimum Point Blank Range (v1.73)
-
-The results card now shows the minimum PBR (closest range where the \
-bullet is within the vital zone when aiming dead-on) and energy at \
-that range, alongside the existing Maximum PBR.\
+Remove Minimum Point Blank Range from results (v1.74)\
 """
 
 def main():

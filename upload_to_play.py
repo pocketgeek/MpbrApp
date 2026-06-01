@@ -23,7 +23,7 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Remove Minimum Point Blank Range from results (v1.74)\
+Results now show Muzzle Energy (v1.75)\
 """
 
 def main():

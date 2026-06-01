@@ -23,11 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Added 7 rimfire/pistol presets; library now at 255 loads (v1.78)
+Added 8 shotgun presets; library now at 263 loads (v1.79)
 
-New: 22 LR 40gr Quiet, 380 ACP 85gr Critical Def, 9mm 115gr +P, \
-9mm 124gr Critical Def, 40 S&W 155gr JHP, 44 Mag 240gr JSP, \
-45 ACP 185gr FMJ.\
+New: 12ga TruBall, 16ga Foster 1oz, 20ga Sabot 275gr Trophy Bonded, \
+410 Slug 1/4oz 3\", 410 000 Buck, 410 00 Buck, \
+20ga 00 Buck, 20ga #3 Buck.\
 """
 
 def main():

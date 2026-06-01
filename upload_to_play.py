@@ -23,7 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-All ammo presets now default to 2.6\" sight height over bore (v1.76)\
+Added 25 rifle presets; library now at 248 loads (v1.77)
+
+New calibers: 204 Ruger, 6mm Rem, 257 Roberts, 6.5×55 Swedish, \
+7×57 Mauser, 7.62×54R, 303 British. Added loads to 270 Win, \
+30-06, and 300 Win Mag.\
 """
 
 def main():

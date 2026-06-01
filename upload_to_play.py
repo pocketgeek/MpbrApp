@@ -23,8 +23,7 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-v1.75: Sight height default 2.6\", field renamed to \
-"Sight Height over Bore", muzzle energy added to results.\
+All ammo presets now default to 2.6\" sight height over bore (v1.76)\
 """
 
 def main():

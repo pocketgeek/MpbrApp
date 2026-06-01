@@ -335,7 +335,7 @@ fun MpbrScreen() {
         NumberField("Ballistic Coefficient", bc, Modifier.fillMaxWidth()) { v -> userEdit({ bc = it }, v) }
         NumberField("Bullet Weight (gr)",    bulletWeight, Modifier.fillMaxWidth()) { v -> userEdit({ bulletWeight = it }, v) }
         NumberField(
-            if (metricMode) "Sight Height (mm)" else "Sight Height (in)",
+            if (metricMode) "Sight Height over Bore (mm)" else "Sight Height over Bore (in)",
             toMetric(sightHeight) { it * 25.4 },
             Modifier.fillMaxWidth()
         ) { v -> userEdit({ sightHeight = it }, fromMetric(v) { it / 25.4 }) }

@@ -23,7 +23,8 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Results now show Muzzle Energy (v1.75)\
+v1.75: Sight height default 2.6\", field renamed to \
+"Sight Height over Bore", muzzle energy added to results.\
 """
 
 def main():

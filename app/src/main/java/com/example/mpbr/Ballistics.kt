@@ -435,7 +435,7 @@ object Ballistics {
         AmmoPreset("300 WSM 150gr BT",            3300.0, 0.435, 150.0, 1.5, 6.0),
         AmmoPreset("300 WSM 180gr AccuBond",      2970.0, 0.250, 180.0, 1.5, 6.0, DragModel.G7),
         AmmoPreset("300 WSM 180gr Power Point",   2970.0, 0.474, 180.0, 1.5, 6.0),
-        AmmoPreset("M80 (7.62×51 NATO)",          2750.0, 0.398, 147.0, 1.5, 6.0),
+        AmmoPreset("M80 (7.62×51 NATO)",          2750.0, 0.398, 147.0, 2.6, 6.0),
         AmmoPreset("308 Win 150gr FMJ",           2820.0, 0.409, 150.0, 1.5, 6.0),
         AmmoPreset("308 Win 165gr BT",            2700.0, 0.450, 165.0, 1.5, 6.0),
         AmmoPreset("308 Win 168gr SMK",           2650.0, 0.224, 168.0, 1.5, 6.0, DragModel.G7),

@@ -23,11 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Added 25 rifle presets; library now at 248 loads (v1.77)
+Added 7 rimfire/pistol presets; library now at 255 loads (v1.78)
 
-New calibers: 204 Ruger, 6mm Rem, 257 Roberts, 6.5×55 Swedish, \
-7×57 Mauser, 7.62×54R, 303 British. Added loads to 270 Win, \
-30-06, and 300 Win Mag.\
+New: 22 LR 40gr Quiet, 380 ACP 85gr Critical Def, 9mm 115gr +P, \
+9mm 124gr Critical Def, 40 S&W 155gr JHP, 44 Mag 240gr JSP, \
+45 ACP 185gr FMJ.\
 """
 
 def main():

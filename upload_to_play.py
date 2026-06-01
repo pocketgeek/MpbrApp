@@ -23,10 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Sessions can now be renamed (v1.72)
+Results now show Minimum Point Blank Range (v1.73)
 
-Tap the pencil icon next to any saved session in the Load dialog \
-to rename it.\
+The results card now shows the minimum PBR (closest range where the \
+bullet is within the vital zone when aiming dead-on) and energy at \
+that range, alongside the existing Maximum PBR.\
 """
 
 def main():

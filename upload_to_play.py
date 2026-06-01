@@ -23,14 +23,12 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Added 15 presets across pistol, rimfire, and shotgun (v1.79)
+Fix hang on Calculate for pistol, shotgun, and other low-BC loads (v1.81)
 
-Pistol: 380 ACP 85gr Critical Def, 9mm 115gr +P, 9mm 124gr Critical \
-Def, 40 S&W 155gr JHP, 44 Mag 240gr JSP, 45 ACP 185gr FMJ.
-Rimfire: 22 LR 40gr Quiet (710 fps).
-Shotgun: 12ga TruBall 1oz, 16ga Foster 1oz, 20ga Sabot 275gr Trophy \
-Bonded, 410 Slug 1/4oz 3\", 410 000/00 Buck, 20ga 00/#3 Buck.
-Library now at 263 factory loads.\
+Low-BC rounds (buckshot, pistol) reach terminal velocity above the 100 fps \
+simulation cutoff, causing horizontal velocity to decay to zero while the \
+loop waited for maxRange — resulting in a freeze. Fixed by breaking when \
+downrange velocity drops below 1 fps.\
 """
 
 def main():

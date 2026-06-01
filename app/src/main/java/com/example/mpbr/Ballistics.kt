@@ -344,6 +344,9 @@ object Ballistics {
         AmmoPreset("223 Rem 55gr FMJ",            3215.0, 0.202,  55.0, 2.6, 6.0),
         AmmoPreset("223 Rem 62gr FMJ BT",         3100.0, 0.265,  62.0, 2.6, 6.0),
         AmmoPreset("223 Rem 77gr SMK",            2700.0, 0.185,  77.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("223 Rem 55gr HP",             3240.0, 0.235,  55.0, 2.6, 6.0),
+        AmmoPreset("223 Rem 69gr SMK",            2950.0, 0.191,  69.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("223 Rem 75gr BTHP",           2790.0, 0.220,  75.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("224 Valkyrie 60gr V-MAX",     3200.0, 0.265,  60.0, 2.6, 6.0),
         AmmoPreset("224 Valkyrie 75gr ELD-M",     3000.0, 0.240,  75.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("224 Valkyrie 90gr SMK",       2700.0, 0.285,  90.0, 2.6, 6.0, DragModel.G7),
@@ -408,10 +411,20 @@ object Ballistics {
         AmmoPreset("6.8 SPC 110gr V-MAX",         2600.0, 0.186, 110.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("6.8 SPC 115gr SMK OTM",       2625.0, 0.162, 115.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("6.8 SPC 120gr SST",           2600.0, 0.202, 120.0, 2.6, 6.0, DragModel.G7),
+        // .280/7mm-class
+        // 280 Rem
+        AmmoPreset("280 Rem 140gr BT",            3000.0, 0.269, 140.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("280 Rem 160gr AccuBond",      2840.0, 0.255, 160.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("280 Rem 175gr PP",            2645.0, 0.391, 175.0, 2.6, 6.0),
+        // 280 Ackley Improved
+        AmmoPreset("280 AI 140gr BT",             3150.0, 0.269, 140.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("280 AI 162gr ELD-X",          2970.0, 0.336, 162.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("280 AI 175gr PP",             2850.0, 0.456, 175.0, 2.6, 6.0),
         // .284/7mm
         AmmoPreset("7mm Rem Mag 139gr",           3150.0, 0.235, 139.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("7mm Rem Mag 150gr BT",        3100.0, 0.250, 150.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("7mm Rem Mag 162gr ELD-X",     3084.0, 0.295, 162.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("7mm Rem Mag 175gr SP",        2860.0, 0.475, 175.0, 2.6, 6.0),
         AmmoPreset("7mm PRC 160gr CX",            2925.0, 0.315, 160.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("7mm PRC 175gr ELD-X",         2860.0, 0.343, 175.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("7mm PRC 180gr ELD-M",         2800.0, 0.352, 180.0, 2.6, 6.0, DragModel.G7),
@@ -436,6 +449,9 @@ object Ballistics {
         AmmoPreset("30-30 Win 150gr FP",          2390.0, 0.186, 150.0, 2.6, 6.0),
         AmmoPreset("30-30 Win 160gr FTX",         2400.0, 0.330, 160.0, 2.6, 6.0),
         AmmoPreset("30-30 Win 170gr FP",          2200.0, 0.227, 170.0, 2.6, 6.0),
+        // 300 Savage
+        AmmoPreset("300 Savage 150gr PP",         2630.0, 0.330, 150.0, 2.6, 6.0),
+        AmmoPreset("300 Savage 180gr SP",         2350.0, 0.383, 180.0, 2.6, 6.0),
         AmmoPreset("30-06 150gr SP",              2910.0, 0.310, 150.0, 2.6, 6.0),
         AmmoPreset("30-06 165gr BT",              2800.0, 0.225, 165.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("30-06 165gr SST",             2800.0, 0.420, 165.0, 2.6, 6.0),
@@ -469,6 +485,7 @@ object Ballistics {
         AmmoPreset("303 British 180gr SP",        2460.0, 0.396, 180.0, 2.6, 6.0),
         AmmoPreset("M80 (7.62×51 NATO)",          2750.0, 0.398, 147.0, 2.6, 6.0),
         AmmoPreset("308 Win 150gr FMJ",           2820.0, 0.409, 150.0, 2.6, 6.0),
+        AmmoPreset("308 Win 155gr Palma",         2940.0, 0.219, 155.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("308 Win 165gr BT",            2700.0, 0.450, 165.0, 2.6, 6.0),
         AmmoPreset("308 Win 168gr SMK",           2650.0, 0.224, 168.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("308 Win 175gr SMK",           2600.0, 0.250, 175.0, 2.6, 6.0, DragModel.G7),
@@ -485,9 +502,25 @@ object Ballistics {
         AmmoPreset("375 H&H 270gr SP",            2690.0, 0.366, 270.0, 2.6, 6.0),
         AmmoPreset("375 H&H 300gr FMJ",           2530.0, 0.338, 300.0, 2.6, 6.0),
         // .35 cal
+        // 35 Rem
+        AmmoPreset("35 Rem 150gr FP",             2300.0, 0.186, 150.0, 2.6, 6.0),
+        AmmoPreset("35 Rem 200gr SP",             2080.0, 0.200, 200.0, 2.6, 6.0),
+        // 35 Whelen
+        AmmoPreset("35 Whelen 200gr SP",          2910.0, 0.306, 200.0, 2.6, 6.0),
+        AmmoPreset("35 Whelen 225gr AccuBond",    2700.0, 0.430, 225.0, 2.6, 6.0),
+        AmmoPreset("35 Whelen 250gr Partition",   2400.0, 0.446, 250.0, 2.6, 6.0),
         AmmoPreset("350 Legend 150gr",            2325.0, 0.223, 150.0, 2.6, 6.0),
         AmmoPreset("350 Legend 180gr",            2100.0, 0.200, 180.0, 2.6, 6.0),
         // .45 cal rifle
+        // 444 Marlin
+        AmmoPreset("444 Marlin 240gr FP",         2350.0, 0.175, 240.0, 2.6, 6.0),
+        AmmoPreset("444 Marlin 265gr FP",         2325.0, 0.200, 265.0, 2.6, 6.0),
+        AmmoPreset("444 Marlin 300gr HP",         2050.0, 0.204, 300.0, 2.6, 6.0),
+        // 45-70 Govt
+        AmmoPreset("45-70 Govt 300gr JHP",        1880.0, 0.185, 300.0, 2.6, 6.0),
+        AmmoPreset("45-70 Govt 325gr FTX",        2050.0, 0.230, 325.0, 2.6, 6.0),
+        AmmoPreset("45-70 Govt 405gr FP",         1330.0, 0.200, 405.0, 2.6, 6.0),
+        AmmoPreset("45-70 Govt 500gr FP",         1200.0, 0.150, 500.0, 2.6, 6.0),
         AmmoPreset("450 Bushmaster 250gr FTX",    2200.0, 0.210, 250.0, 2.6, 6.0),
         AmmoPreset("450 Bushmaster 260gr",        2180.0, 0.144, 260.0, 2.6, 6.0),
         AmmoPreset("458 SOCOM 250gr XD",          2000.0, 0.190, 250.0, 2.6, 6.0),
@@ -756,6 +789,7 @@ object Ballistics {
             val rz   = vz - windFps
             val vRel = sqrt(rx * rx + ry * ry + rz * rz)
             if (vRel < 100.0) break
+            if (vx < 1.0) break     // horizontal velocity exhausted (low-BC rounds at terminal velocity)
             val mach = vRel / ss
             val cdv  = cd(dragModel, mach)
             val aMag = dragCoef * vRel * vRel * cdv

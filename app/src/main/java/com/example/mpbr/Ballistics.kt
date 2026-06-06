@@ -545,14 +545,30 @@ object Ballistics {
         // .17 WSM
         AmmoPreset("17 WSM 20gr",                 3000.0, 0.185,  20.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("17 WSM 25gr",                 2600.0, 0.230,  25.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
-        // .22 LR
+        // .22 LR — hypervelocity
+        AmmoPreset("22 LR 33gr Yellow Jacket",     1500.0, 0.095,  33.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 38gr Super Maximum",     1700.0, 0.107,  38.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 LR 32gr Stinger",           1640.0, 0.103,  32.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
-        AmmoPreset("22 LR 36gr HP",                1280.0, 0.112,  36.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
-        AmmoPreset("22 LR 38gr HP",                1260.0, 0.118,  38.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
-        AmmoPreset("22 LR 40gr Mini-Mag",          1235.0, 0.124,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
-        AmmoPreset("22 LR 40gr Std Velocity",      1070.0, 0.120,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
-        AmmoPreset("22 LR 40gr Quiet (subsonic)",  710.0, 0.120,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 LR 40gr Velocitor",         1435.0, 0.125,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        // .22 LR — high velocity
+        AmmoPreset("22 LR 36gr HP",                1280.0, 0.112,  36.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 36gr CCI Mini-Mag HP",   1260.0, 0.112,  36.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 38gr HP",                1260.0, 0.118,  38.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr CCI Mini-Mag HP",   1235.0, 0.124,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr CCI Mini-Mag RN",   1235.0, 0.126,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr CCI Gamepoint JSP", 1235.0, 0.122,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Winchester Super-X LRN", 1280.0, 0.126, 40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Winchester Power Point", 1280.0, 0.120, 40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Remington Golden Bullet", 1255.0, 0.118, 40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Federal Champion",  1240.0, 0.120,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        // .22 LR — standard/match
+        AmmoPreset("22 LR 40gr Std Velocity",      1070.0, 0.120,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Eley Tenex",        1085.0, 0.140,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Lapua Center-X",    1083.0, 0.135,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr SK Standard Plus",  1083.0, 0.130,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        // .22 LR — subsonic
+        AmmoPreset("22 LR 40gr CCI Subsonic Seg",  1050.0, 0.118,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
+        AmmoPreset("22 LR 40gr Quiet (subsonic)",   710.0, 0.120,  40.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
         AmmoPreset("22 LR 60gr SSS (subsonic)",     950.0, 0.200,  60.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),
         // .22 WMR
         AmmoPreset("22 WMR 30gr VNT",              2200.0, 0.116,  30.0, 2.6, 2.0, category = AmmoCategory.RIMFIRE),

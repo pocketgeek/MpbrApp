@@ -23,12 +23,13 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Fix hang on Calculate for pistol, shotgun, and other low-BC loads (v1.81)
+Expand 22 LR library to 21 loads (v1.82)
 
-Low-BC rounds (buckshot, pistol) reach terminal velocity above the 100 fps \
-simulation cutoff, causing horizontal velocity to decay to zero while the \
-loop waited for maxRange — resulting in a freeze. Fixed by breaking when \
-downrange velocity drops below 1 fps.\
+Added: Yellow Jacket 33gr, Aguila Super Maximum 38gr, CCI Mini-Mag \
+36gr/40gr HP & 40gr RN, CCI Gamepoint 40gr JSP, CCI Segmented Subsonic \
+40gr, Winchester Super-X LRN & Power Point 40gr, Remington Golden Bullet \
+40gr, Federal Champion 40gr, Eley Tenex 40gr, Lapua Center-X 40gr, \
+SK Standard Plus 40gr. Library now at 301 factory loads.\
 """
 
 def main():

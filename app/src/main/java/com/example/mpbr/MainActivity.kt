@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -37,6 +39,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -119,7 +122,18 @@ fun MpbrScreen() {
     var tableStep    by remember { mutableStateOf("50") }
     var dopeTitle    by remember { mutableStateOf("MPBR DOPE CARD") }
 
+    var targetDistEnabled by remember { mutableStateOf(false) }
+    var targetDistYards   by remember { mutableStateOf("100") }
+
     var result by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
+
+    val targetRow: Ballistics.TrajectoryRow? = remember(result, targetDistEnabled, targetDistYards, bulletWeight) {
+        if (!targetDistEnabled) return@remember null
+        val r    = result ?: return@remember null
+        val dist = targetDistYards.toIntOrNull() ?: return@remember null
+        if (dist <= 0 || dist > 2000) return@remember null
+        Ballistics.trajectoryAt(r.rawTrajectory, dist, bulletWeight.toDoubleOrNull() ?: 0.0)
+    }
     var error  by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
@@ -384,6 +398,30 @@ fun MpbrScreen() {
             ) { v -> tableEnd = fromMetricInt(v) { it / 0.9144 } }
         }
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Checkbox(
+                checked = targetDistEnabled,
+                onCheckedChange = { targetDistEnabled = it }
+            )
+            Text(
+                if (metricMode) "Target distance (m)" else "Target distance (yd)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(Modifier.weight(1f))
+            if (targetDistEnabled) {
+                OutlinedTextField(
+                    value         = targetDistYards,
+                    onValueChange = { targetDistYards = it },
+                    singleLine    = true,
+                    modifier      = Modifier.width(110.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+        }
+
         Button(
             onClick  = { calculate() },
             modifier = Modifier.fillMaxWidth()
@@ -450,12 +488,14 @@ fun MpbrScreen() {
 
             if (r.trajectoryTable.isNotEmpty()) {
                 TrajectoryTableCard(
-                    rows       = r.trajectoryTable,
-                    showEnergy = r.energyAtNearZeroFtLb > 0.0,
-                    showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
-                    showMoa    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
-                    showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL,
-                    metricMode = metricMode
+                    rows        = r.trajectoryTable,
+                    showEnergy  = r.energyAtNearZeroFtLb > 0.0,
+                    showDrift   = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
+                    showMoa     = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
+                    showMil     = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL,
+                    metricMode  = metricMode,
+                    targetRow   = targetRow,
+                    targetYards = targetDistYards.toIntOrNull() ?: 0
                 )
             }
 
@@ -646,7 +686,9 @@ private fun TrajectoryTableCard(
     showDrift: Boolean,
     showMoa: Boolean = true,
     showMil: Boolean = true,
-    metricMode: Boolean = false
+    metricMode: Boolean = false,
+    targetRow: Ballistics.TrajectoryRow? = null,
+    targetYards: Int = 0
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -670,20 +712,32 @@ private fun TrajectoryTableCard(
             TrajRow(cells = header, style = MaterialTheme.typography.labelMedium, bold = true)
             HorizontalDivider()
 
-            for (row in rows) {
-                val cells = buildList {
-                    add(if (metricMode) "%.0f m".format(row.rangeYards * 0.9144) else "${row.rangeYards} yd")
-                    add(if (metricMode) "%.1f cm".format(row.dropInches * 2.54)  else "%.1f in".format(row.dropInches))
-                    if (showMoa) add("%.1f".format(row.holdoverMoa))
-                    if (showMil) add("%.2f".format(row.holdoverMil))
-                    if (showDrift) {
-                        if (showMoa) add("%.1f".format(row.driftMoa))
-                        if (showMil) add("%.2f".format(row.driftMil))
-                    }
-                    add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f fps".format(row.velocityFps))
-                    if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f ft·lb".format(row.energyFtLb))
+            fun rowCells(row: Ballistics.TrajectoryRow, rangeLabel: String) = buildList {
+                add(rangeLabel)
+                add(if (metricMode) "%.1f cm".format(row.dropInches * 2.54) else "%.1f in".format(row.dropInches))
+                if (showMoa) add("%.1f".format(row.holdoverMoa))
+                if (showMil) add("%.2f".format(row.holdoverMil))
+                if (showDrift) {
+                    if (showMoa) add("%.1f".format(row.driftMoa))
+                    if (showMil) add("%.2f".format(row.driftMil))
                 }
-                TrajRow(cells = cells, style = MaterialTheme.typography.bodyMedium)
+                add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f fps".format(row.velocityFps))
+                if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f ft·lb".format(row.energyFtLb))
+            }
+
+            var targetInserted = false
+            for (row in rows) {
+                if (targetRow != null && !targetInserted && targetYards < row.rangeYards) {
+                    val label = if (metricMode) "▶ %.0f m".format(targetYards * 0.9144) else "▶ $targetYards yd"
+                    TrajRow(cells = rowCells(targetRow, label), style = MaterialTheme.typography.bodyMedium, highlight = true)
+                    targetInserted = true
+                }
+                val label = if (metricMode) "%.0f m".format(row.rangeYards * 0.9144) else "${row.rangeYards} yd"
+                TrajRow(cells = rowCells(row, label), style = MaterialTheme.typography.bodyMedium)
+            }
+            if (targetRow != null && !targetInserted) {
+                val label = if (metricMode) "▶ %.0f m".format(targetYards * 0.9144) else "▶ $targetYards yd"
+                TrajRow(cells = rowCells(targetRow, label), style = MaterialTheme.typography.bodyMedium, highlight = true)
             }
         }
     }
@@ -693,18 +747,22 @@ private fun TrajectoryTableCard(
 private fun TrajRow(
     cells: List<String>,
     style: androidx.compose.ui.text.TextStyle,
-    bold: Boolean = false
+    bold: Boolean = false,
+    highlight: Boolean = false
 ) {
+    val bg = if (highlight) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(bg),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         for (c in cells) {
             Text(
-                text     = c,
-                style    = style,
-                fontWeight = if (bold) androidx.compose.ui.text.font.FontWeight.Bold else null,
-                modifier = Modifier.weight(1f)
+                text       = c,
+                style      = style,
+                fontWeight = if (bold || highlight) androidx.compose.ui.text.font.FontWeight.Bold else null,
+                modifier   = Modifier.weight(1f)
             )
         }
     }

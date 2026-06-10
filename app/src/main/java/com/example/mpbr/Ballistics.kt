@@ -842,7 +842,8 @@ object Ballistics {
         val velocityAtFarZeroFps: Double,
         val energyAtFarZeroFtLb: Double,
         val energyAtMpbrFtLb: Double,
-        val trajectoryTable: List<TrajectoryRow>
+        val trajectoryTable: List<TrajectoryRow>,
+        val rawTrajectory: List<TrajectoryPoint>    // on-screen target-distance lookup; not saved/printed
     )
 
     /** One sampled row of a trajectory table at a clean range step. */
@@ -1022,8 +1023,36 @@ object Ballistics {
             velocityAtFarZeroFps  = velAtFarZero,
             energyAtFarZeroFtLb   = energyFtLb(bulletWeightGr, velAtFarZero),
             energyAtMpbrFtLb      = energyFtLb(bulletWeightGr, velAtMpbr),
-            trajectoryTable       = table
+            trajectoryTable       = table,
+            rawTrajectory         = traj
         )
+    }
+
+    /** Interpolate the high-res trajectory at an arbitrary range for on-screen display. */
+    fun trajectoryAt(
+        traj: List<TrajectoryPoint>,
+        rangeYards: Int,
+        bulletWeightGr: Double = 0.0
+    ): TrajectoryRow? {
+        if (traj.isEmpty() || rangeYards <= 0) return null
+        var i = 0
+        while (i < traj.size - 1 && traj[i + 1].rangeYards < rangeYards) i++
+        if (i >= traj.size - 1) return null
+        val a    = traj[i]; val b = traj[i + 1]
+        val span = b.rangeYards - a.rangeYards
+        val f    = if (span > 0) (rangeYards - a.rangeYards) / span else 0.0
+        val height   = a.heightInches   + f * (b.heightInches   - a.heightInches)
+        val lateral  = a.lateralInches  + f * (b.lateralInches  - a.lateralInches)
+        val velocity = a.velocityFps    + f * (b.velocityFps    - a.velocityFps)
+        val time     = a.timeSeconds    + f * (b.timeSeconds     - a.timeSeconds)
+        val drop     = -height
+        val moa      = drop    * 100.0 / (rangeYards * 1.0472)
+        val mil      = drop    / (rangeYards * 0.036)
+        val driftMoa = lateral * 100.0 / (rangeYards * 1.0472)
+        val driftMil = lateral / (rangeYards * 0.036)
+        return TrajectoryRow(rangeYards, drop, moa, mil, lateral, driftMoa, driftMil,
+            velocity, energyFtLb(bulletWeightGr, velocity),
+            momentumLbFps(bulletWeightGr, velocity), time)
     }
 
     private fun lerp(x0: Double, x1: Double, y0: Double, y1: Double, yTarget: Double): Double {

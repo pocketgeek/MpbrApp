@@ -468,6 +468,23 @@ fun MpbrScreen() {
                             ResultRow("Energy at Far Zero", "%.0f ft·lb".format(r.energyAtFarZeroFtLb))
                     }
                     ResultRow("Bore Angle Above LOS", "%.2f MOA".format(r.boreAngleMoa))
+                    if (targetRow != null && targetDistEnabled) {
+                        val tDist  = targetDistYards.toIntOrNull() ?: 0
+                        val tLabel = if (metricMode) "%.0f m".format(tDist * 0.9144) else "$tDist yd"
+                        HorizontalDivider()
+                        ResultRow("Drop @ $tLabel",
+                            if (metricMode) "%.2f cm".format(targetRow.dropInches * 2.54)
+                            else           "%.2f in".format(targetRow.dropInches))
+                        ResultRow("Holdover @ $tLabel",
+                            "%.1f MOA  /  %.2f MIL".format(targetRow.holdoverMoa, targetRow.holdoverMil))
+                        ResultRow("Velocity @ $tLabel",
+                            if (metricMode) "%.0f m/s".format(targetRow.velocityFps * 0.3048)
+                            else            "%.0f fps".format(targetRow.velocityFps))
+                        if (targetRow.energyFtLb > 0.0)
+                            ResultRow("Energy @ $tLabel",
+                                if (metricMode) "%.0f J".format(targetRow.energyFtLb * 1.35582)
+                                else            "%.0f ft·lb".format(targetRow.energyFtLb))
+                    }
                 }
             }
 
@@ -488,14 +505,12 @@ fun MpbrScreen() {
 
             if (r.trajectoryTable.isNotEmpty()) {
                 TrajectoryTableCard(
-                    rows        = r.trajectoryTable,
-                    showEnergy  = r.energyAtNearZeroFtLb > 0.0,
-                    showDrift   = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
-                    showMoa     = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
-                    showMil     = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL,
-                    metricMode  = metricMode,
-                    targetRow   = targetRow,
-                    targetYards = targetDistYards.toIntOrNull() ?: 0
+                    rows       = r.trajectoryTable,
+                    showEnergy = r.energyAtNearZeroFtLb > 0.0,
+                    showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
+                    showMoa    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
+                    showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL,
+                    metricMode = metricMode
                 )
             }
 
@@ -686,9 +701,7 @@ private fun TrajectoryTableCard(
     showDrift: Boolean,
     showMoa: Boolean = true,
     showMil: Boolean = true,
-    metricMode: Boolean = false,
-    targetRow: Ballistics.TrajectoryRow? = null,
-    targetYards: Int = 0
+    metricMode: Boolean = false
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -712,32 +725,20 @@ private fun TrajectoryTableCard(
             TrajRow(cells = header, style = MaterialTheme.typography.labelMedium, bold = true)
             HorizontalDivider()
 
-            fun rowCells(row: Ballistics.TrajectoryRow, rangeLabel: String) = buildList {
-                add(rangeLabel)
-                add(if (metricMode) "%.1f cm".format(row.dropInches * 2.54) else "%.1f in".format(row.dropInches))
-                if (showMoa) add("%.1f".format(row.holdoverMoa))
-                if (showMil) add("%.2f".format(row.holdoverMil))
-                if (showDrift) {
-                    if (showMoa) add("%.1f".format(row.driftMoa))
-                    if (showMil) add("%.2f".format(row.driftMil))
-                }
-                add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f fps".format(row.velocityFps))
-                if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f ft·lb".format(row.energyFtLb))
-            }
-
-            var targetInserted = false
             for (row in rows) {
-                if (targetRow != null && !targetInserted && targetYards < row.rangeYards) {
-                    val label = if (metricMode) "▶ %.0f m".format(targetYards * 0.9144) else "▶ $targetYards yd"
-                    TrajRow(cells = rowCells(targetRow, label), style = MaterialTheme.typography.bodyMedium, highlight = true)
-                    targetInserted = true
+                val cells = buildList {
+                    add(if (metricMode) "%.0f m".format(row.rangeYards * 0.9144) else "${row.rangeYards} yd")
+                    add(if (metricMode) "%.1f cm".format(row.dropInches * 2.54)  else "%.1f in".format(row.dropInches))
+                    if (showMoa) add("%.1f".format(row.holdoverMoa))
+                    if (showMil) add("%.2f".format(row.holdoverMil))
+                    if (showDrift) {
+                        if (showMoa) add("%.1f".format(row.driftMoa))
+                        if (showMil) add("%.2f".format(row.driftMil))
+                    }
+                    add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f fps".format(row.velocityFps))
+                    if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f ft·lb".format(row.energyFtLb))
                 }
-                val label = if (metricMode) "%.0f m".format(row.rangeYards * 0.9144) else "${row.rangeYards} yd"
-                TrajRow(cells = rowCells(row, label), style = MaterialTheme.typography.bodyMedium)
-            }
-            if (targetRow != null && !targetInserted) {
-                val label = if (metricMode) "▶ %.0f m".format(targetYards * 0.9144) else "▶ $targetYards yd"
-                TrajRow(cells = rowCells(targetRow, label), style = MaterialTheme.typography.bodyMedium, highlight = true)
+                TrajRow(cells = cells, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }

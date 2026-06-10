@@ -23,13 +23,12 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Expand 22 LR library to 21 loads (v1.82)
+Add optional target distance to Results (v1.83)
 
-Added: Yellow Jacket 33gr, Aguila Super Maximum 38gr, CCI Mini-Mag \
-36gr/40gr HP & 40gr RN, CCI Gamepoint 40gr JSP, CCI Segmented Subsonic \
-40gr, Winchester Super-X LRN & Power Point 40gr, Remington Golden Bullet \
-40gr, Federal Champion 40gr, Eley Tenex 40gr, Lapua Center-X 40gr, \
-SK Standard Plus 40gr. Library now at 301 factory loads.\
+Check the new "Target distance" box to enter a specific range. After \
+calculating, the Results card shows drop, holdover (MOA and MIL), \
+velocity, and energy at that distance. Not included in saved or \
+printed DOPE charts.\
 """
 
 def main():

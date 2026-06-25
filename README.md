@@ -5,7 +5,7 @@ shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections and full-value crosswind drift.
 
-Includes 301 factory ammo presets organized into color-coded categories
+Includes 305 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
 steps, default 50–500 yd, max 2,000 yd). DOPE charts can be saved as a JPEG
 to your gallery, optionally with a scope reticle illustration showing
@@ -85,7 +85,7 @@ App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 
 ## Inputs
 
-**Ammo preset** — 173 factory loads grouped into Rifle (green), Rimfire
+**Ammo preset** — 305 factory loads grouped into Rifle (green), Rimfire
 (blue), Pistol (amber), and Shotgun (purple) categories. Selecting a preset
 populates all bullet and sight fields. Editing any field manually switches the
 selector to "Custom".
@@ -144,7 +144,18 @@ table.
 
 **Trajectory Table** — configurable start, step, and end range (defaults
 0 / 50 / 500 yd; start 0–2000, step 1–500, end 0–2000). Both on-screen
-table and DOPE chart use these values. Start must be less than end.
+table and DOPE chart use these values. Start must be less than end. Start,
+step, and end accept whole numbers only.
+
+**Target Distance** — optional single-range lookup. Check the box and enter
+a distance (any whole number, not limited to the table step interval) to see
+drop, holdover MOA/MIL, velocity, and energy at that exact range in the
+Results card (interpolated from the high-resolution trajectory). When a
+reticle is selected and results are shown, a second checkbox appears —
+**Show target distance only on reticle** — which hides all other range
+callouts on the reticle illustration and displays only the target distance
+dot. This is useful for previewing the exact hold point for a known distance
+regardless of how coarse the table step is.
 
 **Metric toggle** — the **Not Metric / Metric** chip on the right side of
 the Drag Model row toggles SI units. When active the label reads "Metric";
@@ -188,9 +199,13 @@ produces lateral drift. No spin drift, no Coriolis.
 
 After calculating, the results screen shows (in order):
 
-1. Summary card — near/far zero, MPBR, max ordinate, bore angle, velocity/energy
+1. Summary card — near/far zero, MPBR, max ordinate, bore angle, velocity/energy;
+   if Target Distance is enabled, also shows drop, holdover, velocity, and energy
+   at that exact range
 2. **Reticle illustration** (if a reticle is selected) — live on-screen scope view
-   with color-coded holdover callout dots and labels for each range in the table
+   with color-coded holdover callout dots and labels for each range in the table;
+   when **Show target distance only on reticle** is checked, only the target
+   distance callout is shown
 3. Trajectory table — holdover/drift/velocity/energy for each range in the configured
    start-to-end window
 

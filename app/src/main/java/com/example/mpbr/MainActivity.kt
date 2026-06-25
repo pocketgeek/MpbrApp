@@ -122,8 +122,9 @@ fun MpbrScreen() {
     var tableStep    by remember { mutableStateOf("50") }
     var dopeTitle    by remember { mutableStateOf("MPBR DOPE CARD") }
 
-    var targetDistEnabled by remember { mutableStateOf(false) }
-    var targetDistYards   by remember { mutableStateOf("100") }
+    var targetDistEnabled   by remember { mutableStateOf(false) }
+    var targetDistYards     by remember { mutableStateOf("100") }
+    var targetOnlyCallout   by remember { mutableStateOf(false) }
 
     var result by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
 
@@ -369,13 +370,15 @@ fun MpbrScreen() {
         NumberField(
             if (metricMode) "Temperature (°C)" else "Temperature (°F)",
             toMetric(temperature) { (it - 32.0) * 5.0 / 9.0 },
-            Modifier.fillMaxWidth()
+            Modifier.fillMaxWidth(),
+            allowNegative = true
         ) { v -> temperature = fromMetric(v) { it * 9.0 / 5.0 + 32.0 } }
         NumberField("Humidity (%)", humidity, Modifier.fillMaxWidth()) { humidity = it }
         NumberField(
             if (metricMode) "Wind Speed (km/h, full value crosswind)" else "Wind Speed (mph, full value crosswind)",
             toMetric(windSpeed) { it * 1.60934 },
-            Modifier.fillMaxWidth()
+            Modifier.fillMaxWidth(),
+            allowNegative = true
         ) { v -> windSpeed = fromMetric(v) { it / 1.60934 } }
 
         // ---- Trajectory table range ----
@@ -384,17 +387,20 @@ fun MpbrScreen() {
             NumberField(
                 if (metricMode) "Start (m)" else "Start (yd)",
                 toMetric(tableStart, "%.0f") { it * 0.9144 },
-                Modifier.weight(1f)
+                Modifier.weight(1f),
+                intOnly = true
             ) { v -> tableStart = fromMetricInt(v) { it / 0.9144 } }
             NumberField(
                 if (metricMode) "Step (m)" else "Step (yd)",
                 toMetric(tableStep, "%.0f") { it * 0.9144 },
-                Modifier.weight(1f)
+                Modifier.weight(1f),
+                intOnly = true
             ) { v -> tableStep = fromMetricInt(v) { it / 0.9144 } }
             NumberField(
                 if (metricMode) "End (m)" else "End (yd)",
                 toMetric(tableEnd, "%.0f") { it * 0.9144 },
-                Modifier.weight(1f)
+                Modifier.weight(1f),
+                intOnly = true
             ) { v -> tableEnd = fromMetricInt(v) { it / 0.9144 } }
         }
 
@@ -414,11 +420,24 @@ fun MpbrScreen() {
             if (targetDistEnabled) {
                 OutlinedTextField(
                     value         = targetDistYards,
-                    onValueChange = { targetDistYards = it },
+                    onValueChange = { targetDistYards = it.filter { c -> c.isDigit() } },
                     singleLine    = true,
                     modifier      = Modifier.width(110.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
+            }
+        }
+
+        if (targetDistEnabled && selectedReticle != null && result != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = targetOnlyCallout,
+                    onCheckedChange = { targetOnlyCallout = it }
+                )
+                Text("Show target distance only on reticle", style = MaterialTheme.typography.bodyMedium)
             }
         }
 
@@ -490,8 +509,9 @@ fun MpbrScreen() {
 
             // Reticle illustration (on-screen) when a reticle is selected
             selectedReticle?.let { reticle ->
-                val reticleBmp = remember(r, reticle) {
-                    buildReticleBitmap(r, reticle)
+                val reticleBmp = remember(r, reticle, targetOnlyCallout, targetRow, targetDistEnabled) {
+                    val filterRow = if (targetDistEnabled && targetOnlyCallout) targetRow else null
+                    buildReticleBitmap(r, reticle, filterRow)
                 }
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Image(
@@ -787,20 +807,36 @@ private fun SectionLabel(text: String, onSecret: (() -> Unit)? = null) {
     }
 }
 
+private fun filterDecimalInput(v: String, allowNegative: Boolean): String {
+    val negative = allowNegative && v.startsWith("-")
+    val raw = v.removePrefix("-").filter { it.isDigit() || it == '.' }
+    val dotIdx = raw.indexOf('.')
+    val cleaned = if (dotIdx < 0) raw
+                  else raw.substring(0, dotIdx + 1) + raw.substring(dotIdx + 1).filter { it.isDigit() }
+    return if (negative) "-$cleaned" else cleaned
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NumberField(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    intOnly: Boolean = false,
+    allowNegative: Boolean = false,
     onChange: (String) -> Unit
 ) {
     OutlinedTextField(
         value           = value,
-        onValueChange   = onChange,
+        onValueChange   = { v ->
+            onChange(when {
+                intOnly -> v.filter { it.isDigit() }
+                else    -> filterDecimalInput(v, allowNegative)
+            })
+        },
         label           = { Text(label) },
         singleLine      = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        keyboardOptions = KeyboardOptions(keyboardType = if (intOnly) KeyboardType.Number else KeyboardType.Decimal),
         modifier        = modifier
     )
 }
@@ -927,7 +963,8 @@ private fun drawReticleSection(
     sectionTop: Float,
     sectionH: Float,
     bsz: Float,
-    s: Int
+    s: Int,
+    targetOnlyRow: Ballistics.TrajectoryRow? = null
 ) {
     val r   = (sectionH * 0.40f).toInt()
     val cx  = w * 0.26f
@@ -1033,7 +1070,11 @@ private fun drawReticleSection(
         val margin = (r - s * 4f)
         var lastY  = Float.NEGATIVE_INFINITY
         var idx    = 0
-        for (row in result.trajectoryTable) {
+        val rows = if (targetOnlyRow != null)
+            listOf(targetOnlyRow)
+        else
+            result.trajectoryTable
+        for (row in rows) {
             val hold  = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.holdoverMil  else row.holdoverMoa
             val drift = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.driftMil     else row.driftMoa
             val x     = cx + drift.toFloat() * ppu
@@ -1922,7 +1963,8 @@ private fun drawReticleSection(
 /** Renders just the reticle illustration for on-screen display (2× scale, 1100×560 px). */
 private fun buildReticleBitmap(
     result: Ballistics.MpbrResult,
-    reticle: Ballistics.ReticlePreset
+    reticle: Ballistics.ReticlePreset,
+    targetOnlyRow: Ballistics.TrajectoryRow? = null
 ): Bitmap {
     val w   = 1100
     val h   = 560
@@ -1931,7 +1973,7 @@ private fun buildReticleBitmap(
     val bmp = createBitmap(w, h)
     val cv  = android.graphics.Canvas(bmp)
     cv.drawColor(android.graphics.Color.WHITE)
-    drawReticleSection(cv, w, result, reticle, 0f, h.toFloat(), bsz, s)
+    drawReticleSection(cv, w, result, reticle, 0f, h.toFloat(), bsz, s, targetOnlyRow)
     return bmp
 }
 

@@ -47,7 +47,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 3. Calculate button → validates table start/end (0–2000 yd), calls `Ballistics.calculateMpbr()` with `tableMinYards`/`tableMaxYards`, stores result in `result` state
 4. Result renders as: summary Card → reticle illustration Card (if reticle selected, via `buildReticleBitmap()`) → `TrajectoryTableCard` → Save DOPE Chart button
 
-**Session save/load** — Save icon (floppy disk) and Load icon (folder) appear in the title row. Sessions persist all input state (ammo fields, reticle, atmosphere, table range, DOPE title) to `SharedPreferences` ("mpbr_sessions" key) as a JSON array. `SessionData` data class and `saveSession`/`loadSessions`/`deleteSession`/`buildSessionName` helpers live at the bottom of `MainActivity.kt`. Save dialog pre-fills name as `"<PresetName> — MM/dd"` (editable); saving a session with an existing name overwrites it. Load dialog lists all sessions — tap a name to restore all fields (result is cleared), tap ✕ to delete.
+**Session save/load** — Save icon (floppy disk) and Load icon (folder) appear in the title row. Sessions persist all input state (ammo fields, reticle, atmosphere, table range, DOPE title, notes) to `SharedPreferences` ("mpbr_sessions" key) as a JSON array. `SessionData` data class and `saveSession`/`loadSessions`/`deleteSession`/`buildSessionName` helpers live at the bottom of `MainActivity.kt`. Save dialog pre-fills name as `"<PresetName> — MM/dd"` (editable); saving a session with an existing name overwrites it. Load dialog lists all sessions — tap a name to restore all fields (result is cleared), tap ✕ to delete.
 
 ## Key conventions
 
@@ -55,7 +55,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **Trajectory table columns** — controlled by two booleans passed to `TrajectoryTableCard`: `showEnergy` (true when bullet weight > 0) and `showDrift` (true when wind speed != 0). When wind is 0 the W.MOA/W.MIL columns are hidden entirely.
 
-**DOPE chart export** — `buildDopeChartBitmap()` draws a 1200 px wide JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). Layout: header block → optional reticle section (640 px tall) → trajectory table. `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
+**DOPE chart export** — `buildDopeChartBitmap()` draws a 1200 px wide JPEG-ready `Bitmap` using Android `Canvas` (no Compose rendering). Layout: header block → optional reticle section (640 px tall) → trajectory table → optional notes section. `saveDopeChart()` writes it to `Pictures/MPBR DOPE Charts/` via `MediaStore`. On API < 29 a `WRITE_EXTERNAL_STORAGE` runtime permission is requested first (declared in the manifest with `maxSdkVersion="28"`). The same `showEnergy` / `showDrift` booleans that drive the on-screen table also control which columns appear in the chart.
 
 **Trajectory table range** — configurable via "Start / Step / End" fields in the UI (defaults 0 / 50 / 500 yd; start and end clamped 0–2000, step clamped 1–500). All three are validated (start < end) before calling `calculateMpbr()` with `tableStepYards`, `tableMinYards`, and `tableMaxYards`. The reticle callout code uses a circle-bounds check to show only ranges whose 2D position (elevation + drift) falls within the scope circle.
 
@@ -78,6 +78,8 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 **Results summary card** — shows Near Zero, Far Zero, Max Ordinate, MPBR, Energy at MPBR (if bullet weight > 0), Velocity/Energy at Near Zero, Velocity/Energy at Far Zero, Bore Angle. All computed by interpolating the high-res trajectory at the crossing points.
 
 **DOPE chart header** — `buildDopeChartBitmap()` accepts `vitalZoneIn` and prints it on the Max Ordinate line. Call site passes `vitalZone.toDoubleOrNull() ?: 6.0`.
+
+**DOPE chart notes** — `buildDopeChartBitmap()` accepts a `notes: String` parameter (default `""`). When non-blank, a separator rule + bold "Notes:" label + the note lines are appended after the trajectory table. Each `\n` in the string becomes a separate rendered line. The `notes` parameter is sourced from the `dopeNotes` state var (a multiline `OutlinedTextField` labeled "Notes / Turret Adjustments" that appears below the DOPE Card Title field). Saved and restored as `dopeNotes` in `SessionData` / JSON; old sessions without the key load as `""` via `optString`.
 
 **Adding a BDC reticle preset** — append to `Ballistics.RETICLE_PRESETS` with `style = ReticleStyle.BDC`, `holdoverMarks`, `windageMarks`, `postStart` (0 = no thick posts). For SFP scopes, source subtensions from the manufacturer's reticle manual at the scope's maximum magnification. If `minorSpacing > 0`, fine horizontal ticks are drawn at that spacing across the H arm up to `postStart`. No other drawing code changes needed.
 

@@ -121,6 +121,7 @@ fun MpbrScreen() {
     var tableEnd     by remember { mutableStateOf("500") }
     var tableStep    by remember { mutableStateOf("50") }
     var dopeTitle    by remember { mutableStateOf("MPBR DOPE CARD") }
+    var dopeNotes    by remember { mutableStateOf("") }
 
     var targetDistEnabled   by remember { mutableStateOf(false) }
     var targetDistYards     by remember { mutableStateOf("100") }
@@ -201,6 +202,7 @@ fun MpbrScreen() {
         tableEnd     = tableEnd,
         tableStep    = tableStep,
         dopeTitle    = dopeTitle,
+        dopeNotes    = dopeNotes,
         reticleName  = selectedReticle?.name
     )
 
@@ -263,6 +265,7 @@ fun MpbrScreen() {
         tableEnd        = s.tableEnd
         tableStep       = s.tableStep
         dopeTitle       = s.dopeTitle
+        dopeNotes       = s.dopeNotes
         selectedReticle = s.reticleName?.let { n -> Ballistics.RETICLE_PRESETS.find { it.name == n } }
         calculate()
     }
@@ -542,6 +545,14 @@ fun MpbrScreen() {
                 modifier      = Modifier.fillMaxWidth()
             )
 
+            OutlinedTextField(
+                value         = dopeNotes,
+                onValueChange = { dopeNotes = it },
+                label         = { Text("Notes / Turret Adjustments") },
+                minLines      = 3,
+                modifier      = Modifier.fillMaxWidth()
+            )
+
             Button(
                 onClick = {
                     val label      = selectedPreset?.name ?: "Custom"
@@ -559,7 +570,8 @@ fun MpbrScreen() {
                             showEnergy, showDrift,
                             selectedReticle,
                             dopeTitle,
-                            metricMode
+                            metricMode,
+                            dopeNotes
                         )
                         val ok = saveDopeChart(context, bmp, label)
                         android.widget.Toast.makeText(
@@ -597,7 +609,8 @@ fun MpbrScreen() {
                         showEnergy, showDrift,
                         selectedReticle,
                         dopeTitle,
-                        metricMode
+                        metricMode,
+                        dopeNotes
                     )
                     PrintHelper(context as android.app.Activity).apply {
                         scaleMode = PrintHelper.SCALE_MODE_FIT
@@ -1993,7 +2006,8 @@ private fun buildDopeChartBitmap(
     showDrift: Boolean,
     reticle: Ballistics.ReticlePreset? = null,
     cardTitle: String = "MPBR DOPE CARD",
-    metricMode: Boolean = false
+    metricMode: Boolean = false,
+    notes: String = ""
 ): Bitmap {
     val s   = 3
     val w   = 400 * s
@@ -2046,7 +2060,9 @@ private fun buildDopeChartBitmap(
     val reticleH = if (reticle != null) 640 else 0
     val headerH  = pad + tsz.toInt() + 14 + info.size * lnH + pad
     val tableH   = pad + (bsz * 0.2f).toInt() + s * 2 + s + (bsz * 0.8f).toInt() + s * 2 + rwH * result.trajectoryTable.size + pad
-    val h        = headerH + s + (if (reticle != null) reticleH + s else 0) + tableH
+    val noteLines = if (notes.isBlank()) emptyList() else notes.lines()
+    val notesH   = if (noteLines.isEmpty()) 0 else s + pad + lnH + noteLines.size * lnH + pad
+    val h        = headerH + s + (if (reticle != null) reticleH + s else 0) + tableH + notesH
 
     val bmp = createBitmap(w, h)
     val cv  = android.graphics.Canvas(bmp)
@@ -2103,6 +2119,15 @@ private fun buildDopeChartBitmap(
         }
         cells.forEachIndexed { i, cell -> cv.drawText(cell, pad + i * colW, y, pBody) }
         y += rwH
+    }
+
+    if (noteLines.isNotEmpty()) {
+        cv.drawRect(0f, y, w.toFloat(), y + s, pRule)
+        y += s.toFloat() + pad
+        y += lnH
+        cv.drawText("Notes:", pad.toFloat(), y, pHdr)
+        y += lnH * 0.2f
+        for (line in noteLines) { y += lnH; cv.drawText(line, pad.toFloat(), y, pBody) }
     }
 
     return bmp
@@ -2162,6 +2187,7 @@ data class SessionData(
     val tableEnd: String,
     val tableStep: String,
     val dopeTitle: String,
+    val dopeNotes: String,
     val reticleName: String?
 )
 
@@ -2182,6 +2208,7 @@ private fun SessionData.toJson(): org.json.JSONObject = org.json.JSONObject().ap
     put("tableEnd",    tableEnd)
     put("tableStep",   tableStep)
     put("dopeTitle",   dopeTitle)
+    put("dopeNotes",   dopeNotes)
     putOpt("reticleName", reticleName)
 }
 
@@ -2202,6 +2229,7 @@ private fun org.json.JSONObject.toSessionData() = SessionData(
     tableEnd     = getString("tableEnd"),
     tableStep    = getString("tableStep"),
     dopeTitle    = getString("dopeTitle"),
+    dopeNotes    = optString("dopeNotes"),
     reticleName  = optString("reticleName").ifEmpty { null }
 )
 

@@ -169,8 +169,14 @@ load in imperial regardless of the toggle. Bullet weight stays in grains
 **DOPE Card Title** — editable heading printed at the top of the saved JPEG
 (default "MPBR DOPE CARD"). Leave blank to keep the default.
 
+**Notes / Turret Adjustments** — multiline free-text field below the title.
+Appears as a "Notes:" section at the bottom of both the saved JPEG and the
+printed DOPE chart, after the trajectory table. Use it for turret click
+settings, zero-distance notes, or any range card annotation. Saved and
+restored with sessions.
+
 **Sessions** — tap the 💾 (Save) icon in the title bar to save the current
-setup (all inputs: ammo, reticle, atmosphere, table range, DOPE title) under
+setup (all inputs: ammo, reticle, atmosphere, table range, DOPE title, notes) under
 a name. The name pre-fills as `"<Preset> — MM/dd"` and can be edited. Saving
 with an existing name overwrites it. Tap the 📂 (Load) icon to open the
 sessions list — tap a name to restore all inputs and auto-calculate, tap ✕
@@ -230,6 +236,8 @@ to the system print dialog (AirPrint, PDF, etc.). Both render:
   as on-screen — drift columns appear only when wind ≠ 0, energy only when bullet
   weight is set; the redundant MOA or MIL column is dropped when a reticle is
   selected)
+- **Notes section** (if the Notes field is non-empty) — rendered at the bottom
+  after the trajectory table; each newline in the field becomes a separate line
 - Date of generation
 
 ## Easter eggs

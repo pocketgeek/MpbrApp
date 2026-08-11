@@ -297,6 +297,16 @@ object Ballistics {
             ReticleStyle.MOA_TREE,
             postStart = 26.0
         ),
+        // Vortex EBR-7C MRAD — Venom 5-25×56 FFP MRAD variant. Same reticle geometry as the
+        // MOA version above, numbered/scaled in mils: major hashes every 1 mil, minor every
+        // 0.5 mil, dot-grid tree below center, thick outer posts starting near FOV edge.
+        // postStart/vertExtent converted from the MOA-model FOV geometry (26/40 MOA × 0.2909 mil/MOA).
+        ReticlePreset(
+            "Vortex EBR-7C (MRAD, FFP)",
+            ReticleUnit.MIL, 1.0, 0.5, 11.6,
+            ReticleStyle.MRAD_TREE,
+            postStart = 7.6
+        ),
         // Vortex Spitfire AR 1× Prism — DRT (Dual Ring Tactical). Always accurate.
         ReticlePreset(
             "Vortex Spitfire AR DRT (MOA, 1×)",

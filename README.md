@@ -126,6 +126,7 @@ Presets are sorted by manufacturer:
 | Viridian MDS25 BRC (MOA, 1×) | MOA | 1× (always accurate) | BRC | 3 MOA center dot (50/200 yd); holdunder dots ≈7 MOA (15 yd) and ≈25 MOA (7 yd) below; inward chevrons for ranging. Dot positions estimated — exact MOA not published by Viridian |
 | Vortex Dead-Hold BDC (MOA, SFP) | MOA | SFP (max mag) | BDC | Holdover dots: 1.5 / 4.5 / 7.5 / 11.0 MOA; windage ±2 / ±4 / ±6 MOA; thick outer posts at 7 MOA |
 | Vortex EBR-7C (MOA, FFP) | MOA | FFP (all mags) | MOA tree | Numbered H/V stadia (1 MOA minor / 4 MOA major, labeled 4–24/32), thick posts at ±26 MOA; dot-grid tree below center rows 4→36 MOA at 2 MOA dot spacing; thick bottom post. Used in Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II |
+| Vortex EBR-7C (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered H/V stadia (0.5 MIL minor / 1 MIL major), thick posts at ±7.6 MIL; dot-grid tree below center out to 11.6 MIL. Same reticle family as the MOA version, scaled to mil (26/40 MOA × 0.2909 mil/MOA). Venom 5-25×56 FFP MRAD |
 | Vortex Spitfire AR DRT (MOA, 1×) | MOA | 1× (always accurate) | DRT | 3 MOA center dot; inner ring 44 MOA ID / 6 MOA thick; outer ring 140 MOA ID / 3 MOA thick |
 | Vortex Strike Eagle AR-BDC3 (MOA, SFP) | MOA | SFP (8×) | AR-BDC3 | Horseshoe (large top arc + side hooks, open bottom) + 1 MOA center dot; BDC post at 2.4/5.6/9.5/14.6 MOA (300–600 yd); windage dot rows widening at 1 MOA steps to ±5/7/10/12 MOA; "3"–"6" range labels and "10" mph wind label at 600 yd |
 

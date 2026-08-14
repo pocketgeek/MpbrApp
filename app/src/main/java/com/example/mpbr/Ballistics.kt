@@ -563,6 +563,10 @@ object Ballistics {
         AmmoPreset("35 Whelen 250gr Partition",   2400.0, 0.446, 250.0, 2.6, 6.0, caliber = "35 Whelen"),
         AmmoPreset("350 Legend 150gr",            2325.0, 0.223, 150.0, 2.6, 6.0, caliber = "350 Legend"),
         AmmoPreset("350 Legend 180gr",            2100.0, 0.200, 180.0, 2.6, 6.0, caliber = "350 Legend"),
+        // 400 Legend — straight-wall hunting cartridge, Winchester's full current lineup.
+        AmmoPreset("400 Legend 190gr Deer Season XP", 2400.0, 0.198, 190.0, 2.6, 6.0, caliber = "400 Legend"),
+        AmmoPreset("400 Legend 215gr Power-Point", 2250.0, 0.206, 215.0, 2.6, 6.0, caliber = "400 Legend"),
+        AmmoPreset("400 Legend 300gr Super Suppressed (subsonic)", 1060.0, 0.318, 300.0, 2.6, 6.0, caliber = "400 Legend"),
         // .45 cal rifle
         // 444 Marlin
         AmmoPreset("444 Marlin 240gr FP",         2350.0, 0.175, 240.0, 2.6, 6.0, caliber = "444 Marlin"),

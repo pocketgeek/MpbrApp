@@ -5,7 +5,7 @@ shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections and full-value crosswind drift.
 
-Includes 305 factory ammo presets organized into color-coded categories
+Includes 308 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
 steps, default 50–500 yd, max 2,000 yd). DOPE charts can be saved as a JPEG
 to your gallery, optionally with a scope reticle illustration showing
@@ -85,7 +85,7 @@ App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 
 ## Inputs
 
-**Ammo preset** — 305 factory loads grouped into Rifle (green), Rimfire
+**Ammo preset** — 308 factory loads grouped into Rifle (green), Rimfire
 (blue), Pistol (amber), and Shotgun (purple) categories. Selecting a preset
 populates all bullet and sight fields. Editing any field manually switches the
 selector to "Custom".
@@ -129,6 +129,8 @@ Presets are sorted by manufacturer:
 | Vortex EBR-7C (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered H/V stadia (0.5 MIL minor / 1 MIL major), thick posts at ±7.6 MIL; dot-grid tree below center out to 11.6 MIL. Same reticle family as the MOA version, scaled to mil (26/40 MOA × 0.2909 mil/MOA). Venom 5-25×56 FFP MRAD |
 | Vortex Spitfire AR DRT (MOA, 1×) | MOA | 1× (always accurate) | DRT | 3 MOA center dot; inner ring 44 MOA ID / 6 MOA thick; outer ring 140 MOA ID / 3 MOA thick |
 | Vortex Strike Eagle AR-BDC3 (MOA, SFP) | MOA | SFP (8×) | AR-BDC3 | Horseshoe (large top arc + side hooks, open bottom) + 1 MOA center dot; BDC post at 2.4/5.6/9.5/14.6 MOA (300–600 yd); windage dot rows widening at 1 MOA steps to ±5/7/10/12 MOA; "3"–"6" range labels and "10" mph wind label at 600 yd |
+| Vortex VMR-4 (MOA, FFP) | MOA | FFP (all mags) | MOA tree | Numbered H/V stadia (1 MOA minor / 4 MOA major, labeled 4–20), thick posts at ±32.5 MOA; dot-grid tree below center rows 4→20 MOA at 2 MOA dot spacing. Real scope's thick vertical post sits at 38 MOA; rendered here at the last tree row (20 MOA) since there are no hashmarks in that gap. Source: Vortex VMR-4 MOA reticle manual. Viper HD 5-25×50 FFP |
+| Vortex VMR-4 (MRAD, FFP) | MIL | FFP (all mags) | MRAD tree | Numbered H/V stadia (0.5 MIL minor / 1 MIL major, labeled 1–6), thick posts at ±10 MIL; dot-grid tree below center rows 1→6 MIL at 2 MIL dot spacing. Real scope's thick vertical post sits at 11 MIL; rendered here at the last tree row (6 MIL) for the same reason as the MOA version. Source: Vortex VMR-4 MRAD reticle manual. Viper HD 5-25×50 FFP |
 
 **Drag model** — G1 or G7. The BC value you enter must reference the model you
 pick. Manufacturers usually publish G1; many also publish G7 for long

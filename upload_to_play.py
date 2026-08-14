@@ -23,12 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Add optional target distance to Results (v1.83)
+Add Vortex EBR-7C MRAD reticle preset (v1.86)
 
-Check the new "Target distance" box to enter a specific range. After \
-calculating, the Results card shows drop, holdover (MOA and MIL), \
-velocity, and energy at that distance. Not included in saved or \
-printed DOPE charts.\
+New reticle preset for the Venom 5-25x56 FFP MRAD: numbered MRAD \
+tree with dot-grid holdover rows and thick outer posts, matching \
+the existing MOA version's geometry scaled to mils.\
 """
 
 def main():

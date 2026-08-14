@@ -320,6 +320,30 @@ object Ballistics {
             ReticleUnit.MOA, 8.3125, 0.5, 25.0,
             ReticleStyle.AR_BDC3,
             holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6)
+        ),
+        // Vortex VMR-4 — Viper HD 5-25x50 FFP. Numbered stadia (4 MOA major / 1 MOA minor
+        // hashmarks per Vortex reticle manual) + dot-grid tree rows at 4/8/12/16/20 MOA;
+        // thick horizontal posts begin at 32.5 MOA (exact from manual diagram). Real scope's
+        // thick vertical post begins at 38 MOA — rendered here at the last tree row (20 MOA)
+        // instead, since the drawing code ties the vertical post to tree depth and the real
+        // 18 MOA gap between the tree and the post has no functional hashmarks to show.
+        // Source: Vortex Reticle Manual VTX_M-00358 (VMR-4 MOA), p.2-3.
+        ReticlePreset(
+            "Vortex VMR-4 (MOA, FFP)",
+            ReticleUnit.MOA, 4.0, 1.0, 24.0,
+            ReticleStyle.MOA_TREE,
+            postStart = 32.5
+        ),
+        // Vortex VMR-4 MRAD — same reticle as above, mil-graduated: 1 MRAD major / 0.5 MRAD
+        // minor hashmarks, dot-grid tree rows 1–6 MRAD, thick horizontal posts at 10 MRAD
+        // (exact from manual diagram; real vertical post at 11 MRAD, rendered at row 6 for
+        // the same reason as the MOA version above).
+        // Source: Vortex Reticle Manual VTX_M-00359 (VMR-4 MRAD), p.2-3.
+        ReticlePreset(
+            "Vortex VMR-4 (MRAD, FFP)",
+            ReticleUnit.MIL, 1.0, 0.5, 7.0,
+            ReticleStyle.MOA_TREE,
+            postStart = 10.0
         )
     )
 
@@ -504,6 +528,9 @@ object Ballistics {
         AmmoPreset("308 Win 168gr SMK",           2650.0, 0.224, 168.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("308 Win 175gr SMK",           2600.0, 0.250, 175.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("308 Win 180gr SP",            2600.0, 0.383, 180.0, 2.6, 6.0),
+        AmmoPreset("308 Win 190gr Fusion (subsonic)", 1000.0, 0.494, 190.0, 2.6, 6.0),
+        AmmoPreset("308 Win 200gr FMJBT (subsonic)",  1066.0, 0.235, 200.0, 2.6, 6.0, DragModel.G7),
+        AmmoPreset("308 Win 205gr HP (subsonic)",     1000.0, 0.480, 205.0, 2.6, 6.0),
         // .338
         AmmoPreset("338 Win Mag 200gr AccuBond",  2960.0, 0.225, 200.0, 2.6, 6.0, DragModel.G7),
         AmmoPreset("338 Win Mag 225gr AccuBond",  2785.0, 0.249, 225.0, 2.6, 6.0, DragModel.G7),

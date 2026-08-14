@@ -54,6 +54,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -873,17 +874,38 @@ private fun AmmoPresetDropdown(
     onSelect: (Ballistics.AmmoPreset?) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val display = selected?.name ?: "Custom"
+    var query by remember { mutableStateOf(selected?.name ?: "Custom") }
+
+    // Keep the field text in sync when the selection changes from outside
+    // (preset picked, session loaded, or a manual edit reset it to Custom).
+    LaunchedEffect(selected) {
+        query = selected?.name ?: "Custom"
+    }
+
+    val isFiltering = query.isNotBlank() && query != selected?.name && query != "Custom"
+    val filtered = remember(query, presets, isFiltering) {
+        if (!isFiltering) presets else presets.filter { it.name.contains(query, ignoreCase = true) }
+    }
+
+    fun close(picked: Ballistics.AmmoPreset?) {
+        onSelect(picked)
+        query = picked?.name ?: "Custom"
+        expanded = false
+    }
 
     ExposedDropdownMenuBox(
         expanded         = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = {
+            expanded = it
+            if (it) query = ""
+        }
     ) {
         OutlinedTextField(
-            value         = display,
-            onValueChange = {},
-            readOnly      = true,
+            value         = query,
+            onValueChange = { query = it; expanded = true },
+            singleLine    = true,
             label         = { Text("Preset") },
+            placeholder   = { Text("Type to search…") },
             trailingIcon  = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier      = Modifier
                 .fillMaxWidth()
@@ -891,11 +913,14 @@ private fun AmmoPresetDropdown(
         )
         ExposedDropdownMenu(
             expanded         = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false; query = selected?.name ?: "Custom" }
         ) {
+            if (filtered.isEmpty()) {
+                DropdownMenuItem(text = { Text("No matches") }, onClick = {}, enabled = false)
+            }
             var lastCategory: Ballistics.AmmoCategory? = null
-            for (p in presets) {
-                if (p.category != lastCategory) {
+            for (p in filtered) {
+                if (!isFiltering && p.category != lastCategory) {
                     val headerLabel = when (p.category) {
                         Ballistics.AmmoCategory.RIFLE   -> "Rifle"
                         Ballistics.AmmoCategory.RIMFIRE -> "Rimfire"
@@ -917,13 +942,13 @@ private fun AmmoPresetDropdown(
                 }
                 DropdownMenuItem(
                     text     = { Text(p.name) },
-                    onClick  = { onSelect(p); expanded = false },
+                    onClick  = { close(p) },
                     modifier = Modifier.background(bgColor)
                 )
             }
             DropdownMenuItem(
                 text    = { Text("Custom") },
-                onClick = { onSelect(null); expanded = false }
+                onClick = { close(null) }
             )
         }
     }

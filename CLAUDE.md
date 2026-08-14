@@ -30,7 +30,7 @@ There are no unit tests in this project. All logic is in two Kotlin files that c
 The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **`Ballistics.kt`** — pure Kotlin object, no Android dependencies. Contains:
-- `AmmoPreset` data class and `PRESETS` list — factory ammo with name, MV, BC, weight, sight height, vital zone, drag model, and category
+- `AmmoPreset` data class and `PRESETS` list — factory ammo with name, MV, BC, weight, sight height, vital zone, drag model, category, and caliber (drives the Type → Caliber → Load picker in the UI)
 - `AmmoCategory` enum — `RIFLE`, `RIMFIRE`, `PISTOL`, `SHOTGUN`; defaults to `RIFLE` so only non-rifle presets need an explicit tag
 - `ReticlePreset` data class and `RETICLE_PRESETS` list — scope reticle definitions (name, unit, majorSpacing, minorSpacing, vertExtent, style)
 - `ReticleUnit` enum — `MIL`, `MOA`
@@ -38,11 +38,11 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 - `RETICLE_PRESETS` list is sorted by manufacturer (Burris → EOTech → Firefield → German/Czech → Holosun → Leupold → SIG → Trijicon → U.S. Army → UUQ → Viridian → Vortex)
 - `Atmosphere` data class — ICAO pressure model + Magnus humidity correction; call `.densityRatio()` and `.speedOfSound()` for scaled values
 - `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind enters the drag force naturally. Returns `List<TrajectoryPoint>`
-- `calculateMpbr()` — binary-searches bore angle (50 iterations) until trajectory peak = `vitalZone/2`, then re-simulates at high resolution to extract near zero, far zero, max ordinate, MPBR, and trajectory table. Entry point for the UI
+- `calculateMpbr()` — binary-searches bore angle (50 iterations) until trajectory peak = `vitalZone/2`, then re-simulates at high resolution to extract near zero, far zero, max ordinate, MPBR, and trajectory table. Entry point for the UI. Requires muzzle velocity ≥ 400 fps and that the trajectory actually reaches a far zero — below 400 fps the flat-fire assumption breaks down (the bullet decelerates below its drag-limited terminal fall speed before traveling far, so reported velocity can climb with range instead of decaying, and drop/holdover blow up to thousands of MOA); throws `IllegalArgumentException` with a user-facing message instead of returning nonsense values
 - `trajectoryTable()` — interpolates `TrajectoryPoint` list onto clean yard steps; computes holdover MOA/MIL and wind drift MOA/MIL for each row
 
 **`MainActivity.kt`** — single `@Composable` function (`MpbrScreen`) with all state as `mutableStateOf` vars. No ViewModel, no architecture layers. Flow:
-1. User picks an ammo preset → `applyPreset()` populates all fields and sets `selectedPreset`; any manual field edit calls `userEdit()` which resets `selectedPreset = null` (shows "Custom" in dropdown)
+1. User picks an ammo preset via the three-step Type → Caliber → Load cascade (`AmmoPresetDropdown`/`SimpleDropdown` in `MainActivity.kt`) → `applyPreset()` populates all fields and sets `selectedPreset`; any manual field edit calls `userEdit()` which resets `selectedPreset = null` (shows "Custom" in the Type picker)
 2. User optionally selects a reticle preset (`selectedReticle`) for the DOPE chart illustration
 3. Calculate button → validates table start/end (0–2000 yd), calls `Ballistics.calculateMpbr()` with `tableMinYards`/`tableMaxYards`, stores result in `result` state
 4. Result renders as: summary Card → reticle illustration Card (if reticle selected, via `buildReticleBitmap()`) → `TrajectoryTableCard` → Save DOPE Chart button
@@ -51,7 +51,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 ## Key conventions
 
-**Adding ammo presets** — append to `Ballistics.PRESETS`. G7 model is specified as the 7th constructor argument (`DragModel.G7`); G1 is the default. BC passed to the constructor must match the drag model (do not mix G1 BCs with G7 model or vice versa). Always set the appropriate `category =` for non-rifle rounds (`RIMFIRE`, `PISTOL`, `SHOTGUN`); `RIFLE` is the default and needs no explicit tag. Keep presets grouped by category in the list — the dropdown inserts section headers by detecting category changes in order. Shotgun slugs use `sightHeightIn = 0.5` (bead) for smoothbore loads and `1.5` (scoped rifled barrel) for sabots; `vitalZoneIn = 8.0` for deer, `4.0` for buckshot/defensive.
+**Adding ammo presets** — append to `Ballistics.PRESETS`. G7 model is specified as the 7th constructor argument (`DragModel.G7`); G1 is the default. BC passed to the constructor must match the drag model (do not mix G1 BCs with G7 model or vice versa). Always set the appropriate `category =` for non-rifle rounds (`RIMFIRE`, `PISTOL`, `SHOTGUN`); `RIFLE` is the default and needs no explicit tag. Always set `caliber = "..."` (named arg) — this drives the Caliber step of the Type → Caliber → Load picker, so presets sharing a caliber must use an identical string (e.g. every `.308 Win` load, including mil-designation rounds like `M80`, uses `caliber = "308 Win"`; mil-spec 5.56 rounds like `M193`/`M855`/`Mk262` use `caliber = "5.56×45"`, kept distinct from `"223 Rem"`). Shotgun presets use the bare gauge as caliber (`"12ga"`, `"20ga"`, `"410"`) regardless of wad/slug type. Keep presets grouped by category in the list — new presets no longer need to worry about dropdown section-header ordering since the picker groups by `category` and `caliber` fields directly, not list position. Shotgun slugs use `sightHeightIn = 0.5` (bead) for smoothbore loads and `1.5` (scoped rifled barrel) for sabots; `vitalZoneIn = 8.0` for deer, `4.0` for buckshot/defensive.
 
 **Trajectory table columns** — controlled by two booleans passed to `TrajectoryTableCard`: `showEnergy` (true when bullet weight > 0) and `showDrift` (true when wind speed != 0). When wind is 0 the W.MOA/W.MIL columns are hidden entirely.
 

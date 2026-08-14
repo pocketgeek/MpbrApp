@@ -85,10 +85,12 @@ App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 
 ## Inputs
 
-**Ammo preset** — 308 factory loads grouped into Rifle (green), Rimfire
-(blue), Pistol (amber), and Shotgun (purple) categories. Selecting a preset
-populates all bullet and sight fields. Editing any field manually switches the
-selector to "Custom".
+**Ammo preset** — 308 factory loads picked via a three-step Type → Caliber →
+Load cascade instead of one long scrolling list: pick a category (Rifle
+green, Rimfire blue, Pistol amber, Shotgun purple, or Custom), then a caliber
+within that category, then the specific load. Selecting a load populates all
+bullet and sight fields. Editing any field manually switches the Type
+selector back to "Custom".
 
 Shotgun notes: smoothbore slug presets use 0.5" sight height (bead) and an 8"
 vital zone (deer); sabot presets use 1.5" (scoped rifled barrel). Buckshot
@@ -138,7 +140,13 @@ boat-tail bullets where G7 fits better. Don't convert between them with a
 fixed multiplier; use the manufacturer's value.
 
 **Bullet & sight** — muzzle velocity (fps), BC, sight height above bore (in),
-vital zone diameter (in).
+vital zone diameter (in). Muzzle velocity must be at least 400 fps — below
+that the point-blank-range model's flat-fire assumption breaks down (the
+bullet decelerates below its own drag-limited terminal fall speed before it
+gets anywhere, so "velocity" can start climbing back up with range instead
+of decaying, and drop/holdover values blow up to thousands of MOA well
+inside a normal table). Even the slowest cataloged subsonic loads run
+700+ fps, so 400 fps rejects only physically unrealistic inputs.
 
 **Atmosphere** — altitude (ft), temperature (°F), humidity (%), wind speed
 (mph full-value crosswind). Defaults are Parma, ID conditions (2231 ft, 70°F,

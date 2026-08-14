@@ -866,6 +866,25 @@ private fun ResultRow(label: String, value: String) {
     }
 }
 
+private fun categoryLabel(c: Ballistics.AmmoCategory): String = when (c) {
+    Ballistics.AmmoCategory.RIFLE   -> "Rifle"
+    Ballistics.AmmoCategory.RIMFIRE -> "Rimfire"
+    Ballistics.AmmoCategory.PISTOL  -> "Pistol"
+    Ballistics.AmmoCategory.SHOTGUN -> "Shotgun"
+}
+
+private fun categoryColor(c: Ballistics.AmmoCategory): Color = when (c) {
+    Ballistics.AmmoCategory.RIFLE   -> Color(0x334CAF50)
+    Ballistics.AmmoCategory.RIMFIRE -> Color(0x332196F3)
+    Ballistics.AmmoCategory.PISTOL  -> Color(0x33FF9800)
+    Ballistics.AmmoCategory.SHOTGUN -> Color(0x339C27B0)
+}
+
+/**
+ * Three-step cascading picker (Type → Caliber → Load) instead of one flat
+ * 300+ item list. Each step is a short, plain (non-editable) dropdown, so
+ * there's no combined typing+popup focus fight to worry about.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AmmoPresetDropdown(
@@ -873,39 +892,80 @@ private fun AmmoPresetDropdown(
     presets: List<Ballistics.AmmoPreset>,
     onSelect: (Ballistics.AmmoPreset?) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var query by remember { mutableStateOf(selected?.name ?: "Custom") }
+    var category by remember { mutableStateOf(selected?.category) }
+    var caliber  by remember { mutableStateOf(selected?.caliber) }
 
-    // Keep the field text in sync when the selection changes from outside
+    // Keep the pickers in sync when the selection changes from outside
     // (preset picked, session loaded, or a manual edit reset it to Custom).
     LaunchedEffect(selected) {
-        query = selected?.name ?: "Custom"
+        category = selected?.category
+        caliber  = selected?.caliber
     }
 
-    val isFiltering = query.isNotBlank() && query != selected?.name && query != "Custom"
-    val filtered = remember(query, presets, isFiltering) {
-        if (!isFiltering) presets else presets.filter { it.name.contains(query, ignoreCase = true) }
+    val calibersInCategory = remember(presets, category) {
+        val c = category ?: return@remember emptyList()
+        presets.filter { it.category == c }.map { it.caliber }.distinct()
+    }
+    val loadsInCaliber = remember(presets, category, caliber) {
+        val c = category; val cal = caliber
+        if (c == null || cal == null) emptyList()
+        else presets.filter { it.category == c && it.caliber == cal }
     }
 
-    fun close(picked: Ballistics.AmmoPreset?) {
-        onSelect(picked)
-        query = picked?.name ?: "Custom"
-        expanded = false
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SimpleDropdown(
+            label    = "Type",
+            display  = category?.let(::categoryLabel) ?: "Custom",
+            options  = Ballistics.AmmoCategory.entries.map(::categoryLabel) + "Custom",
+            onPick   = { label ->
+                if (label == "Custom") {
+                    category = null; caliber = null; onSelect(null)
+                } else {
+                    category = Ballistics.AmmoCategory.entries.first { categoryLabel(it) == label }
+                    caliber = null
+                }
+            }
+        )
+        if (category != null) {
+            SimpleDropdown(
+                label   = "Caliber",
+                display = caliber ?: "Select…",
+                options = calibersInCategory,
+                onPick  = { caliber = it }
+            )
+        }
+        if (category != null && caliber != null) {
+            SimpleDropdown(
+                label    = "Load",
+                display  = selected?.takeIf { it.category == category && it.caliber == caliber }?.name ?: "Select…",
+                options  = loadsInCaliber.map { it.name },
+                onPick   = { name -> onSelect(loadsInCaliber.first { it.name == name }) },
+                itemColor = category?.let(::categoryColor)
+            )
+        }
     }
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SimpleDropdown(
+    label: String,
+    display: String,
+    options: List<String>,
+    onPick: (String) -> Unit,
+    itemColor: Color? = null
+) {
+    var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
         expanded         = expanded,
-        onExpandedChange = {
-            expanded = it
-            if (it) query = ""
-        }
+        onExpandedChange = { expanded = it }
     ) {
         OutlinedTextField(
-            value         = query,
-            onValueChange = { query = it; expanded = true },
+            value         = display,
+            onValueChange = {},
+            readOnly      = true,
             singleLine    = true,
-            label         = { Text("Preset") },
-            placeholder   = { Text("Type to search…") },
+            label         = { Text(label) },
             trailingIcon  = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier      = Modifier
                 .fillMaxWidth()
@@ -913,43 +973,15 @@ private fun AmmoPresetDropdown(
         )
         ExposedDropdownMenu(
             expanded         = expanded,
-            onDismissRequest = { expanded = false; query = selected?.name ?: "Custom" }
+            onDismissRequest = { expanded = false }
         ) {
-            if (filtered.isEmpty()) {
-                DropdownMenuItem(text = { Text("No matches") }, onClick = {}, enabled = false)
-            }
-            var lastCategory: Ballistics.AmmoCategory? = null
-            for (p in filtered) {
-                if (!isFiltering && p.category != lastCategory) {
-                    val headerLabel = when (p.category) {
-                        Ballistics.AmmoCategory.RIFLE   -> "Rifle"
-                        Ballistics.AmmoCategory.RIMFIRE -> "Rimfire"
-                        Ballistics.AmmoCategory.PISTOL  -> "Pistol"
-                        Ballistics.AmmoCategory.SHOTGUN -> "Shotgun"
-                    }
-                    DropdownMenuItem(
-                        text    = { Text(headerLabel, style = MaterialTheme.typography.labelSmall) },
-                        onClick = {},
-                        enabled = false
-                    )
-                    lastCategory = p.category
-                }
-                val bgColor = when (p.category) {
-                    Ballistics.AmmoCategory.RIFLE   -> Color(0x334CAF50)
-                    Ballistics.AmmoCategory.RIMFIRE -> Color(0x332196F3)
-                    Ballistics.AmmoCategory.PISTOL  -> Color(0x33FF9800)
-                    Ballistics.AmmoCategory.SHOTGUN -> Color(0x339C27B0)
-                }
+            for (opt in options) {
                 DropdownMenuItem(
-                    text     = { Text(p.name) },
-                    onClick  = { close(p) },
-                    modifier = Modifier.background(bgColor)
+                    text     = { Text(opt) },
+                    onClick  = { onPick(opt); expanded = false },
+                    modifier = itemColor?.let { Modifier.background(it) } ?: Modifier
                 )
             }
-            DropdownMenuItem(
-                text    = { Text("Custom") },
-                onClick = { close(null) }
-            )
         }
     }
 }

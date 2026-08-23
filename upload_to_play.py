@@ -23,12 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Ammo picker overhaul, new presets, safety guard (v1.90)
+Fix MRAD reticle tree offset (v1.91)
 
-Ammo dropdown is now a Type -> Caliber -> Load picker instead of one \
-long scrolling list. Added Vortex VMR-4 MOA/MRAD reticles, .308 \
-subsonic loads, .277 Fury/6.8x51, and .400 Legend. Guarded against \
-unrealistically low muzzle velocities producing nonsense results.\
+The dot-grid holdover tree on MRAD reticles (Vortex EBR-7C MRAD, EOTech \
+VUDU MR5) was drawn one full mil lower than the real scope, throwing off \
+which row matched which range. Fixed to match the manufacturer reticle.\
 """
 
 def main():

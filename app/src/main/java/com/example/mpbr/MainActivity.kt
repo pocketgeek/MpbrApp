@@ -1517,8 +1517,9 @@ private fun drawReticleSection(
                 val majorPx     = (reticle.majorSpacing * ppu).toFloat()
                 val postPx      = reticle.postStart.toFloat() * ppu
                 val circleR     = ppu * 1.0f      // 1 MRAD speed ring radius
-                val treeStart   = 2               // tree rows begin at 2 MRAD below center
-                val treeDepth   = reticle.vertExtent.toInt()
+                val treeStep    = reticle.majorSpacing.toInt()
+                val treeStart   = treeStep                              // tree rows begin at 1 MRAD below center
+                val treeDepth   = reticle.vertExtent.toInt() - treeStep // leaves room for the bottom post
 
                 val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = android.graphics.Color.BLACK; strokeWidth = s * 6f

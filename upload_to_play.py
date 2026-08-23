@@ -23,11 +23,12 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Add Vortex EBR-7C MRAD reticle preset (v1.86)
+Ammo picker overhaul, new presets, safety guard (v1.90)
 
-New reticle preset for the Venom 5-25x56 FFP MRAD: numbered MRAD \
-tree with dot-grid holdover rows and thick outer posts, matching \
-the existing MOA version's geometry scaled to mils.\
+Ammo dropdown is now a Type -> Caliber -> Load picker instead of one \
+long scrolling list. Added Vortex VMR-4 MOA/MRAD reticles, .308 \
+subsonic loads, .277 Fury/6.8x51, and .400 Legend. Guarded against \
+unrealistically low muzzle velocities producing nonsense results.\
 """
 
 def main():

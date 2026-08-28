@@ -228,6 +228,26 @@ object Ballistics {
             windageMarks  = listOf(13.48),
             postStart     = 2.20
         ),
+        // SIG Sauer Tango-MSR 5-30×56 FFP — MRAD Milling 2.0 reticle. FFP, all mags.
+        // Numbered H/V stadia at 2 MRAD increments (1 MRAD minor ticks), thick outer
+        // posts at ±14 MRAD; holdover grid below center to 14 MRAD.
+        // Source: SIG Sauer TANGO-MSR Operator's Manual, p.28 (7404914-01 R00).
+        ReticlePreset(
+            "SIG Sauer Tango-MSR MRAD Milling 2.0 (MRAD, FFP)",
+            ReticleUnit.MIL, 2.0, 1.0, 16.0,
+            ReticleStyle.MRAD_TREE,
+            postStart = 14.0
+        ),
+        // SIG Sauer Tango-MSR 5-30×56 FFP — MOA Milling 2.0 reticle. FFP, all mags.
+        // Numbered H/V stadia at 4 MOA increments (1 MOA minor ticks), thick outer
+        // posts at ±30 MOA; holdover grid below center to 32 MOA.
+        // Source: SIG Sauer TANGO-MSR Operator's Manual, p.30 (7404914-01 R00).
+        ReticlePreset(
+            "SIG Sauer Tango-MSR MOA Milling 2.0 (MOA, FFP)",
+            ReticleUnit.MOA, 4.0, 1.0, 36.0,
+            ReticleStyle.MOA_TREE,
+            postStart = 30.0
+        ),
         // ── Trijicon ─────────────────────────────────────────────────────────────
         // Trijicon ACOG TA31 4×32 — Donut BDC reticle (5.56mm/.223 Rem, 100m zero).
         // Fixed 4× — subtensions always accurate. Top of donut ring = POA at 100m.

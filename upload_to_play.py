@@ -23,11 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Fix MRAD reticle tree offset (v1.91)
+Add SIG Tango-MSR reticles (v1.92)
 
-The dot-grid holdover tree on MRAD reticles (Vortex EBR-7C MRAD, EOTech \
-VUDU MR5) was drawn one full mil lower than the real scope, throwing off \
-which row matched which range. Fixed to match the manufacturer reticle.\
+Add SIG Sauer Tango-MSR 5-30x56 MRAD and MOA Milling 2.0 reticle \
+presets. Also fixed a mislabeling bug in the MRAD tree reticle style \
+that affected reticles with major spacing other than 1 mil.\
 """
 
 def main():

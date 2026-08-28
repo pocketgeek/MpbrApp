@@ -1553,7 +1553,7 @@ private fun drawReticleSection(
                     cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
                     cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
                     if (isMaj) {
-                        val label = (hStep / stepsPerMaj).toString()
+                        val label = (hStep / stepsPerMaj * treeStep).toString()
                         cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
                         cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
                     }

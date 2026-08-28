@@ -86,7 +86,11 @@ object Ballistics {
         ),
         // ── EOTech ───────────────────────────────────────────────────────────────
         // EOTech VUDU 3-9×32 SFP HC1 — hunting crosshair. SFP, valid at 9× only.
-        // Windage ±2–±12 MOA; holdover 2–22 MOA at 2 MOA steps.
+        // Windage ±2–±12 MOA; holdover 2–22 MOA at 2 MOA steps. EOTech's official
+        // HC1 reticle manual (VD1909 Rev B) tables hash spacing at 18 MOA·mag (i.e.
+        // 1.0 MOA at 18×, the 3.5-18x50 model) — normalized to this scope's 9× max
+        // mag that's 18/9 = 2.0 MOA, matching the spacing already used here.
+        // Source: EOTech Vudu_Reticle_Manual_HC1_RevB.pdf.
         ReticlePreset(
             "EOTech VUDU HC1 (MOA, SFP)",
             ReticleUnit.MOA, 0.0, 0.0, 22.0,
@@ -307,13 +311,16 @@ object Ballistics {
         ),
         // ── Vortex ───────────────────────────────────────────────────────────────
         // Vortex Dead-Hold BDC — Viper 4-12×40, 3.5-10×50, etc. SFP, max mag only.
+        // Holdover hashmarks at 1.5/4.5/7.5 MOA; thick post begins at 11 MOA (top edge
+        // of the bottom post, not a 4th hashmark). Source: Vortex Dead-Hold BDC MOA
+        // reticle manual.
         ReticlePreset(
             "Vortex Dead-Hold BDC (MOA, SFP)",
-            ReticleUnit.MOA, 0.0, 0.0, 11.0,
+            ReticleUnit.MOA, 0.0, 0.0, 13.0,
             ReticleStyle.BDC,
-            holdoverMarks = listOf(1.5, 4.5, 7.5, 11.0),
+            holdoverMarks = listOf(1.5, 4.5, 7.5),
             windageMarks  = listOf(2.0, 4.0, 6.0),
-            postStart     = 7.0
+            postStart     = 11.0
         ),
         // Vortex EBR-7C — Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II. FFP.
         ReticlePreset(

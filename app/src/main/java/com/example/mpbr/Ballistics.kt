@@ -229,11 +229,11 @@ object Ballistics {
             postStart     = 2.20
         ),
         // SIG Sauer Tango-MSR 5-30×56 FFP — MRAD Milling 2.0 reticle. FFP, all mags.
-        // Fine continuous grid: 0.2 MRAD minor ticks, numbered every 2 MRAD; short
-        // top post (4 MRAD), full elevation/windage grid below center to 14 MRAD,
-        // thick outer posts beyond ±14 MRAD.
+        // Fine ladder crosshair: 0.2 MRAD minor ticks, numbered every 2 MRAD; short
+        // top post (4 MRAD); thin vertical drop-lines from each major windage tick down
+        // to 14 MRAD (no horizontal rungs); thick outer posts beyond ±14 MRAD.
         // Dedicated SIG_MRAD_MILLING drawing style — see drawReticleSection().
-        // Source: SIG Sauer TANGO-MSR Operator's Manual, pp.28–29 (7404914-01 R00).
+        // Source: SIG Sauer TANGO-MSR Operator's Manual, p.28 (7404914-01 R00).
         ReticlePreset(
             "SIG Sauer Tango-MSR MRAD Milling 2.0 (MRAD, FFP)",
             ReticleUnit.MIL, 2.0, 0.2, 16.0,
@@ -241,13 +241,15 @@ object Ballistics {
             postStart = 14.0
         ),
         // SIG Sauer Tango-MSR 5-30×56 FFP — MOA Milling 2.0 reticle. FFP, all mags.
-        // Fine continuous grid: 0.5 MOA minor ticks, numbered every 4 MOA; full
-        // elevation/windage grid below center to 32 MOA, thick outer posts at ±30 MOA.
+        // Plain 4-way ladder/comb crosshair (no drop-lines/mesh, distinct from the MRAD
+        // version): 0.5 MOA minor ticks, numbered every 2 MOA; short 10 MOA top post,
+        // long 32 MOA bottom post (both hardcoded in the drawing to match the manual
+        // diagram); thick outer posts beyond ±30 MOA / 32 MOA below center.
         // Dedicated SIG_MOA_MILLING drawing style — see drawReticleSection().
-        // Source: SIG Sauer TANGO-MSR Operator's Manual, pp.30–31 (7404914-01 R00).
+        // Source: SIG Sauer TANGO-MSR Operator's Manual, p.30 (7404914-01 R00).
         ReticlePreset(
             "SIG Sauer Tango-MSR MOA Milling 2.0 (MOA, FFP)",
-            ReticleUnit.MOA, 4.0, 0.5, 36.0,
+            ReticleUnit.MOA, 2.0, 0.5, 36.0,
             ReticleStyle.SIG_MOA_MILLING,
             postStart = 30.0
         ),

@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC, SIG_MRAD_MILLING, SIG_MOA_MILLING }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -229,23 +229,26 @@ object Ballistics {
             postStart     = 2.20
         ),
         // SIG Sauer Tango-MSR 5-30×56 FFP — MRAD Milling 2.0 reticle. FFP, all mags.
-        // Numbered H/V stadia at 2 MRAD increments (1 MRAD minor ticks), thick outer
-        // posts at ±14 MRAD; holdover grid below center to 14 MRAD.
-        // Source: SIG Sauer TANGO-MSR Operator's Manual, p.28 (7404914-01 R00).
+        // Fine continuous grid: 0.2 MRAD minor ticks, numbered every 2 MRAD; short
+        // top post (4 MRAD), full elevation/windage grid below center to 14 MRAD,
+        // thick outer posts beyond ±14 MRAD.
+        // Dedicated SIG_MRAD_MILLING drawing style — see drawReticleSection().
+        // Source: SIG Sauer TANGO-MSR Operator's Manual, pp.28–29 (7404914-01 R00).
         ReticlePreset(
             "SIG Sauer Tango-MSR MRAD Milling 2.0 (MRAD, FFP)",
-            ReticleUnit.MIL, 2.0, 1.0, 16.0,
-            ReticleStyle.MRAD_TREE,
+            ReticleUnit.MIL, 2.0, 0.2, 16.0,
+            ReticleStyle.SIG_MRAD_MILLING,
             postStart = 14.0
         ),
         // SIG Sauer Tango-MSR 5-30×56 FFP — MOA Milling 2.0 reticle. FFP, all mags.
-        // Numbered H/V stadia at 4 MOA increments (1 MOA minor ticks), thick outer
-        // posts at ±30 MOA; holdover grid below center to 32 MOA.
-        // Source: SIG Sauer TANGO-MSR Operator's Manual, p.30 (7404914-01 R00).
+        // Fine continuous grid: 0.5 MOA minor ticks, numbered every 4 MOA; full
+        // elevation/windage grid below center to 32 MOA, thick outer posts at ±30 MOA.
+        // Dedicated SIG_MOA_MILLING drawing style — see drawReticleSection().
+        // Source: SIG Sauer TANGO-MSR Operator's Manual, pp.30–31 (7404914-01 R00).
         ReticlePreset(
             "SIG Sauer Tango-MSR MOA Milling 2.0 (MOA, FFP)",
-            ReticleUnit.MOA, 4.0, 1.0, 36.0,
-            ReticleStyle.MOA_TREE,
+            ReticleUnit.MOA, 4.0, 0.5, 36.0,
+            ReticleStyle.SIG_MOA_MILLING,
             postStart = 30.0
         ),
         // ── Trijicon ─────────────────────────────────────────────────────────────

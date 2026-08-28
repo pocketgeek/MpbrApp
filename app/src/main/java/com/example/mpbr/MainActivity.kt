@@ -1974,6 +1974,130 @@ private fun drawReticleSection(
                 }
             }
 
+            Ballistics.ReticleStyle.SIG_MRAD_MILLING -> {
+                // SIG Tango-MSR MRAD Milling 2.0: fine continuous grid, numbered every
+                // 2 MRAD, short thin top post, full elevation/windage mesh below center,
+                // thick outer posts beyond postStart. Source: TANGO-MSR manual pp.28-29.
+                val minor      = reticle.minorSpacing.toFloat()   // 0.2 MRAD
+                val major      = reticle.majorSpacing.toFloat()   // 2 MRAD
+                val minorPx    = minor * ppu
+                val postPx     = reticle.postStart.toFloat() * ppu
+                val topArmMrad = major * 2f                       // short top post, 4 MRAD
+                val gridDepth  = reticle.postStart.toInt()        // full mesh rows/cols
+
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pGrid  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 0.75f }
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 6f }
+                val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = ppu * major * 0.30f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
+                }
+
+                // Thin crosshair core + thick outer posts (H) and bottom post (V)
+                cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
+                cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
+                cv.drawLine(cx + postPx, cy, cx + r.toFloat(), cy, pThick)
+                cv.drawLine(cx, cy - topArmMrad * ppu, cx, cy, pThin)
+                cv.drawLine(cx, cy, cx, cy + postPx, pThin)
+                cv.drawLine(cx, cy + postPx, cx, cy + r.toFloat(), pThick)
+
+                // Fine ticks every minorSpacing, longer + numbered every majorSpacing
+                fun tickRow(axisIsY: Boolean, sign: Int, maxMrad: Float) {
+                    var v = minor
+                    while (v <= maxMrad + 0.001f) {
+                        val isMaj = (Math.round(v / minor) % Math.round(major / minor)) == 0
+                        val len = if (isMaj) ppu * major * 0.14f else ppu * major * 0.07f
+                        val pos = v * ppu * sign
+                        if (axisIsY) cv.drawLine(cx - len, cy + pos, cx + len, cy + pos, pThin)
+                        else cv.drawLine(cx + pos, cy - len, cx + pos, cy + len, pThin)
+                        if (isMaj) {
+                            val label = Math.round(v).toString()
+                            if (axisIsY) cv.drawText(label, cx - len - ppu * major * 0.28f, cy + pos + ppu * major * 0.10f, pNum)
+                            else cv.drawText(label, cx + pos, cy - len - ppu * major * 0.10f, pNum)
+                        }
+                        v += minor
+                    }
+                }
+                tickRow(false,  1, reticle.postStart.toFloat())
+                tickRow(false, -1, reticle.postStart.toFloat())
+                tickRow(true,  -1, topArmMrad)
+                tickRow(true,   1, reticle.postStart.toFloat())
+
+                // Full elevation/windage mesh below center: horizontal + vertical grid
+                // lines every 1 MRAD out to gridDepth, major lines heavier every majorSpacing.
+                for (row in 1..gridDepth) {
+                    val ry     = cy + row * ppu
+                    val isMajR = row % major.toInt() == 0
+                    cv.drawLine(cx - postPx, ry, cx + postPx, ry, if (isMajR) pGrid else pThin)
+                }
+                for (col in 1..gridDepth) {
+                    val gx     = col.toFloat() * ppu
+                    val isMajC = col % major.toInt() == 0
+                    val paint  = if (isMajC) pGrid else pThin
+                    cv.drawLine(cx + gx, cy, cx + gx, cy + postPx, paint)
+                    cv.drawLine(cx - gx, cy, cx - gx, cy + postPx, paint)
+                }
+            }
+
+            Ballistics.ReticleStyle.SIG_MOA_MILLING -> {
+                // SIG Tango-MSR MOA Milling 2.0: same concept as SIG_MRAD_MILLING, scaled
+                // for MOA. Source: TANGO-MSR manual pp.30-31.
+                val minor      = reticle.minorSpacing.toFloat()   // 0.5 MOA
+                val major      = reticle.majorSpacing.toFloat()   // 4 MOA
+                val postPx     = reticle.postStart.toFloat() * ppu
+                val topArmMoa  = major * 2f                       // short top post, 8 MOA
+                val gridDepth  = reticle.postStart.toInt()
+
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pGrid  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 0.75f }
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 6f }
+                val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = ppu * major * 0.30f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
+                }
+
+                cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
+                cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
+                cv.drawLine(cx + postPx, cy, cx + r.toFloat(), cy, pThick)
+                cv.drawLine(cx, cy - topArmMoa * ppu, cx, cy, pThin)
+                cv.drawLine(cx, cy, cx, cy + postPx, pThin)
+                cv.drawLine(cx, cy + postPx, cx, cy + r.toFloat(), pThick)
+
+                fun tickRow(axisIsY: Boolean, sign: Int, maxMoa: Float) {
+                    var v = minor
+                    while (v <= maxMoa + 0.001f) {
+                        val isMaj = (Math.round(v / minor) % Math.round(major / minor)) == 0
+                        val len = if (isMaj) ppu * major * 0.14f else ppu * major * 0.07f
+                        val pos = v * ppu * sign
+                        if (axisIsY) cv.drawLine(cx - len, cy + pos, cx + len, cy + pos, pThin)
+                        else cv.drawLine(cx + pos, cy - len, cx + pos, cy + len, pThin)
+                        if (isMaj) {
+                            val label = Math.round(v).toString()
+                            if (axisIsY) cv.drawText(label, cx - len - ppu * major * 0.28f, cy + pos + ppu * major * 0.10f, pNum)
+                            else cv.drawText(label, cx + pos, cy - len - ppu * major * 0.10f, pNum)
+                        }
+                        v += minor
+                    }
+                }
+                tickRow(false,  1, reticle.postStart.toFloat())
+                tickRow(false, -1, reticle.postStart.toFloat())
+                tickRow(true,  -1, topArmMoa)
+                tickRow(true,   1, reticle.postStart.toFloat())
+
+                for (row in 1..gridDepth) {
+                    val ry     = cy + row * ppu
+                    val isMajR = row % major.toInt() == 0
+                    cv.drawLine(cx - postPx, ry, cx + postPx, ry, if (isMajR) pGrid else pThin)
+                }
+                for (col in 1..gridDepth) {
+                    val gx     = col.toFloat() * ppu
+                    val isMajC = col % major.toInt() == 0
+                    val paint  = if (isMajC) pGrid else pThin
+                    cv.drawLine(cx + gx, cy, cx + gx, cy + postPx, paint)
+                    cv.drawLine(cx - gx, cy, cx - gx, cy + postPx, paint)
+                }
+            }
+
             else -> {
                 // Hash / Dot / Christmas tree
                 cv.drawLine(cx, sectionTop, cx, sectionTop + sectionH, pLine)

@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, MRAD_TREE, CIRCLE_DOT, MOA_TREE, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC, SIG_MRAD_MILLING, SIG_MOA_MILLING }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC, SIG_MRAD_MILLING, SIG_MOA_MILLING, EOTECH_MR5_TREE, VORTEX_EBR7C_MOA_TREE, VORTEX_EBR7C_MRAD_TREE, VORTEX_VMR4_MOA_TREE, VORTEX_VMR4_MRAD_TREE, HOLOSUN_510C, HOLOSUN_507COMP, HOLOSUN_507K }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -99,7 +99,7 @@ object Ballistics {
         ReticlePreset(
             "EOTech VUDU MR5 (MRAD, FFP)",
             ReticleUnit.MIL, 1.0, 0.5, 8.0,
-            ReticleStyle.MRAD_TREE,
+            ReticleStyle.EOTECH_MR5_TREE,
             postStart = 6.0
         ),
         // ── Firefield ────────────────────────────────────────────────────────────
@@ -149,13 +149,13 @@ object Ballistics {
         ReticlePreset(
             "Holosun 510C (2 MOA / 65 MOA)",
             ReticleUnit.MOA, 32.5, 1.0, 40.0,
-            ReticleStyle.CIRCLE_DOT
+            ReticleStyle.HOLOSUN_510C
         ),
         // Holosun HS510C — 65 MOA ring only, no dot.
         ReticlePreset(
             "Holosun 510C (65 MOA ring only)",
             ReticleUnit.MOA, 32.5, 0.0, 40.0,
-            ReticleStyle.CIRCLE_DOT
+            ReticleStyle.HOLOSUN_510C
         ),
         // Holosun HS507COMP CRS — 2 MOA dot + 8/20/32 MOA selectable circles, 1× red dot.
         // holdoverMarks = ring radii (half-diameters): 4/10/16 MOA.
@@ -163,26 +163,26 @@ object Ballistics {
         ReticlePreset(
             "Holosun 507 COMP (2 MOA / 8-20-32 MOA CRS)",
             ReticleUnit.MOA, 16.0, 1.0, 20.0,
-            ReticleStyle.CIRCLE_DOT,
+            ReticleStyle.HOLOSUN_507COMP,
             holdoverMarks = listOf(4.0, 10.0, 16.0)
         ),
         // Holosun HS507COMP — 32 MOA ring only, no dot.
         ReticlePreset(
             "Holosun 507 COMP (32 MOA ring only)",
             ReticleUnit.MOA, 16.0, 0.0, 20.0,
-            ReticleStyle.CIRCLE_DOT
+            ReticleStyle.HOLOSUN_507COMP
         ),
         // Holosun HS507K — 2 MOA center dot + 32 MOA ring, 1× red dot.
         ReticlePreset(
             "Holosun 507K (2 MOA / 32 MOA)",
             ReticleUnit.MOA, 16.0, 1.0, 20.0,
-            ReticleStyle.CIRCLE_DOT
+            ReticleStyle.HOLOSUN_507K
         ),
         // Holosun HS507K — 32 MOA ring only, no dot.
         ReticlePreset(
             "Holosun 507K (32 MOA ring only)",
             ReticleUnit.MOA, 16.0, 0.0, 20.0,
-            ReticleStyle.CIRCLE_DOT
+            ReticleStyle.HOLOSUN_507K
         ),
         // ── Leupold ──────────────────────────────────────────────────────────────
         // Leupold VX-Freedom 1.5-4x20 SFP — MOA-Ring reticle.
@@ -319,7 +319,7 @@ object Ballistics {
         ReticlePreset(
             "Vortex EBR-7C (MOA, FFP)",
             ReticleUnit.MOA, 4.0, 1.0, 40.0,
-            ReticleStyle.MOA_TREE,
+            ReticleStyle.VORTEX_EBR7C_MOA_TREE,
             postStart = 26.0
         ),
         // Vortex EBR-7C MRAD — Venom 5-25×56 FFP MRAD variant. Same reticle geometry as the
@@ -329,7 +329,7 @@ object Ballistics {
         ReticlePreset(
             "Vortex EBR-7C (MRAD, FFP)",
             ReticleUnit.MIL, 1.0, 0.5, 11.6,
-            ReticleStyle.MRAD_TREE,
+            ReticleStyle.VORTEX_EBR7C_MRAD_TREE,
             postStart = 7.6
         ),
         // Vortex Spitfire AR 1× Prism — DRT (Dual Ring Tactical). Always accurate.
@@ -356,7 +356,7 @@ object Ballistics {
         ReticlePreset(
             "Vortex VMR-4 (MOA, FFP)",
             ReticleUnit.MOA, 4.0, 1.0, 24.0,
-            ReticleStyle.MOA_TREE,
+            ReticleStyle.VORTEX_VMR4_MOA_TREE,
             postStart = 32.5
         ),
         // Vortex VMR-4 MRAD — same reticle as above, mil-graduated: 1 MRAD major / 0.5 MRAD
@@ -367,7 +367,7 @@ object Ballistics {
         ReticlePreset(
             "Vortex VMR-4 (MRAD, FFP)",
             ReticleUnit.MIL, 1.0, 0.5, 7.0,
-            ReticleStyle.MOA_TREE,
+            ReticleStyle.VORTEX_VMR4_MRAD_TREE,
             postStart = 10.0
         )
     )

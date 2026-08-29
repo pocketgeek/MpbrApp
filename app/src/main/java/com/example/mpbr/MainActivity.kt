@@ -1516,14 +1516,17 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.EOTECH_MR5_TREE -> {
+                // Real EOTech MR5 diagram (eotechinc.com product SVG): tree rows start at
+                // row 2 (not 1 — different convention from the Vortex EBR-7C family), short
+                // capped top stub to 3 MRAD (not a full-height fine-tick stadia), no speed
+                // ring. Verified against the official reticle image, not a manual scan.
                 val stepsPerMaj = (reticle.majorSpacing / reticle.minorSpacing).roundToInt()
                 val minorPx     = (reticle.minorSpacing * ppu).toFloat()
                 val majorPx     = (reticle.majorSpacing * ppu).toFloat()
                 val postPx      = reticle.postStart.toFloat() * ppu
-                val circleR     = ppu * 1.0f      // 1 MRAD speed ring radius
-                val treeStep    = reticle.majorSpacing.toInt()
-                val treeStart   = treeStep                              // tree rows begin at 1 MRAD below center
-                val treeDepth   = reticle.vertExtent.toInt() - treeStep // leaves room for the bottom post
+                val treeStart   = 2 * reticle.majorSpacing.toInt()  // hardcoded: real tree starts at row 2
+                val treeDepth   = reticle.postStart.toInt()         // last labeled row = thick-post threshold
+                val topArmMrad  = 3f                                // hardcoded from the official diagram
 
                 val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = android.graphics.Color.BLACK; strokeWidth = s * 6f
@@ -1557,31 +1560,21 @@ private fun drawReticleSection(
                     cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
                     cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
                     if (isMaj) {
-                        val label = (hStep / stepsPerMaj * treeStep).toString()
+                        val label = (hStep / stepsPerMaj * reticle.majorSpacing.toInt()).toString()
                         cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
                         cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
                     }
                 }
 
-                // Center speed ring
-                cv.drawCircle(cx, cy, circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    style = Paint.Style.STROKE
-                    color = android.graphics.Color.BLACK
-                    strokeWidth = s * 1.5f
-                })
+                // Short capped top stub to 3 MRAD (no fine ticks, matches official diagram)
+                val topPx = topArmMrad * ppu
+                cv.drawLine(cx, cy - topPx, cx, cy, pThin)
+                cv.drawLine(cx - majTickH, cy - topPx, cx + majTickH, cy - topPx, pTick)
+                cv.drawText(topArmMrad.toInt().toString(), cx + majTickH + majorPx * 0.15f,
+                    cy - topPx + pNum.textSize * 0.35f, pNum)
 
-                // Short vertical stadia above center with minor ticks
-                cv.drawLine(cx, cy - r.toFloat(), cx, cy - circleR, pThin)
-                val vMaxSteps = floor(((r - circleR) / minorPx).toDouble()).toInt()
-                for (vStep in 1..vMaxSteps) {
-                    val vy    = circleR + vStep * minorPx
-                    val isMaj = vStep % stepsPerMaj == 0
-                    val tw    = if (isMaj) majTickH else minTickH
-                    cv.drawLine(cx - tw, cy - vy, cx + tw, cy - vy, pTick)
-                }
-
-                // Vertical connector from circle bottom to tree start
-                cv.drawLine(cx, cy + circleR, cx, cy + treeStart * ppu, pThin)
+                // Vertical connector from top-stub base to tree start
+                cv.drawLine(cx, cy, cx, cy + treeStart * ppu, pThin)
 
                 // Christmas tree: dot grid + half-MRAD ticks between dots
                 val dotRad    = (majorPx * 0.13f).coerceAtLeast(s * 3f)
@@ -1682,81 +1675,70 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.VORTEX_VMR4_MRAD_TREE -> {
+                // Real VMR-4 MRAD reticle (Vortex manual M-00359-0): ladder crosshair with
+                // DOTTED windage drop-lines hanging from each major tick (dots growing in
+                // size with distance — not a dot-grid Christmas tree; that assumption from
+                // an earlier session was wrong). Thick posts begin right after the last
+                // labeled tick (postStart). Top arm length is an estimate — not clearly
+                // legible in the source scan.
                 val stepsPerMaj = (reticle.majorSpacing / reticle.minorSpacing).roundToInt()
                 val minorPx     = (reticle.minorSpacing * ppu).toFloat()
                 val majorPx     = (reticle.majorSpacing * ppu).toFloat()
                 val postPx      = reticle.postStart.toFloat() * ppu
-                val circleR     = ppu * 1.0f      // 1 MRAD speed ring radius
-                val treeStep    = reticle.majorSpacing.toInt()
-                val treeStart   = treeStep                              // tree rows begin at 1 MRAD below center
-                val treeDepth   = reticle.vertExtent.toInt() - treeStep // leaves room for the bottom post
+                val major       = reticle.majorSpacing.toFloat()
+                val topArmMrad  = 4f   // estimate — see note above
 
-                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; strokeWidth = s * 6f
-                }
-                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; strokeWidth = s.toFloat()
-                }
-                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f
-                }
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 6f }
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f }
                 val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color     = android.graphics.Color.BLACK
-                    textSize  = majorPx * 0.48f
-                    typeface  = Typeface.DEFAULT_BOLD
-                    textAlign = Paint.Align.CENTER
+                    color = android.graphics.Color.BLACK; textSize = majorPx * 0.48f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
                 }
+                val pDot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
 
                 cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
                 cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
-                cv.drawLine(cx + postPx,      cy, cx + r.toFloat(), cy, pThick)
+                cv.drawLine(cx + postPx, cy, cx + r.toFloat(), cy, pThick)
+                cv.drawLine(cx, cy - topArmMrad * ppu, cx, cy, pThin)
+                cv.drawLine(cx, cy, cx, cy + postPx, pThin)
+                cv.drawLine(cx, cy + postPx, cx, cy + r.toFloat(), pThick)
 
                 val majTickH  = majorPx * 0.45f
                 val minTickH  = majorPx * 0.22f
-                val hMaxSteps = (reticle.postStart / reticle.minorSpacing).roundToInt()
-                for (hStep in 1..hMaxSteps) {
-                    val isMaj = hStep % stepsPerMaj == 0
-                    val hx    = hStep * minorPx
-                    val th    = if (isMaj) majTickH else minTickH
-                    cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
-                    cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
-                    if (isMaj) {
-                        val label = (hStep / stepsPerMaj * treeStep).toString()
-                        cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
-                        cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
+                fun tickRow(axisIsY: Boolean, sign: Int, maxV: Float) {
+                    var v = reticle.minorSpacing.toFloat()
+                    while (v <= maxV + 0.001f) {
+                        val isMaj = (Math.round(v / reticle.minorSpacing.toFloat()) % stepsPerMaj) == 0
+                        val th = if (isMaj) majTickH else minTickH
+                        val pos = v * ppu * sign
+                        if (axisIsY) cv.drawLine(cx - th, cy + pos, cx + th, cy + pos, pTick)
+                        else cv.drawLine(cx + pos, cy - th, cx + pos, cy + th, pTick)
+                        if (isMaj) {
+                            val label = Math.round(v).toString()
+                            if (axisIsY) cv.drawText(label, cx + th + majorPx * 0.3f, cy + pos + pNum.textSize * 0.35f, pNum)
+                            else { cv.drawText(label, cx + pos, cy - th - majorPx * 0.08f, pNum); cv.drawText(label, cx + pos, cy + th + pNum.textSize, pNum) }
+                        }
+                        v += reticle.minorSpacing.toFloat()
                     }
                 }
+                tickRow(false, 1, reticle.postStart.toFloat())
+                tickRow(false, -1, reticle.postStart.toFloat())
+                tickRow(true, -1, topArmMrad)
+                tickRow(true, 1, reticle.postStart.toFloat())
 
-                cv.drawCircle(cx, cy, circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    style = Paint.Style.STROKE
-                    color = android.graphics.Color.BLACK
-                    strokeWidth = s * 1.5f
-                })
-
-                cv.drawLine(cx, cy - r.toFloat(), cx, cy - circleR, pThin)
-                val vMaxSteps2 = floor(((r - circleR) / minorPx).toDouble()).toInt()
-                for (vStep in 1..vMaxSteps2) {
-                    val vy    = circleR + vStep * minorPx
-                    val isMaj = vStep % stepsPerMaj == 0
-                    val tw    = if (isMaj) majTickH else minTickH
-                    cv.drawLine(cx - tw, cy - vy, cx + tw, cy - vy, pTick)
-                }
-
-                cv.drawLine(cx, cy + circleR, cx, cy + treeStart * ppu, pThin)
-
-                val dotRad    = (majorPx * 0.13f).coerceAtLeast(s * 3f)
-                val halfTickH = majorPx * 0.20f
-                val pDotFill  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; style = Paint.Style.FILL
-                }
-                for (row in treeStart..treeDepth) {
-                    val ry = cy + row * ppu
-                    for (col in -row..row) {
-                        cv.drawCircle(cx + col * ppu, ry, dotRad, pDotFill)
-                    }
-                    for (col in -row until row) {
-                        val hx = cx + (col + 0.5f) * ppu
-                        cv.drawLine(hx, ry - halfTickH, hx, ry + halfTickH, pTick)
+                // Dotted windage drop-lines from each major tick, dots growing with depth
+                val steps = Math.round(reticle.postStart.toFloat() / major)
+                for (i in 1..steps) {
+                    val gx = i * major * ppu
+                    for (sign in listOf(1f, -1f)) {
+                        var dv = reticle.minorSpacing.toFloat()
+                        while (dv <= reticle.postStart.toFloat() + 0.001f) {
+                            val frac = dv / reticle.postStart.toFloat()
+                            val dotRad = (majorPx * (0.05f + 0.10f * frac)).coerceAtLeast(s * 1.5f)
+                            cv.drawCircle(cx + sign * gx, cy + dv * ppu, dotRad, pDot)
+                            dv += reticle.minorSpacing.toFloat()
+                        }
                     }
                 }
             }
@@ -1859,12 +1841,17 @@ private fun drawReticleSection(
             }
 
             Ballistics.ReticleStyle.VORTEX_VMR4_MOA_TREE -> {
+                // Real VMR-4 MOA reticle (Vortex manual M-00358-0): ladder crosshair with
+                // DOTTED windage drop-lines hanging from each major tick (dots growing in
+                // size with distance — not a dot-grid Christmas tree; that assumption from
+                // an earlier session was wrong, same fix as the MRAD variant). Thick posts
+                // begin right after the last labeled tick (postStart = 24). Top arm length
+                // is an estimate — not clearly legible in the source scan.
                 val stepsPerMaj = (reticle.majorSpacing / reticle.minorSpacing).roundToInt()
-                val minorPx     = (reticle.minorSpacing * ppu).toFloat()
                 val majorPx     = (reticle.majorSpacing * ppu).toFloat()
                 val postPx      = reticle.postStart.toFloat() * ppu
-                val treeStep    = reticle.majorSpacing.toInt()
-                val treeDepth   = reticle.vertExtent.toInt() - treeStep
+                val major       = reticle.majorSpacing.toFloat()
+                val topArmMoa   = 8f   // estimate — see note above
 
                 val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 6f }
                 val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
@@ -1873,76 +1860,51 @@ private fun drawReticleSection(
                     color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
                     typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
                 }
-                val pNumL  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
-                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
-                }
-                val pNumR  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = android.graphics.Color.BLACK; textSize = majorPx * 0.55f
-                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.RIGHT
-                }
+                val pDot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
 
                 cv.drawLine(cx - postPx, cy, cx + postPx, cy, pThin)
                 cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
                 cv.drawLine(cx + postPx, cy, cx + r.toFloat(), cy, pThick)
-                cv.drawLine(cx, cy - r.toFloat(), cx, cy, pThin)
-                cv.drawLine(cx, cy, cx, cy + treeDepth * ppu, pThin)
-                cv.drawLine(cx, cy + treeDepth * ppu, cx, cy + r.toFloat(), pThick)
+                cv.drawLine(cx, cy - topArmMoa * ppu, cx, cy, pThin)
+                cv.drawLine(cx, cy, cx, cy + postPx, pThin)
+                cv.drawLine(cx, cy + postPx, cx, cy + r.toFloat(), pThick)
 
                 val majTickH  = majorPx * 0.45f
                 val minTickH  = majorPx * 0.22f
-                val hMaxSteps = (reticle.postStart / reticle.minorSpacing).roundToInt()
-                for (hStep in 1..hMaxSteps) {
-                    val isMaj = hStep % stepsPerMaj == 0
-                    val hx = hStep * minorPx
-                    val th = if (isMaj) majTickH else minTickH
-                    cv.drawLine(cx + hx, cy - th, cx + hx, cy + th, pTick)
-                    cv.drawLine(cx - hx, cy - th, cx - hx, cy + th, pTick)
-                    if (isMaj) {
-                        val label = (hStep / stepsPerMaj * treeStep).toString()
-                        cv.drawText(label, cx + hx, cy - th - majorPx * 0.08f, pNum)
-                        cv.drawText(label, cx - hx, cy - th - majorPx * 0.08f, pNum)
+                fun tickRow(axisIsY: Boolean, sign: Int, maxV: Float) {
+                    var v = reticle.minorSpacing.toFloat()
+                    while (v <= maxV + 0.001f) {
+                        val isMaj = (Math.round(v / reticle.minorSpacing.toFloat()) % stepsPerMaj) == 0
+                        val th = if (isMaj) majTickH else minTickH
+                        val pos = v * ppu * sign
+                        if (axisIsY) cv.drawLine(cx - th, cy + pos, cx + th, cy + pos, pTick)
+                        else cv.drawLine(cx + pos, cy - th, cx + pos, cy + th, pTick)
+                        if (isMaj) {
+                            val label = Math.round(v).toString()
+                            if (axisIsY) cv.drawText(label, cx + th + majorPx * 0.3f, cy + pos + pNum.textSize * 0.35f, pNum)
+                            else { cv.drawText(label, cx + pos, cy - th - majorPx * 0.08f, pNum); cv.drawText(label, cx + pos, cy + th + pNum.textSize, pNum) }
+                        }
+                        v += reticle.minorSpacing.toFloat()
                     }
                 }
+                tickRow(false, 1, reticle.postStart.toFloat())
+                tickRow(false, -1, reticle.postStart.toFloat())
+                tickRow(true, -1, topArmMoa)
+                tickRow(true, 1, reticle.postStart.toFloat())
 
-                val vMaxSteps = floor((r / minorPx).toDouble()).toInt()
-                for (vStep in 1..vMaxSteps) {
-                    val vy = vStep * minorPx
-                    if (vy > r) break
-                    val isMaj = vStep % stepsPerMaj == 0
-                    val tw = if (isMaj) majTickH else minTickH
-                    cv.drawLine(cx - tw, cy - vy, cx + tw, cy - vy, pTick)
-                    if (isMaj) {
-                        val label = (vStep / stepsPerMaj * treeStep).toString()
-                        cv.drawText(label, cx + tw + majorPx * 0.12f, cy - vy + pNumL.textSize * 0.35f, pNumL)
+                // Dotted windage drop-lines from each major tick, dots growing with depth
+                val steps = Math.round(reticle.postStart.toFloat() / major)
+                for (i in 1..steps) {
+                    val gx = i * major * ppu
+                    for (sign in listOf(1f, -1f)) {
+                        var dv = reticle.minorSpacing.toFloat()
+                        while (dv <= reticle.postStart.toFloat() + 0.001f) {
+                            val frac = dv / reticle.postStart.toFloat()
+                            val dotRad = (majorPx * (0.05f + 0.10f * frac)).coerceAtLeast(s * 1.5f)
+                            cv.drawCircle(cx + sign * gx, cy + dv * ppu, dotRad, pDot)
+                            dv += reticle.minorSpacing.toFloat()
+                        }
                     }
-                }
-
-                cv.drawCircle(cx, cy, (ppu * 0.14f).coerceAtLeast(s * 2f),
-                    Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK })
-
-                val dotRad    = (majorPx * 0.10f).coerceAtLeast(s * 2f)
-                val halfTickH = majorPx * 0.18f
-                val pDot      = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
-                val labelOff  = majorPx * 0.40f
-                var rowMoa    = treeStep
-                while (rowMoa <= treeDepth) {
-                    val ry = cy + rowMoa * ppu
-                    var colMoa = -rowMoa
-                    while (colMoa <= rowMoa) {
-                        cv.drawCircle(cx + colMoa * ppu, ry, dotRad, pDot)
-                        colMoa += 2
-                    }
-                    colMoa = -(rowMoa - 1)
-                    while (colMoa < rowMoa) {
-                        val hx = cx + colMoa * ppu
-                        cv.drawLine(hx, ry - halfTickH, hx, ry + halfTickH, pTick)
-                        colMoa += 2
-                    }
-                    val outerX = rowMoa * ppu
-                    cv.drawText(rowMoa.toString(), cx - outerX - labelOff, ry + pNumR.textSize * 0.35f, pNumR)
-                    cv.drawText(rowMoa.toString(), cx + outerX + labelOff * 0.5f, ry + pNumL.textSize * 0.35f, pNumL)
-                    rowMoa += treeStep
                 }
             }
 

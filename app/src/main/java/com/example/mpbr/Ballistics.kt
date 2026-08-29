@@ -100,11 +100,14 @@ object Ballistics {
             postStart     = 0.0
         ),
         // EOTech VUDU 4-12×36 FFP MR5 — MRAD dot-grid Christmas tree. FFP, all mags.
+        // Numbered stadia 2–8 MRAD (thick posts at ±8), short capped top stub to 3 MRAD,
+        // tree rows start at row 2 (not 1 — confirmed from EOTech's own reticle image,
+        // eotechinc.com/cdn/shop/files/EOTECH-Vudu-Reticle-MR5.svg).
         ReticlePreset(
             "EOTech VUDU MR5 (MRAD, FFP)",
-            ReticleUnit.MIL, 1.0, 0.5, 8.0,
+            ReticleUnit.MIL, 1.0, 0.5, 9.0,
             ReticleStyle.EOTECH_MR5_TREE,
-            postStart = 6.0
+            postStart = 8.0
         ),
         // ── Firefield ────────────────────────────────────────────────────────────
         // Firefield RapidStrike 1-6×24 SFP — Circle Dot BDC reticle.
@@ -353,29 +356,28 @@ object Ballistics {
             ReticleStyle.AR_BDC3,
             holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6)
         ),
-        // Vortex VMR-4 — Viper HD 5-25x50 FFP. Numbered stadia (4 MOA major / 1 MOA minor
-        // hashmarks per Vortex reticle manual) + dot-grid tree rows at 4/8/12/16/20 MOA;
-        // thick horizontal posts begin at 32.5 MOA (exact from manual diagram). Real scope's
-        // thick vertical post begins at 38 MOA — rendered here at the last tree row (20 MOA)
-        // instead, since the drawing code ties the vertical post to tree depth and the real
-        // 18 MOA gap between the tree and the post has no functional hashmarks to show.
-        // Source: Vortex Reticle Manual VTX_M-00358 (VMR-4 MOA), p.2-3.
+        // Vortex VMR-4 — Viper HD 5-25x50 FFP. CORRECTED (was previously implemented as a
+        // dot-grid Christmas tree, copying the EBR-7C assumption — wrong design). The real
+        // reticle is a ladder crosshair with dotted windage drop-lines hanging from each
+        // major tick (dots grow with distance). Numbered stadia 4/8/12/16/20/24 MOA (4 MOA
+        // major / 1 MOA minor); thick posts begin right after 24 MOA. Top arm length (8 MOA)
+        // is an estimate — not clearly legible in the source scan; everything else is exact.
+        // Source: Vortex Reticle Manual M-00358-0 (VMR-4 MOA), pp.2-3.
         ReticlePreset(
             "Vortex VMR-4 (MOA, FFP)",
-            ReticleUnit.MOA, 4.0, 1.0, 24.0,
+            ReticleUnit.MOA, 4.0, 1.0, 26.0,
             ReticleStyle.VORTEX_VMR4_MOA_TREE,
-            postStart = 32.5
+            postStart = 24.0
         ),
-        // Vortex VMR-4 MRAD — same reticle as above, mil-graduated: 1 MRAD major / 0.5 MRAD
-        // minor hashmarks, dot-grid tree rows 1–6 MRAD, thick horizontal posts at 10 MRAD
-        // (exact from manual diagram; real vertical post at 11 MRAD, rendered at row 6 for
-        // the same reason as the MOA version above).
-        // Source: Vortex Reticle Manual VTX_M-00359 (VMR-4 MRAD), p.2-3.
+        // Vortex VMR-4 MRAD — same corrected design as the MOA version, mil-graduated:
+        // 1 MRAD major / 0.5 MRAD minor hashmarks, thick posts begin right after 6 MRAD.
+        // Top arm length (4 MRAD) is an estimate. Source: Vortex Reticle Manual M-00359-0
+        // (VMR-4 MRAD), pp.2-3.
         ReticlePreset(
             "Vortex VMR-4 (MRAD, FFP)",
-            ReticleUnit.MIL, 1.0, 0.5, 7.0,
+            ReticleUnit.MIL, 1.0, 0.5, 8.0,
             ReticleStyle.VORTEX_VMR4_MRAD_TREE,
-            postStart = 10.0
+            postStart = 6.0
         )
     )
 

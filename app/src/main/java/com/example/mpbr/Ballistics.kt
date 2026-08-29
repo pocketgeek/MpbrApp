@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC, SIG_MRAD_MILLING, SIG_MOA_MILLING, EOTECH_MR5_TREE, VORTEX_EBR7C_MOA_TREE, VORTEX_EBR7C_MRAD_TREE, VORTEX_VMR4_MOA_TREE, VORTEX_VMR4_MRAD_TREE, HOLOSUN_510C, HOLOSUN_507COMP, HOLOSUN_507K }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, BALLISTIC_3X, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC, SIG_MRAD_MILLING, SIG_MOA_MILLING, EOTECH_MR5_TREE, VORTEX_EBR7C_MOA_TREE, VORTEX_EBR7C_MRAD_TREE, VORTEX_VMR4_MOA_TREE, VORTEX_VMR4_MRAD_TREE, HOLOSUN_510C, HOLOSUN_507COMP, HOLOSUN_507K }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -83,6 +83,28 @@ object Ballistics {
             ReticleStyle.BALLISTIC_E3,
             holdoverMarks = listOf(1.49, 4.31, 7.18),
             postStart     = 4.0
+        ),
+        // Burris RT-3 3x Prism Sight — Ballistic 3X reticle (model AR-332, fixed 3×).
+        // Broken circle ("horseshoe" open at bottom, matching the HORSESHOE_BDC convention)
+        // with center dot, thin BDC post, and two crossbar hash marks for 400/500 yd.
+        // Values read directly off Burris's own "Ballistic 3X Subtensions" diagram
+        // (burrisoptics.com/reticles/ballistic-3x): dimension table gives A=1 MOA (post width),
+        // C=.175 MOA (crossbar thickness), F=1.25 MOA (crossbar half-width from centerline),
+        // G=10 MOA (windage arm span, tip-to-tip); yardage/MOA table gives holdover 6.1 MOA
+        // at 400 yd and 9.5 MOA at 500 yd (only these two yardages get an etched crossbar —
+        // 100/200/300/600 are unmarked reference points on the same table). Circle radius
+        // (majorSpacing) and center dot radius (minorSpacing) are not dimensioned in the
+        // table; measured proportionally from the diagram's own vector artwork instead.
+        // Windage arm graduation ticks (windageMarks) approximated as even 1 MOA steps out
+        // to the 5 MOA half-span — the diagram's own fine-tick spacing (its B/E dimensions)
+        // wasn't resolvable to the precision needed from the source image.
+        ReticlePreset(
+            "Burris RT-3 Ballistic 3X (MOA, 3x)",
+            ReticleUnit.MOA, 1.65, 0.06, 13.0,
+            ReticleStyle.BALLISTIC_3X,
+            holdoverMarks = listOf(6.1, 9.5),
+            windageMarks  = listOf(1.0, 2.0, 3.0, 4.0, 5.0),
+            postStart     = 1.25
         ),
         // ── EOTech ───────────────────────────────────────────────────────────────
         // EOTech VUDU 3-9×32 SFP HC1 — hunting crosshair. SFP, valid at 9× only.

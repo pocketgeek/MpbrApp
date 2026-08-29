@@ -1066,6 +1066,15 @@ private fun drawReticleSection(
         })
     }
 
+    // BALLISTIC_3X: same broken-circle convention as HORSESHOE_BDC (60° gap at bottom)
+    if (reticle.style == Ballistics.ReticleStyle.BALLISTIC_3X) {
+        val circleR = reticle.majorSpacing.toFloat() * ppu
+        val oval = android.graphics.RectF(cx - circleR, cy - circleR, cx + circleR, cy + circleR)
+        cv.drawArc(oval, 120f, 300f, false, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; color = android.graphics.Color.BLACK; strokeWidth = s * 2f
+        })
+    }
+
     // AR-BDC3: horseshoe (large top arc + two side hooks) drawn outside clip
     if (reticle.style == Ballistics.ReticleStyle.AR_BDC3) {
         val circleR = reticle.majorSpacing.toFloat() * ppu
@@ -1401,6 +1410,51 @@ private fun drawReticleSection(
                 }
 
                 cv.drawLine(cx, lastHy + ppu * 0.5f, cx, cy + r.toFloat(), pThick)
+            }
+
+            Ballistics.ReticleStyle.BALLISTIC_3X -> {
+                // Arc drawn outside clip; inside: center dot, thin post through the arc gap
+                // down to two BDC crossbars (400/500 yd), plus graduated windage arms.
+                val dotR    = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
+                val circleR = reticle.majorSpacing.toFloat() * ppu
+                val barHW   = reticle.postStart.toFloat() * ppu
+                val postW   = (1.0f * ppu).coerceAtLeast(s.toFloat())
+                val barH    = (0.175f * ppu).coerceAtLeast(s.toFloat())
+                val pFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL;   color = android.graphics.Color.BLACK }
+                val pPost   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = postW }
+                val pBar    = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = barH }
+                val pArm    = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pTick   = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 2f }
+
+                cv.drawCircle(cx, cy, dotR, pFill)
+
+                // Faint reference above arc for trajectory callouts
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy - circleR, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()
+                })
+
+                // Thin post from arc gap bottom, through both crossbars, to a short tail below
+                val lastHy = if (reticle.holdoverMarks.isNotEmpty())
+                    cy + reticle.holdoverMarks.last().toFloat() * ppu else cy + circleR
+                cv.drawLine(cx, cy + circleR, cx, lastHy + ppu * 0.5f, pPost)
+
+                for (h in reticle.holdoverMarks) {
+                    val hy = cy + h.toFloat() * ppu
+                    cv.drawLine(cx - barHW, hy, cx + barHW, hy, pBar)
+                }
+
+                // Graduated windage arms: thin line out to the tip, fine ticks, bold outer tick
+                if (reticle.windageMarks.isNotEmpty()) {
+                    val armSpan = reticle.windageMarks.last().toFloat() * ppu
+                    for (sign in listOf(-1f, 1f)) {
+                        cv.drawLine(cx + sign * circleR, cy, cx + sign * armSpan, cy, pArm)
+                        reticle.windageMarks.forEachIndexed { i, wm ->
+                            val wx = cx + sign * wm.toFloat() * ppu
+                            val th = if (i == reticle.windageMarks.lastIndex) ppu * 1.0f else ppu * 0.5f
+                            cv.drawLine(wx, cy - th, wx, cy + th, pTick)
+                        }
+                    }
+                }
             }
 
             Ballistics.ReticleStyle.AR_BDC3 -> {

@@ -210,8 +210,9 @@ object Ballistics {
         // ── SIG Sauer ────────────────────────────────────────────────────────────
         // SIG Sauer Tango SPR 1-4×24 SFP — BDC1 reticle. SFP, valid at 4× only.
         // Thick H posts at ±10 MOA (2 MOA wide, 1.5 MOA half-height); thin crosshair
-        // with 0.25 MOA ticks; holdover marks at 3.75/6.50/9.50/14.50 MOA.
-        // Source: SIG Sauer Tango SPR owner's manual, p.16.
+        // with 0.25 MOA ticks; holdover marks at 3.75/6.50/9.50/14.50 MOA. Re-verified
+        // exact match against the manual diagram.
+        // Source: SIG Sauer Tango-SPR owner's manual (25SIG3843_TANGO-SPR_Manual_7405579-01_R11.pdf), p.16.
         ReticlePreset(
             "SIG Sauer Tango SPR BDC1 (MOA, SFP)",
             ReticleUnit.MOA, 0.0, 0.0, 17.0,
@@ -223,10 +224,13 @@ object Ballistics {
         // SIG Sauer Tango SPR 1-4×24 SFP — FL-4 reticle. SFP, valid at 4× only.
         // Main crosshair is thin; lower BDC stadia are at 2.86/3.44/4.30/5.73 MOA
         // with 0.75 MOA half-widths; horizontal reference triangles are at
-        // ±3.13/±5.95 MOA, with outer horizontal hashes at ±13.48 MOA.
+        // ±3.13/±5.95 MOA, plain hashes at ±9.37/±13.48 MOA (9.37 was missing from
+        // an earlier session's implementation — confirmed present via a 400 DPI
+        // re-render of the manual page; re-verify pixel positions if this style is
+        // touched again).
         // Lower post is 20.22 MOA tall with a 15° included tip angle.
         // Open outlines in the source diagram are dimensional callouts, not reticle artwork.
-        // Source: SIG Sauer Tango SPR owner's manual, p.17.
+        // Source: SIG Sauer Tango-SPR owner's manual (25SIG3843_TANGO-SPR_Manual_7405579-01_R11.pdf), p.17.
         ReticlePreset(
             "SIG Sauer Tango SPR FL-4 (MOA, SFP)",
             ReticleUnit.MOA, 12.24, 6.12, 22.68,
@@ -326,11 +330,15 @@ object Ballistics {
             postStart     = 11.0
         ),
         // Vortex EBR-7C — Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II. FFP.
+        // Re-verified against Vortex's official reticle manual (M-00247-0): numbered H/V
+        // stadia to 32 MOA, thick posts begin right after 32 (was incorrectly 26), tree
+        // rows 4→36 MOA confirmed as a genuine widening pyramid (row N spans ±N MOA), not
+        // a constant-width dotted grid — double-checked closely after nearly misreading it.
         ReticlePreset(
             "Vortex EBR-7C (MOA, FFP)",
             ReticleUnit.MOA, 4.0, 1.0, 40.0,
             ReticleStyle.VORTEX_EBR7C_MOA_TREE,
-            postStart = 26.0
+            postStart = 32.0
         ),
         // Vortex EBR-7C MRAD — Venom 5-25×56 FFP MRAD variant. Same reticle geometry as the
         // MOA version above, numbered/scaled in mils: major hashes every 1 mil, minor every

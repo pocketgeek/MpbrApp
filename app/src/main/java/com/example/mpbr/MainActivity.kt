@@ -2091,7 +2091,7 @@ private fun drawReticleSection(
                 val lowerTip  = cy + 5.73f * ppu
                 val lowerEnd  = cy + 20.22f * ppu
                 val horizontalTriangles = listOf(3.13f, 5.95f)
-                val horizontalHashes = listOf(13.48f)
+                val horizontalHashes = listOf(9.37f, 13.48f)
                 val bdcRows = listOf(2.86f, 3.44f, 4.30f, 5.73f)
                 val pFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; style = Paint.Style.FILL }
                 val pCross = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = crossW }

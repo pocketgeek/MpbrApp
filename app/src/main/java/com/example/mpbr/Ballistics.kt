@@ -113,9 +113,12 @@ object Ballistics {
         // Firefield RapidStrike 1-6×24 SFP — Circle Dot BDC reticle.
         // SFP, calibrated for .223 55gr FMJ. Circle 9.95 MOA diameter + 1.34 MOA center dot.
         // BDC tick marks below circle for 300/400/500/600 yd; thick bottom post.
-        // BDC positions estimated from image proportions — exact MOA not published.
+        // Design re-confirmed against the FF13075 (1-10x24) manual's "Circle Dot" page,
+        // which describes the same circle+dot+BDC-ladder layout at 1.34 MOA dot diameter
+        // (matches minorSpacing here exactly). Exact BDC depths still estimated from image
+        // proportions — the manual gives IPSC-width ranging methodology, not raw MOA values.
         // majorSpacing = circle radius (4.975 MOA); minorSpacing = dot radius (0.67 MOA).
-        // Source: Firefield product page + reticle image.
+        // Source: Firefield product page + reticle image; cross-checked against FF13075 manual.
         ReticlePreset(
             "Firefield RapidStrike Circle Dot (MOA, SFP)",
             ReticleUnit.MOA, 4.975, 0.67, 22.0,

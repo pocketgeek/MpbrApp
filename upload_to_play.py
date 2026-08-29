@@ -23,13 +23,13 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Reticle accuracy pass (v1.97)
+More reticle accuracy fixes (v1.98)
 
-Audited every scope reticle illustration against official manuals/\
-diagrams. Fixed several inaccurate reticle drawings, most notably \
-Vortex VMR-4 (was drawn as the wrong reticle pattern entirely) and \
-EOTech MR5. Numeric ballistics/trajectory calculations are unaffected \
-- this only corrects the on-screen scope illustrations.\
+Continued auditing scope reticle illustrations against official \
+manuals. Fixed a missing hash mark on the SIG Tango SPR FL-4 and an \
+incorrect post position on the Vortex EBR-7C MOA reticle. Numeric \
+ballistics/trajectory calculations are unaffected - this only \
+corrects the on-screen scope illustrations.\
 """
 
 def main():

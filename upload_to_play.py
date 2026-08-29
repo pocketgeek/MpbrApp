@@ -23,11 +23,13 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Add SIG Tango-MSR reticles (v1.92)
+Reticle accuracy pass (v1.97)
 
-Add SIG Sauer Tango-MSR 5-30x56 MRAD and MOA Milling 2.0 reticle \
-presets. Also fixed a mislabeling bug in the MRAD tree reticle style \
-that affected reticles with major spacing other than 1 mil.\
+Audited every scope reticle illustration against official manuals/\
+diagrams. Fixed several inaccurate reticle drawings, most notably \
+Vortex VMR-4 (was drawn as the wrong reticle pattern entirely) and \
+EOTech MR5. Numeric ballistics/trajectory calculations are unaffected \
+- this only corrects the on-screen scope illustrations.\
 """
 
 def main():

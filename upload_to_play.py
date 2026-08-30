@@ -23,13 +23,14 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-New reticles: Vortex EBR-2C MOA/MRAD (v2.02)
+SFP scopes: set current magnification (v2.03)
 
-Added the Diamondback Tactical 4-16x44's EBR-2C reticle, both MOA \
-and MRAD versions - an open-center numbered crosshair with a fine \
-dot-grid tree, sourced from Vortex's own reticle manuals. Numeric \
-ballistics/trajectory calculations are unaffected - this only adds \
-two new scope illustration options.\
+Added a Current Magnification field for SFP (second focal plane) \
+reticles. SFP subtensions are only accurate at one calibrated power \
+- this lets you enter your scope's actual current magnification and \
+the reticle illustration rescales holdover/drift positions to match, \
+instead of assuming you're always at max zoom. Defaults to the \
+reticle's calibrated magnification.\
 """
 
 def main():

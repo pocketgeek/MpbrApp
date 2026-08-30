@@ -18,8 +18,8 @@ android {
         applicationId = "us.pgnet.mpbr"
         minSdk = 24
         targetSdk = 37
-        versionCode = 102
-        versionName = "2.02"
+        versionCode = 103
+        versionName = "2.03"
     }
 
     signingConfigs {

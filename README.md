@@ -102,6 +102,22 @@ to "None". Selecting a reticle also removes the redundant MOA or MIL column
 from the trajectory table (whichever unit the reticle doesn't use). Available
 presets are all real manufacturer scopes:
 
+**Current Magnification** — appears only when the selected reticle is SFP
+(second focal plane) with a known calibrated magnification (the "SFP (N×)"
+tag in the table below). SFP subtensions are only physically accurate at
+that one calibrated magnification; at any other power a fixed etched mark
+subtends a different real-world angle. Defaults to the reticle's calibrated
+magnification (edit it to your scope's actual current power) and rescales
+where each range's holdover/drift dot lands on the reticle illustration
+accordingly — e.g. at half the calibrated magnification, a given holdover
+lands at half the distance from center it would at full power. Only the dot
+positions move; the printed range/holdover labels next to each dot always
+show the true (unscaled) values, and the trajectory table numbers are
+unaffected either way — this only changes where the reticle illustration
+draws the callouts. FFP reticles and fixed/1× "always accurate" reticles
+don't show this field since their subtensions are correct at any/every
+magnification.
+
 Presets are sorted by manufacturer:
 
 | Preset | Unit | Focal plane | Style | Details |

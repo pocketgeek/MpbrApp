@@ -146,6 +146,9 @@ fun MpbrScreen() {
     ) { granted -> onPermissionResult.value(granted) }
 
     var selectedReticle by remember { mutableStateOf<Ballistics.ReticlePreset?>(null) }
+    // Current scope magnification, only used/shown for SFP reticles (sfpMagnification > 0).
+    // Defaults to the reticle's calibrated magnification when a new SFP reticle is picked.
+    var currentMag by remember { mutableStateOf("") }
 
     val showSaveDialog   = remember { mutableStateOf(false) }
     val showLoadDialog   = remember { mutableStateOf(false) }
@@ -204,7 +207,8 @@ fun MpbrScreen() {
         tableStep    = tableStep,
         dopeTitle    = dopeTitle,
         dopeNotes    = dopeNotes,
-        reticleName  = selectedReticle?.name
+        reticleName  = selectedReticle?.name,
+        currentMag   = currentMag
     )
 
     fun calculate() {
@@ -268,6 +272,9 @@ fun MpbrScreen() {
         dopeTitle       = s.dopeTitle
         dopeNotes       = s.dopeNotes
         selectedReticle = s.reticleName?.let { n -> Ballistics.RETICLE_PRESETS.find { it.name == n } }
+        currentMag      = s.currentMag.ifEmpty {
+            selectedReticle?.let { if (it.sfpMagnification > 0.0) formatNum(it.sfpMagnification) else "" } ?: ""
+        }
         calculate()
     }
 
@@ -342,7 +349,30 @@ fun MpbrScreen() {
 
         // ---- Reticle (shapes the DOPE chart illustration) ----
         SectionLabel("Reticle")
-        ReticleDropdown(selected = selectedReticle, onSelect = { selectedReticle = it })
+        ReticleDropdown(
+            selected = selectedReticle,
+            onSelect = { picked ->
+                selectedReticle = picked
+                currentMag = if (picked != null && picked.sfpMagnification > 0.0)
+                    formatNum(picked.sfpMagnification) else ""
+            }
+        )
+        selectedReticle?.let { reticle ->
+            if (reticle.sfpMagnification > 0.0) {
+                NumberField(
+                    "Current Magnification (${formatNum(reticle.sfpMagnification)}× calibrated)",
+                    currentMag,
+                    Modifier.fillMaxWidth()
+                ) { v -> currentMag = v }
+            }
+        }
+        // Scales holdover/drift callout positions onto the fixed-size etched reticle when the
+        // user isn't at the SFP-calibrated magnification. 1.0 for FFP/always-accurate reticles.
+        val magFactor = selectedReticle?.let { reticle ->
+            if (reticle.sfpMagnification > 0.0)
+                (currentMag.toDoubleOrNull() ?: reticle.sfpMagnification) / reticle.sfpMagnification
+            else 1.0
+        } ?: 1.0
 
         // ---- Bullet & sight ----
         SectionLabel("Bullet & Sight")
@@ -513,9 +543,9 @@ fun MpbrScreen() {
 
             // Reticle illustration (on-screen) when a reticle is selected
             selectedReticle?.let { reticle ->
-                val reticleBmp = remember(r, reticle, targetOnlyCallout, targetRow, targetDistEnabled) {
+                val reticleBmp = remember(r, reticle, targetOnlyCallout, targetRow, targetDistEnabled, magFactor) {
                     val filterRow = if (targetDistEnabled && targetOnlyCallout) targetRow else null
-                    buildReticleBitmap(r, reticle, filterRow)
+                    buildReticleBitmap(r, reticle, filterRow, magFactor)
                 }
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Image(
@@ -572,7 +602,8 @@ fun MpbrScreen() {
                             selectedReticle,
                             dopeTitle,
                             metricMode,
-                            dopeNotes
+                            dopeNotes,
+                            magFactor
                         )
                         val ok = saveDopeChart(context, bmp, label)
                         android.widget.Toast.makeText(
@@ -611,7 +642,8 @@ fun MpbrScreen() {
                         selectedReticle,
                         dopeTitle,
                         metricMode,
-                        dopeNotes
+                        dopeNotes,
+                        magFactor
                     )
                     PrintHelper(context as android.app.Activity).apply {
                         scaleMode = PrintHelper.SCALE_MODE_FIT
@@ -1034,7 +1066,8 @@ private fun drawReticleSection(
     sectionH: Float,
     bsz: Float,
     s: Int,
-    targetOnlyRow: Ballistics.TrajectoryRow? = null
+    targetOnlyRow: Ballistics.TrajectoryRow? = null,
+    magFactor: Double = 1.0
 ) {
     val r   = (sectionH * 0.40f).toInt()
     val cx  = w * 0.26f
@@ -1158,8 +1191,12 @@ private fun drawReticleSection(
         for (row in rows) {
             val hold  = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.holdoverMil  else row.holdoverMoa
             val drift = if (reticle.unit == Ballistics.ReticleUnit.MIL) row.driftMil     else row.driftMoa
-            val x     = cx + drift.toFloat() * ppu
-            val y     = cy + hold.toFloat()  * ppu
+            // magFactor maps the actual holdover/drift onto the fixed-size etched reticle:
+            // at anything below the SFP calibrated magnification, a physical mark subtends
+            // more real-world angle, so a given true value lands closer to center on the
+            // illustration. The label below still shows the true (unscaled) hold/drift value.
+            val x     = cx + (drift * magFactor).toFloat() * ppu
+            val y     = cy + (hold  * magFactor).toFloat() * ppu
             // Skip if outside the scope circle
             val dx = x - cx; val dy = y - cy
             if (dx * dx + dy * dy > margin * margin) continue
@@ -2564,7 +2601,8 @@ private fun drawReticleSection(
 private fun buildReticleBitmap(
     result: Ballistics.MpbrResult,
     reticle: Ballistics.ReticlePreset,
-    targetOnlyRow: Ballistics.TrajectoryRow? = null
+    targetOnlyRow: Ballistics.TrajectoryRow? = null,
+    magFactor: Double = 1.0
 ): Bitmap {
     val w   = 1100
     val h   = 560
@@ -2573,7 +2611,7 @@ private fun buildReticleBitmap(
     val bmp = createBitmap(w, h)
     val cv  = android.graphics.Canvas(bmp)
     cv.drawColor(android.graphics.Color.WHITE)
-    drawReticleSection(cv, w, result, reticle, 0f, h.toFloat(), bsz, s, targetOnlyRow)
+    drawReticleSection(cv, w, result, reticle, 0f, h.toFloat(), bsz, s, targetOnlyRow, magFactor)
     return bmp
 }
 
@@ -2594,7 +2632,8 @@ private fun buildDopeChartBitmap(
     reticle: Ballistics.ReticlePreset? = null,
     cardTitle: String = "MPBR DOPE CARD",
     metricMode: Boolean = false,
-    notes: String = ""
+    notes: String = "",
+    magFactor: Double = 1.0
 ): Bitmap {
     val s   = 3
     val w   = 400 * s
@@ -2677,7 +2716,7 @@ private fun buildDopeChartBitmap(
     y += s.toFloat()
 
     if (reticle != null) {
-        drawReticleSection(cv, w, result, reticle, y, reticleH.toFloat(), bsz, s)
+        drawReticleSection(cv, w, result, reticle, y, reticleH.toFloat(), bsz, s, magFactor = magFactor)
         y += reticleH
         cv.drawRect(0f, y, w.toFloat(), y + s, pRule)
         y += s.toFloat()
@@ -2775,7 +2814,8 @@ data class SessionData(
     val tableStep: String,
     val dopeTitle: String,
     val dopeNotes: String,
-    val reticleName: String?
+    val reticleName: String?,
+    val currentMag: String = ""
 )
 
 private fun SessionData.toJson(): org.json.JSONObject = org.json.JSONObject().apply {
@@ -2797,6 +2837,7 @@ private fun SessionData.toJson(): org.json.JSONObject = org.json.JSONObject().ap
     put("dopeTitle",   dopeTitle)
     put("dopeNotes",   dopeNotes)
     putOpt("reticleName", reticleName)
+    put("currentMag",  currentMag)
 }
 
 private fun org.json.JSONObject.toSessionData() = SessionData(
@@ -2817,7 +2858,8 @@ private fun org.json.JSONObject.toSessionData() = SessionData(
     tableStep    = getString("tableStep"),
     dopeTitle    = getString("dopeTitle"),
     dopeNotes    = optString("dopeNotes"),
-    reticleName  = optString("reticleName").ifEmpty { null }
+    reticleName  = optString("reticleName").ifEmpty { null },
+    currentMag   = optString("currentMag")
 )
 
 private const val PREFS_NAME = "mpbr_sessions"

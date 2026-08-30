@@ -52,7 +52,14 @@ object Ballistics {
         // BDC reticles — ignored for HASH/DOT/CHRISTMAS_TREE styles:
         val holdoverMarks: List<Double> = emptyList(),  // mark positions in units below center
         val windageMarks: List<Double>  = emptyList(),  // hash positions in units each side of center
-        val postStart: Double = 0.0                     // unit where thin line transitions to thick outer post (0 = no posts)
+        val postStart: Double = 0.0,                    // unit where thin line transitions to thick outer post (0 = no posts)
+        // SFP reticles only: the magnification the printed/etched subtensions are calibrated
+        // to (0.0 = FFP, or a 1× reflex/prism sight — subtensions are accurate at any/every
+        // magnification, so no scope-magnification input is shown). At any other magnification
+        // a physically fixed SFP mark subtends more real-world angle the lower you zoom, so a
+        // held holdover of H units lands on the illustration at H × (currentMag / sfpMagnification)
+        // — see `magFactor` in MainActivity.kt's drawReticleSection.
+        val sfpMagnification: Double = 0.0
     )
 
     val RETICLE_PRESETS: List<ReticlePreset> = listOf(
@@ -68,7 +75,8 @@ object Ballistics {
         ReticlePreset(
             "Burris Fullfield Plex (MOA, SFP)",
             ReticleUnit.MOA, 3.85, 0.90, 11.0,
-            ReticleStyle.DUPLEX
+            ReticleStyle.DUPLEX,
+            sfpMagnification = 8.0
         ),
         // Burris Fullfield 3-12×42 SFP — Ballistic E3 reticle.
         // SFP, calibrated at 12×. Source: Burris Ballistic E3 subtension diagram.
@@ -82,7 +90,8 @@ object Ballistics {
             ReticleUnit.MOA, 4.0, 0.8, 20.0,
             ReticleStyle.BALLISTIC_E3,
             holdoverMarks = listOf(1.49, 4.31, 7.18),
-            postStart     = 4.0
+            postStart     = 4.0,
+            sfpMagnification = 12.0
         ),
         // Burris RT-3 3x Prism Sight — Ballistic 3X reticle (model AR-332, fixed 3×).
         // Broken circle ("horseshoe" open at bottom, matching the HORSESHOE_BDC convention)
@@ -131,7 +140,8 @@ object Ballistics {
             ReticleStyle.BALLISTIC_3X,
             holdoverMarks = listOf(0.96, 1.77, 2.76),
             windageMarks  = listOf(0.75, 1.25, 1.0),
-            postStart     = 5.0
+            postStart     = 5.0,
+            sfpMagnification = 6.0
         ),
         // ── EOTech ───────────────────────────────────────────────────────────────
         // EOTech VUDU 3-9×32 SFP HC1 — hunting crosshair. SFP, valid at 9× only.
@@ -146,7 +156,8 @@ object Ballistics {
             ReticleStyle.BDC,
             holdoverMarks = listOf(2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0),
             windageMarks  = listOf(2.0, 4.0, 6.0, 8.0, 10.0, 12.0),
-            postStart     = 0.0
+            postStart     = 0.0,
+            sfpMagnification = 9.0
         ),
         // EOTech VUDU 4-12×36 FFP MR5 — MRAD dot-grid Christmas tree. FFP, all mags.
         // Numbered stadia 2–8 MRAD (thick posts at ±8), short capped top stub to 3 MRAD,
@@ -172,7 +183,8 @@ object Ballistics {
             "Firefield RapidStrike Circle Dot (MOA, SFP)",
             ReticleUnit.MOA, 4.975, 0.67, 22.0,
             ReticleStyle.CIRCLE_BDC,
-            holdoverMarks = listOf(7.0, 10.0, 13.5, 17.5)
+            holdoverMarks = listOf(7.0, 10.0, 13.5, 17.5),
+            sfpMagnification = 6.0
         ),
         // Firefield RapidStrike 1-10×24 SFP — CR1 reticle.
         // SFP, valid at 10× only. Calibrated for 5.56x45/.223 Rem 55gr FMJ, 100-yd zero.
@@ -186,7 +198,8 @@ object Ballistics {
             ReticleUnit.MOA, 2.87, 0.67, 22.0,
             ReticleStyle.HORSESHOE_BDC,
             holdoverMarks = listOf(6.0, 11.0, 17.0),
-            windageMarks  = listOf(2.15, 1.72, 1.43)
+            windageMarks  = listOf(2.15, 1.72, 1.43),
+            sfpMagnification = 10.0
         ),
         // ── German/Czech ──────────────────────────────────────────────────────────
         // ZB26/ZB30 anti-aircraft front spider sight (German WWII issue).
@@ -257,7 +270,8 @@ object Ballistics {
             ReticleStyle.RING_BDC,
             holdoverMarks = listOf(5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0),
             windageMarks  = listOf(6.5, 13.0),
-            postStart     = 40.0
+            postStart     = 40.0,
+            sfpMagnification = 4.0
         ),
         // ── SIG Sauer ────────────────────────────────────────────────────────────
         // SIG Sauer Tango SPR 1-4×24 SFP — BDC1 reticle. SFP, valid at 4× only.
@@ -271,7 +285,8 @@ object Ballistics {
             ReticleStyle.BDC,
             holdoverMarks = listOf(3.75, 6.50, 9.50, 14.50),
             windageMarks  = listOf(2.0, 4.0, 6.0, 8.0),
-            postStart     = 10.0
+            postStart     = 10.0,
+            sfpMagnification = 4.0
         ),
         // SIG Sauer Tango SPR 1-4×24 SFP — FL-4 reticle. SFP, valid at 4× only.
         // Main crosshair is thin; lower BDC stadia are at 2.86/3.44/4.30/5.73 MOA
@@ -289,7 +304,8 @@ object Ballistics {
             ReticleStyle.SIG_FL4,
             holdoverMarks = listOf(2.86, 3.44, 4.30, 5.73),
             windageMarks  = listOf(13.48),
-            postStart     = 2.20
+            postStart     = 2.20,
+            sfpMagnification = 4.0
         ),
         // SIG Sauer Tango-MSR 5-30×56 FFP — MRAD Milling 2.0 reticle. FFP, all mags.
         // Fine ladder crosshair: 0.2 MRAD minor ticks, numbered every 2 MRAD; short
@@ -377,13 +393,19 @@ object Ballistics {
         // Windage line-width-change marks at 2/4/6/8 MOA (re-checked against the manual's
         // own windage diagram — the previous version of this preset was missing the 4th,
         // 8 MOA mark). Source: Vortex Dead-Hold BDC MOA reticle manual (M-00240-1).
+        // sfpMagnification: no single correct value since this preset covers several scope
+        // models with different max magnifications (4-12x44, 3.5-10x50, etc.) — defaulted to
+        // 12 (the Crossfire II 4-12x44) since that's the model most often asked about; the
+        // in-app Current Magnification field lets the user override this to their own scope's
+        // actual max power.
         ReticlePreset(
             "Vortex Dead-Hold BDC (MOA, SFP)",
             ReticleUnit.MOA, 0.0, 0.0, 13.0,
             ReticleStyle.BDC,
             holdoverMarks = listOf(1.5, 4.5, 7.5),
             windageMarks  = listOf(2.0, 4.0, 6.0, 8.0),
-            postStart     = 11.0
+            postStart     = 11.0,
+            sfpMagnification = 12.0
         ),
         // Vortex EBR-7C — Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II. FFP.
         // Re-verified against Vortex's official reticle manual (M-00247-0): numbered H/V
@@ -453,7 +475,8 @@ object Ballistics {
             "Vortex Strike Eagle AR-BDC3 (MOA, SFP)",
             ReticleUnit.MOA, 8.3125, 0.5, 25.0,
             ReticleStyle.AR_BDC3,
-            holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6)
+            holdoverMarks = listOf(2.4, 5.6, 9.5, 14.6),
+            sfpMagnification = 8.0
         ),
         // Vortex VMR-4 — Viper HD 5-25x50 FFP. CORRECTED (was previously implemented as a
         // dot-grid Christmas tree, copying the EBR-7C assumption — wrong design). The real

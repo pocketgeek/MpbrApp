@@ -369,16 +369,20 @@ object Ballistics {
             holdoverMarks = listOf(7.0, 25.0)
         ),
         // ── Vortex ───────────────────────────────────────────────────────────────
-        // Vortex Dead-Hold BDC — Viper 4-12×40, 3.5-10×50, etc. SFP, max mag only.
-        // Holdover hashmarks at 1.5/4.5/7.5 MOA; thick post begins at 11 MOA (top edge
-        // of the bottom post, not a 4th hashmark). Source: Vortex Dead-Hold BDC MOA
-        // reticle manual.
+        // Vortex Dead-Hold BDC — shared across many Vortex SFP lines with this reticle
+        // (Viper 4-12×40, 3.5-10×50, Crossfire II 4-12×44, etc. — same physical reticle,
+        // confirmed generic/scope-model-agnostic in Vortex's own M-00240 reticle manual,
+        // not just assumed); max mag only. Holdover hashmarks at 1.5/4.5/7.5 MOA; thick
+        // post begins at 11 MOA (top edge of the bottom post, not a 4th hashmark).
+        // Windage line-width-change marks at 2/4/6/8 MOA (re-checked against the manual's
+        // own windage diagram — the previous version of this preset was missing the 4th,
+        // 8 MOA mark). Source: Vortex Dead-Hold BDC MOA reticle manual (M-00240-1).
         ReticlePreset(
             "Vortex Dead-Hold BDC (MOA, SFP)",
             ReticleUnit.MOA, 0.0, 0.0, 13.0,
             ReticleStyle.BDC,
             holdoverMarks = listOf(1.5, 4.5, 7.5),
-            windageMarks  = listOf(2.0, 4.0, 6.0),
+            windageMarks  = listOf(2.0, 4.0, 6.0, 8.0),
             postStart     = 11.0
         ),
         // Vortex EBR-7C — Venom 5-25×56, Viper PST Gen II, Strike Eagle, Razor HD Gen II. FFP.

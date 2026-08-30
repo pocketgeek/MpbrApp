@@ -23,15 +23,13 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-New reticle: Burris RT-6 Ballistic AR (v2.00)
+Vortex Dead-Hold BDC windage fix (v2.01)
 
-Added the Burris RT-6's Ballistic AR (mil) reticle - same broken \
-circle + BDC post + windage arm family as the RT-3 Ballistic 3X, \
-with per-row crossbar widths sourced from Burris's own subtension \
-diagram. Also refined that shared drawing style so each BDC crossbar \
-can have its own width, matching the manufacturer diagrams more \
-closely. Numeric ballistics/trajectory calculations are unaffected \
-- this only adds a new scope illustration option.\
+Confirmed the Vortex Dead-Hold BDC MOA reticle (Viper, Crossfire II \
+4-12x44, and other Vortex SFP scopes using it) against Vortex's own \
+manual and added a missing 4th windage mark at 8 MOA. Numeric \
+ballistics/trajectory calculations are unaffected - this only \
+corrects a scope illustration.\
 """
 
 def main():

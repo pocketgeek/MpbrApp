@@ -15,3 +15,8 @@ local.properties
 # Google Play service account keys — never commit these
 plexcloud-*.json
 *-service-account.json
+
+# Release signing credentials — never commit these
+keystore.properties
+*.jks
+*.keystore

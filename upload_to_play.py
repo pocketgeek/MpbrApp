@@ -23,13 +23,13 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-More reticle accuracy fixes (v1.98)
+New reticle: Burris RT-3 Ballistic 3X (v1.99)
 
-Continued auditing scope reticle illustrations against official \
-manuals. Fixed a missing hash mark on the SIG Tango SPR FL-4 and an \
-incorrect post position on the Vortex EBR-7C MOA reticle. Numeric \
-ballistics/trajectory calculations are unaffected - this only \
-corrects the on-screen scope illustrations.\
+Added the Burris RT-3 prism sight's Ballistic 3X reticle - broken \
+circle with center dot, BDC crossbar ticks at 400/500 yd, and \
+graduated windage arms, sourced from Burris's own subtension \
+diagram. Numeric ballistics/trajectory calculations are unaffected \
+- this only adds a new scope illustration option.\
 """
 
 def main():

@@ -22,13 +22,13 @@ the reticle's extent.
 <td align="center"><img src="screenshots/Screenshot_20260829-102400.MPBR%20Calculator.png" width="190"><br><em>Reticle preset dropdown by manufacturer</em></td>
 </tr>
 <tr>
-<td align="center"><img src="screenshots/Screenshot_20260829-102401.MPBR%20Calculator.png" width="190"><br><em>Inputs with Vortex EBR-2C selected</em></td>
+<td align="center"><img src="screenshots/Screenshot_20260829-102401.MPBR%20Calculator.png" width="190"><br><em>SFP reticle selected with Current Magnification field (set to 6× on a 12×-calibrated scope)</em></td>
 <td align="center"><img src="screenshots/Screenshot_20260829-102402.MPBR%20Calculator.png" width="190"><br><em>Atmosphere and trajectory table settings</em></td>
-<td align="center"><img src="screenshots/Screenshot_20260829-102500.MPBR%20Calculator.png" width="190"><br><em>Results: MPBR summary + reticle illustration</em></td>
+<td align="center"><img src="screenshots/Screenshot_20260829-102500.MPBR%20Calculator.png" width="190"><br><em>Results: holdover dots rescaled for 6× (half the reticle's 12× calibration)</em></td>
 </tr>
 <tr>
 <td align="center"><img src="screenshots/Screenshot_20260829-102600.MPBR%20Calculator.png" width="190"><br><em>Trajectory table and Save DOPE Chart</em></td>
-<td align="center"><img src="screenshots/DOPE_M80__7_62_51_NATO__20260830_155756.jpg" width="190"><br><em>Exported DOPE chart JPEG</em></td>
+<td align="center"><img src="screenshots/DOPE_M80__7_62_51_NATO__20260830_171443.jpg" width="190"><br><em>Exported DOPE chart JPEG</em></td>
 <td></td>
 </tr>
 </table>

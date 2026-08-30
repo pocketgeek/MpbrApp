@@ -1414,10 +1414,15 @@ private fun drawReticleSection(
 
             Ballistics.ReticleStyle.BALLISTIC_3X -> {
                 // Arc drawn outside clip; inside: center dot, thin post through the arc gap
-                // down to two BDC crossbars (400/500 yd), plus graduated windage arms.
+                // down to BDC crossbars, plus graduated windage arms. windageMarks[i] is the
+                // half-width of holdoverMarks[i]'s crossbar (parallel arrays, same convention
+                // as HORSESHOE_BDC) since Burris's own diagrams give a different half-width
+                // per row rather than one constant. postStart is the windage arm half-span;
+                // arm ticks are auto-graduated at 1-unit intervals out to that span.
                 val dotR    = (reticle.minorSpacing.toFloat() * ppu).coerceAtLeast(s * 2f)
                 val circleR = reticle.majorSpacing.toFloat() * ppu
-                val barHW   = reticle.postStart.toFloat() * ppu
+                val armSpan = reticle.postStart.toFloat()
+                val defaultHW = ppu * 1.0f
                 val postW   = (1.0f * ppu).coerceAtLeast(s.toFloat())
                 val barH    = (0.175f * ppu).coerceAtLeast(s.toFloat())
                 val pFill   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL;   color = android.graphics.Color.BLACK }
@@ -1433,24 +1438,26 @@ private fun drawReticleSection(
                     color = android.graphics.Color.LTGRAY; strokeWidth = s.toFloat()
                 })
 
-                // Thin post from arc gap bottom, through both crossbars, to a short tail below
+                // Thin post from arc gap bottom, through all crossbars, to a short tail below
                 val lastHy = if (reticle.holdoverMarks.isNotEmpty())
                     cy + reticle.holdoverMarks.last().toFloat() * ppu else cy + circleR
                 cv.drawLine(cx, cy + circleR, cx, lastHy + ppu * 0.5f, pPost)
 
-                for (h in reticle.holdoverMarks) {
+                reticle.holdoverMarks.forEachIndexed { i, h ->
                     val hy = cy + h.toFloat() * ppu
-                    cv.drawLine(cx - barHW, hy, cx + barHW, hy, pBar)
+                    val hw = if (i < reticle.windageMarks.size)
+                        reticle.windageMarks[i].toFloat() * ppu else defaultHW
+                    cv.drawLine(cx - hw, hy, cx + hw, hy, pBar)
                 }
 
-                // Graduated windage arms: thin line out to the tip, fine ticks, bold outer tick
-                if (reticle.windageMarks.isNotEmpty()) {
-                    val armSpan = reticle.windageMarks.last().toFloat() * ppu
+                // Graduated windage arms: thin line out to the tip, ticks every 1 unit, bold outer tick
+                if (armSpan > 0f) {
+                    val steps = armSpan.roundToInt()
                     for (sign in listOf(-1f, 1f)) {
-                        cv.drawLine(cx + sign * circleR, cy, cx + sign * armSpan, cy, pArm)
-                        reticle.windageMarks.forEachIndexed { i, wm ->
-                            val wx = cx + sign * wm.toFloat() * ppu
-                            val th = if (i == reticle.windageMarks.lastIndex) ppu * 1.0f else ppu * 0.5f
+                        cv.drawLine(cx + sign * circleR, cy, cx + sign * armSpan * ppu, cy, pArm)
+                        for (i in 1..steps) {
+                            val wx = cx + sign * i * ppu
+                            val th = if (i == steps) ppu * 1.0f else ppu * 0.5f
                             cv.drawLine(wx, cy - th, wx, cy + th, pTick)
                         }
                     }

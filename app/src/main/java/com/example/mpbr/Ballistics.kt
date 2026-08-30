@@ -89,22 +89,49 @@ object Ballistics {
         // with center dot, thin BDC post, and two crossbar hash marks for 400/500 yd.
         // Values read directly off Burris's own "Ballistic 3X Subtensions" diagram
         // (burrisoptics.com/reticles/ballistic-3x): dimension table gives A=1 MOA (post width),
-        // C=.175 MOA (crossbar thickness), F=1.25 MOA (crossbar half-width from centerline),
-        // G=10 MOA (windage arm span, tip-to-tip); yardage/MOA table gives holdover 6.1 MOA
-        // at 400 yd and 9.5 MOA at 500 yd (only these two yardages get an etched crossbar —
-        // 100/200/300/600 are unmarked reference points on the same table). Circle radius
-        // (majorSpacing) and center dot radius (minorSpacing) are not dimensioned in the
-        // table; measured proportionally from the diagram's own vector artwork instead.
-        // Windage arm graduation ticks (windageMarks) approximated as even 1 MOA steps out
-        // to the 5 MOA half-span — the diagram's own fine-tick spacing (its B/E dimensions)
-        // wasn't resolvable to the precision needed from the source image.
+        // C=.175 MOA (crossbar thickness), F=1.25 MOA (crossbar half-width from centerline,
+        // same for both rows), G=10 MOA (windage arm span, tip-to-tip); yardage/MOA table
+        // gives holdover 6.1 MOA at 400 yd and 9.5 MOA at 500 yd (only these two yardages
+        // get an etched crossbar — 100/200/300/600 are unmarked reference points on the same
+        // table). Circle radius (majorSpacing) and center dot radius (minorSpacing) are not
+        // dimensioned in the table; measured proportionally from the diagram's own vector
+        // artwork instead. windageMarks holds one half-width per holdoverMarks row (both 1.25
+        // MOA here); postStart is the windage arm half-span (5 MOA) — arm ticks are drawn
+        // automatically at 1-unit intervals out to postStart.
         ReticlePreset(
             "Burris RT-3 Ballistic 3X (MOA, 3x)",
             ReticleUnit.MOA, 1.65, 0.06, 13.0,
             ReticleStyle.BALLISTIC_3X,
             holdoverMarks = listOf(6.1, 9.5),
-            windageMarks  = listOf(1.0, 2.0, 3.0, 4.0, 5.0),
-            postStart     = 1.25
+            windageMarks  = listOf(1.25, 1.25),
+            postStart     = 5.0
+        ),
+        // Burris RT-6 1-6x24 — Ballistic AR reticle (renamed "Ballistic 5X" on Burris's
+        // current site, but still the same design — the diagram image file itself is named
+        // "ballistic-ar-subtensions.png", confirming the rename. Same broken-circle + BDC
+        // post + windage arm family as the RT-3 Ballistic 3X above, just in MIL instead of
+        // MOA and with three BDC rows instead of two. SFP, subtensions valid at 6× only.
+        // Values read directly off Burris's "Reticle Subtensions (Mils)" table for the
+        // 1.5-6x42 model row (closest max-mag match to the RT-6's 1-6x24; table is shared
+        // across that whole reticle family): Outside Dia. = 2.25 mil, center dot Diameter =
+        // .25 mil (both explicitly dimensioned in this diagram, unlike RT-3's); crossbar
+        // half-widths E=.75/F=1.25/B=1.0 mil for 300/400/500 yd rows (unlike RT-3, these are
+        // NOT uniform — confirmed from the diagram's own per-row arrows, not assumed); arm
+        // half-span A/2=5 mil. Holdover depths .96/1.77/2.76 mil at 300/400/500 yd from the
+        // same Yards/Mils/MOA table (600 yd is listed but gets no crossbar, matching RT-3's
+        // convention of leaving some table rows unmarked). Source: burrisoptics.com/reticles/
+        // ballistic-5x subtension diagram. vertExtent must cover the 5 mil windage arm
+        // half-span (not just the 2.76 mil last holdover) since BALLISTIC_3X's arms are
+        // drawn inside the same clip circle as everything else — sizing it off the holdover
+        // alone (as RT-3 did, where its own 5 MOA arm span happens to be well under its
+        // vertExtent=13) clips the outer arm ticks off-screen; caught by an on-emulator check.
+        ReticlePreset(
+            "Burris RT-6 Ballistic AR (MIL, SFP)",
+            ReticleUnit.MIL, 1.125, 0.125, 6.0,
+            ReticleStyle.BALLISTIC_3X,
+            holdoverMarks = listOf(0.96, 1.77, 2.76),
+            windageMarks  = listOf(0.75, 1.25, 1.0),
+            postStart     = 5.0
         ),
         // ── EOTech ───────────────────────────────────────────────────────────────
         // EOTech VUDU 3-9×32 SFP HC1 — hunting crosshair. SFP, valid at 9× only.

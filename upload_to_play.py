@@ -23,12 +23,14 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-New reticle: Burris RT-3 Ballistic 3X (v1.99)
+New reticle: Burris RT-6 Ballistic AR (v2.00)
 
-Added the Burris RT-3 prism sight's Ballistic 3X reticle - broken \
-circle with center dot, BDC crossbar ticks at 400/500 yd, and \
-graduated windage arms, sourced from Burris's own subtension \
-diagram. Numeric ballistics/trajectory calculations are unaffected \
+Added the Burris RT-6's Ballistic AR (mil) reticle - same broken \
+circle + BDC post + windage arm family as the RT-3 Ballistic 3X, \
+with per-row crossbar widths sourced from Burris's own subtension \
+diagram. Also refined that shared drawing style so each BDC crossbar \
+can have its own width, matching the manufacturer diagrams more \
+closely. Numeric ballistics/trajectory calculations are unaffected \
 - this only adds a new scope illustration option.\
 """
 

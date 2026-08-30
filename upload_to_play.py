@@ -23,13 +23,13 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Vortex Dead-Hold BDC windage fix (v2.01)
+New reticles: Vortex EBR-2C MOA/MRAD (v2.02)
 
-Confirmed the Vortex Dead-Hold BDC MOA reticle (Viper, Crossfire II \
-4-12x44, and other Vortex SFP scopes using it) against Vortex's own \
-manual and added a missing 4th windage mark at 8 MOA. Numeric \
-ballistics/trajectory calculations are unaffected - this only \
-corrects a scope illustration.\
+Added the Diamondback Tactical 4-16x44's EBR-2C reticle, both MOA \
+and MRAD versions - an open-center numbered crosshair with a fine \
+dot-grid tree, sourced from Vortex's own reticle manuals. Numeric \
+ballistics/trajectory calculations are unaffected - this only adds \
+two new scope illustration options.\
 """
 
 def main():

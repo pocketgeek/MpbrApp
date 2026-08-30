@@ -1901,6 +1901,149 @@ private fun drawReticleSection(
                 }
             }
 
+            Ballistics.ReticleStyle.VORTEX_EBR2C_MOA_TREE -> {
+                // Vortex EBR-2C MOA: open-center ladder crosshair + fine dot-grid tree below,
+                // thick posts on left/right/bottom only (no top post). majorSpacing = vertical
+                // numbered-tick AND dot-row spacing (4 MOA); minorSpacing = horizontal
+                // numbered-tick spacing (8 MOA, double the vertical — a real asymmetry, not a
+                // typo); postStart = left/right half-width AND bottom-post depth (37 MOA).
+                val vMajPx  = reticle.majorSpacing.toFloat() * ppu
+                val hMajPx  = reticle.minorSpacing.toFloat() * ppu
+                val postPx  = reticle.postStart.toFloat() * ppu
+                val openGap = (0.25f * ppu).coerceAtLeast(s.toFloat())
+                val treeStep  = reticle.majorSpacing.toInt()
+                val treeDepth = reticle.postStart.toInt() - 1 // last row just short of the post
+
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 6f }
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f }
+                val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = vMajPx * 0.5f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
+                }
+                val pNumL  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = vMajPx * 0.5f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
+                }
+
+                // Horizontal stadia: thin from the open-center gap to the posts, thick posts to the edge
+                cv.drawLine(cx - postPx, cy, cx - openGap, cy, pThin)
+                cv.drawLine(cx + openGap, cy, cx + postPx, cy, pThin)
+                cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
+                cv.drawLine(cx + postPx, cy, cx + r.toFloat(), cy, pThick)
+
+                // Vertical stadia: thin all the way above center (no top post), thin through
+                // the tree, thick bottom post
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy - openGap, pThin)
+                cv.drawLine(cx, cy + openGap, cx, cy + treeDepth * ppu, pThin)
+                cv.drawLine(cx, cy + treeDepth * ppu, cx, cy + r.toFloat(), pThick)
+
+                // Horizontal numbered ticks
+                val hTickH = vMajPx * 0.4f
+                var hMoa = reticle.minorSpacing
+                while (hMoa.toFloat() * ppu < postPx) {
+                    val hx = hMoa.toFloat() * ppu
+                    cv.drawLine(cx + hx, cy - hTickH, cx + hx, cy + hTickH, pTick)
+                    cv.drawLine(cx - hx, cy - hTickH, cx - hx, cy + hTickH, pTick)
+                    val label = hMoa.toInt().toString()
+                    cv.drawText(label, cx + hx, cy - hTickH - vMajPx * 0.1f, pNum)
+                    cv.drawText(label, cx - hx, cy - hTickH - vMajPx * 0.1f, pNum)
+                    hMoa += reticle.minorSpacing
+                }
+
+                // Vertical numbered ticks above center
+                val vTickH = vMajPx * 0.4f
+                var vMoa = reticle.majorSpacing
+                while (vMoa.toFloat() * ppu < r) {
+                    val vy = vMoa.toFloat() * ppu
+                    cv.drawLine(cx - vTickH, cy - vy, cx + vTickH, cy - vy, pTick)
+                    cv.drawText(vMoa.toInt().toString(), cx + vTickH + vMajPx * 0.15f, cy - vy + pNumL.textSize * 0.35f, pNumL)
+                    vMoa += reticle.majorSpacing
+                }
+
+                // Dot-grid tree: rows every treeStep MOA, fine dots at 0.3 MOA pitch, widening pyramid
+                val dotRad = (ppu * 0.03f).coerceAtLeast(s.toFloat())
+                val pDot   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                var rowMoa = treeStep
+                while (rowMoa <= treeDepth) {
+                    val ry = cy + rowMoa * ppu
+                    var colMoa = -rowMoa.toFloat()
+                    while (colMoa <= rowMoa) {
+                        cv.drawCircle(cx + colMoa * ppu, ry, dotRad, pDot)
+                        colMoa += 0.3f
+                    }
+                    rowMoa += treeStep
+                }
+            }
+
+            Ballistics.ReticleStyle.VORTEX_EBR2C_MRAD_TREE -> {
+                // Vortex EBR-2C MRAD: same design as the MOA version, but with a real
+                // asymmetry of its own — dot-tree rows are twice as dense as the numbered
+                // ticks (rows every 1 mil = majorSpacing, ticks every 2 mil = minorSpacing,
+                // used for BOTH axes here since horizontal and vertical numbering match,
+                // unlike the MOA version's 2x horizontal spacing). postStart = left/right
+                // half-width AND bottom-post depth (9.1 mil).
+                val tickPx  = reticle.minorSpacing.toFloat() * ppu
+                val postPx  = reticle.postStart.toFloat() * ppu
+                val openGap = (0.06f * ppu).coerceAtLeast(s.toFloat())
+                val treeStep  = reticle.majorSpacing.toFloat()
+                val treeDepth = reticle.postStart.toInt() // last row (9) is < postStart (9.1)
+
+                val pThick = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 6f }
+                val pThin  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s.toFloat() }
+                val pTick  = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK; strokeWidth = s * 1.5f }
+                val pNum   = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = tickPx * 0.6f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.CENTER
+                }
+                val pNumL  = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.BLACK; textSize = tickPx * 0.6f
+                    typeface = Typeface.DEFAULT_BOLD; textAlign = Paint.Align.LEFT
+                }
+
+                cv.drawLine(cx - postPx, cy, cx - openGap, cy, pThin)
+                cv.drawLine(cx + openGap, cy, cx + postPx, cy, pThin)
+                cv.drawLine(cx - r.toFloat(), cy, cx - postPx, cy, pThick)
+                cv.drawLine(cx + postPx, cy, cx + r.toFloat(), cy, pThick)
+
+                cv.drawLine(cx, cy - r.toFloat(), cx, cy - openGap, pThin)
+                cv.drawLine(cx, cy + openGap, cx, cy + treeDepth * ppu, pThin)
+                cv.drawLine(cx, cy + treeDepth * ppu, cx, cy + r.toFloat(), pThick)
+
+                val tickH = tickPx * 0.4f
+                var hMil = reticle.minorSpacing
+                while (hMil.toFloat() * ppu < postPx) {
+                    val hx = hMil.toFloat() * ppu
+                    cv.drawLine(cx + hx, cy - tickH, cx + hx, cy + tickH, pTick)
+                    cv.drawLine(cx - hx, cy - tickH, cx - hx, cy + tickH, pTick)
+                    val label = hMil.toInt().toString()
+                    cv.drawText(label, cx + hx, cy - tickH - tickPx * 0.15f, pNum)
+                    cv.drawText(label, cx - hx, cy - tickH - tickPx * 0.15f, pNum)
+                    hMil += reticle.minorSpacing
+                }
+                var vMil = reticle.minorSpacing
+                while (vMil.toFloat() * ppu < r) {
+                    val vy = vMil.toFloat() * ppu
+                    cv.drawLine(cx - tickH, cy - vy, cx + tickH, cy - vy, pTick)
+                    cv.drawText(vMil.toInt().toString(), cx + tickH + tickPx * 0.2f, cy - vy + pNumL.textSize * 0.35f, pNumL)
+                    vMil += reticle.minorSpacing
+                }
+
+                // Dot-grid tree: rows every treeStep (1) mil, fine dots at .075 mil pitch
+                val dotRad = (ppu * 0.03f).coerceAtLeast(s.toFloat())
+                val pDot   = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = android.graphics.Color.BLACK }
+                var rowMil = treeStep
+                while (rowMil <= treeDepth) {
+                    val ry = cy + rowMil * ppu
+                    var colMil = -rowMil
+                    while (colMil <= rowMil) {
+                        cv.drawCircle(cx + colMil * ppu, ry, dotRad, pDot)
+                        colMil += 0.075f
+                    }
+                    rowMil += treeStep
+                }
+            }
+
             Ballistics.ReticleStyle.VORTEX_VMR4_MOA_TREE -> {
                 // Real VMR-4 MOA reticle (Vortex manual M-00358-0): ladder crosshair with
                 // DOTTED windage drop-lines hanging from each major tick (dots growing in

@@ -34,7 +34,7 @@ object Ballistics {
     enum class AmmoCategory { RIFLE, RIMFIRE, PISTOL, SHOTGUN }
 
     enum class ReticleUnit  { MIL, MOA }
-    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, BALLISTIC_3X, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC, SIG_MRAD_MILLING, SIG_MOA_MILLING, EOTECH_MR5_TREE, VORTEX_EBR7C_MOA_TREE, VORTEX_EBR7C_MRAD_TREE, VORTEX_VMR4_MOA_TREE, VORTEX_VMR4_MRAD_TREE, HOLOSUN_510C, HOLOSUN_507COMP, HOLOSUN_507K }
+    enum class ReticleStyle { HASH, DOT, CHRISTMAS_TREE, BDC, DRT, BRC, AR_BDC3, CIRCLE_BDC, DUPLEX, BALLISTIC_E3, BALLISTIC_3X, SIG_FL4, ACOG_CHEVRON, ACOG_DONUT, CHEVRON_BDC, LEAD_RINGS, SPIDER_SIGHT, HORSESHOE_BDC, RING_BDC, SIG_MRAD_MILLING, SIG_MOA_MILLING, EOTECH_MR5_TREE, VORTEX_EBR7C_MOA_TREE, VORTEX_EBR7C_MRAD_TREE, VORTEX_VMR4_MOA_TREE, VORTEX_VMR4_MRAD_TREE, VORTEX_EBR2C_MOA_TREE, VORTEX_EBR2C_MRAD_TREE, HOLOSUN_510C, HOLOSUN_507COMP, HOLOSUN_507K }
 
     /**
      * Describes a scope reticle for DOPE chart illustration.
@@ -405,6 +405,41 @@ object Ballistics {
             ReticleUnit.MIL, 1.0, 0.5, 11.6,
             ReticleStyle.VORTEX_EBR7C_MRAD_TREE,
             postStart = 7.6
+        ),
+        // Vortex EBR-2C MOA — Diamondback Tactical 4-16x44 FFP. Genuinely different design
+        // from EBR-7C, not just a rescale (dedicated style per project policy): open center
+        // (.25 MOA gap, not a continuous crosshair), horizontal major ticks numbered at 2x
+        // the vertical spacing (8 MOA vs 4 MOA — EBR-7C numbers both axes the same), and
+        // thick posts on left/right/bottom only (no top post). majorSpacing = vertical
+        // numbered-tick AND dot-tree row spacing (4 MOA, same value for both — confirmed
+        // from the diagram, unlike the MRAD variant below); minorSpacing = horizontal
+        // numbered-tick spacing (8 MOA); postStart = left/right half-width AND bottom-post
+        // start depth (37 MOA, same value for both per the diagram). Fine two-tier tick
+        // lengths (.75/2 MOA) and the dense fine-tick cluster near the posts are simplified
+        // to a single tick style; dot pitch within each tree row is simplified to one
+        // constant (0.3 MOA — the manual gives .2 and .3 MOA depending on row, not resolvable
+        // to more precision from the diagram) since these are cosmetic, not load-bearing.
+        // Source: Vortex EBR-2C MOA reticle manual (M-00209-1).
+        ReticlePreset(
+            "Vortex EBR-2C (MOA, FFP)",
+            ReticleUnit.MOA, 4.0, 8.0, 42.0,
+            ReticleStyle.VORTEX_EBR2C_MOA_TREE,
+            postStart = 37.0
+        ),
+        // Vortex EBR-2C MRAD — same Diamondback Tactical FFP scope, mil reticle. Unlike the
+        // MOA version, here the dot-tree rows (every 1 mil, majorSpacing) are TWICE as dense
+        // as the numbered ticks (every 2 mil, minorSpacing — used for BOTH axes here, since
+        // horizontal and vertical numbering match at 2 mil, another asymmetry vs the MOA
+        // version where horizontal was double vertical) — confirmed from the MRAD manual's
+        // own diagram, not assumed from the MOA version. postStart = 9.1 mil (left/right
+        // half-width AND bottom-post depth). Open center gap .06 mil; dot pitch simplified
+        // to .075 mil (splitting the manual's .06/.09 mil row-dependent values).
+        // Source: Vortex EBR-2C MRAD reticle manual (M-00210-0).
+        ReticlePreset(
+            "Vortex EBR-2C (MRAD, FFP)",
+            ReticleUnit.MIL, 1.0, 2.0, 12.0,
+            ReticleStyle.VORTEX_EBR2C_MRAD_TREE,
+            postStart = 9.1
         ),
         // Vortex Spitfire AR 1× Prism — DRT (Dual Ring Tactical). Always accurate.
         ReticlePreset(

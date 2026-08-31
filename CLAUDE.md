@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 There are no unit tests in this project. All logic is in two Kotlin files that can be verified by running the app.
 
-**Build toolchain:** Kotlin 2.2.10 · AGP 9.2.1 · Gradle 9.4.1. Zero Android Studio warnings as of v1.75 — KTX functions used throughout, Kotlin stdlib for math, no unused params. Since Kotlin 2.x the Compose compiler ships as `org.jetbrains.kotlin.plugin.compose` (declared in `build.gradle.kts`); the old `composeOptions.kotlinCompilerExtensionVersion` block is no longer used. AGP 9 provides built-in Kotlin support — the explicit `org.jetbrains.kotlin.android` plugin and `android.builtInKotlin=false` property are not used. Note: the system JDK 25 causes Gradle to fail with a version-parse error — build from Android Studio (which uses its bundled JDK 17/21) instead.
+**Build toolchain:** Kotlin 2.2.10 · AGP 9.3.2 · Gradle 9.5.0. Zero Android Studio warnings as of v1.75 — KTX functions used throughout, Kotlin stdlib for math, no unused params. Since Kotlin 2.x the Compose compiler ships as `org.jetbrains.kotlin.plugin.compose` (declared in `build.gradle.kts`); the old `composeOptions.kotlinCompilerExtensionVersion` block is no longer used. AGP 9 provides built-in Kotlin support — the explicit `org.jetbrains.kotlin.android` plugin and `android.builtInKotlin=false` property are not used. Note: the system JDK 25 causes Gradle to fail with a version-parse error — build from Android Studio (which uses its bundled JDK 17/21) instead.
 
 ## Architecture
 

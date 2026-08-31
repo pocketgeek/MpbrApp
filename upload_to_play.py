@@ -23,12 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Label the drawn magnification on SFP reticles (v2.04)
+New ammo: Hornady ELD Match .300 Win Mag (v2.05)
 
-The reticle illustration and DOPE chart now print the magnification \
-they were drawn at (e.g. "Reticle: Vortex Dead-Hold BDC (MOA, SFP) \
-@ 6x") for SFP scopes, so it's clear at a glance whether you're \
-looking at the calibrated power or a rescaled one.\
+Added the Hornady ELD Match 178gr and 195gr .300 Winchester Magnum \
+loads, with MV and BC pulled from Hornady's own product and bullet \
+pages.\
 """
 
 def main():

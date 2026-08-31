@@ -677,8 +677,18 @@ object Ballistics {
         AmmoPreset("300 PRC 250gr A-Tip",         2800.0, 0.442, 250.0, 2.6, 6.0, DragModel.G7, caliber = "300 PRC"),
         AmmoPreset("300 Win Mag 150gr PP",        3290.0, 0.310, 150.0, 2.6, 6.0, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 168gr SMK",       3000.0, 0.235, 168.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // Hornady Match #82043 (300 Win Mag 178gr ELD Match). MV from Hornady's own product
+        // page (24" test barrel). BC is the bullet's own published G7 value (Hornady's #30178
+        // 178gr ELD Match bullet, hornady.com/bc, Mach 2.25 / 2512 fps reference) since the
+        // loaded-ammo page itself doesn't list a BC.
+        AmmoPreset("300 Win Mag 178gr ELD Match",  2960.0, 0.275, 178.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 180gr AccuBond",  2950.0, 0.250, 180.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 190gr SMK",       2950.0, 0.290, 190.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // Hornady Match #82180 (300 Win Mag 195gr ELD Match). MV from Hornady's own product
+        // page (24" test barrel). BC is the bullet's own published G7 value (Hornady's #30951
+        // 195gr ELD Match bullet, hornady.com/bc, Mach 2.25 / 2512 fps reference) since the
+        // loaded-ammo page itself doesn't list a BC.
+        AmmoPreset("300 Win Mag 195gr ELD Match",  2930.0, 0.294, 195.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 200gr Partition", 2930.0, 0.245, 200.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 WSM 150gr BT",            3300.0, 0.435, 150.0, 2.6, 6.0, caliber = "300 WSM"),
         AmmoPreset("300 WSM 180gr AccuBond",      2970.0, 0.250, 180.0, 2.6, 6.0, DragModel.G7, caliber = "300 WSM"),

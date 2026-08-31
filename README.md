@@ -5,7 +5,7 @@ shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections and full-value crosswind drift.
 
-Includes 315 factory ammo presets organized into color-coded categories
+Includes 318 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
 steps, default 50–500 yd, max 2,000 yd). DOPE charts can be saved as a JPEG
 to your gallery, optionally with a scope reticle illustration showing
@@ -44,9 +44,9 @@ the reticle's extent.
 5. Click ▶️ Run.
 
 Tested with Android Studio Meerkat (2024.3) or later. Builds against Android
-SDK 35, supports devices from Android 7 (API 24) up.
+SDK 37, supports devices from Android 7 (API 24) up.
 
-Build toolchain: Kotlin 2.2.10 · AGP 9.2.1 · Gradle 9.4.1. The Kotlin
+Build toolchain: Kotlin 2.2.10 · AGP 9.3.2 · Gradle 9.5.0. The Kotlin
 Compose compiler plugin (`org.jetbrains.kotlin.plugin.compose`) is now
 separate from the Kotlin plugin — required since Kotlin 2.x.
 
@@ -85,7 +85,7 @@ App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 
 ## Inputs
 
-**Ammo preset** — 315 factory loads picked via a three-step Type → Caliber →
+**Ammo preset** — 318 factory loads picked via a three-step Type → Caliber →
 Load cascade instead of one long scrolling list: pick a category (Rifle
 green, Rimfire blue, Pistol amber, Shotgun purple, or Custom), then a caliber
 within that category, then the specific load. Selecting a load populates all

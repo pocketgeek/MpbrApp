@@ -23,14 +23,12 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-SFP scopes: set current magnification (v2.03)
+Label the drawn magnification on SFP reticles (v2.04)
 
-Added a Current Magnification field for SFP (second focal plane) \
-reticles. SFP subtensions are only accurate at one calibrated power \
-- this lets you enter your scope's actual current magnification and \
-the reticle illustration rescales holdover/drift positions to match, \
-instead of assuming you're always at max zoom. Defaults to the \
-reticle's calibrated magnification.\
+The reticle illustration and DOPE chart now print the magnification \
+they were drawn at (e.g. "Reticle: Vortex Dead-Hold BDC (MOA, SFP) \
+@ 6x") for SFP scopes, so it's clear at a glance whether you're \
+looking at the calibrated power or a rescaled one.\
 """
 
 def main():

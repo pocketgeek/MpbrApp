@@ -24,11 +24,11 @@ the reticle's extent.
 <tr>
 <td align="center"><img src="screenshots/Screenshot_20260829-102401.MPBR%20Calculator.png" width="190"><br><em>SFP reticle selected with Current Magnification field (set to 6× on a 12×-calibrated scope)</em></td>
 <td align="center"><img src="screenshots/Screenshot_20260829-102402.MPBR%20Calculator.png" width="190"><br><em>Atmosphere and trajectory table settings</em></td>
-<td align="center"><img src="screenshots/Screenshot_20260829-102500.MPBR%20Calculator.png" width="190"><br><em>Results: holdover dots rescaled for 6× (half the reticle's 12× calibration)</em></td>
+<td align="center"><img src="screenshots/Screenshot_20260829-102500.MPBR%20Calculator.png" width="190"><br><em>Results: holdover dots rescaled for 6× (half the reticle's 12× calibration), labeled "@ 6×" above the scope circle</em></td>
 </tr>
 <tr>
 <td align="center"><img src="screenshots/Screenshot_20260829-102600.MPBR%20Calculator.png" width="190"><br><em>Trajectory table and Save DOPE Chart</em></td>
-<td align="center"><img src="screenshots/DOPE_M80__7_62_51_NATO__20260830_171443.jpg" width="190"><br><em>Exported DOPE chart JPEG</em></td>
+<td align="center"><img src="screenshots/DOPE_M80__7_62_51_NATO__20260830_181601.jpg" width="190"><br><em>Exported DOPE chart JPEG</em></td>
 <td></td>
 </tr>
 </table>
@@ -116,7 +116,10 @@ show the true (unscaled) values, and the trajectory table numbers are
 unaffected either way — this only changes where the reticle illustration
 draws the callouts. FFP reticles and fixed/1× "always accurate" reticles
 don't show this field since their subtensions are correct at any/every
-magnification.
+magnification. When this field applies, the reticle illustration's title
+also prints the magnification it was drawn at (e.g. "Reticle: Vortex
+Dead-Hold BDC (MOA, SFP) @ 6×"), on-screen and in the exported/printed
+DOPE chart, so it's never ambiguous which power a saved chart reflects.
 
 Presets are sorted by manufacturer:
 

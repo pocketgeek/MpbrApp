@@ -1162,7 +1162,10 @@ private fun drawReticleSection(
     val pLbl = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = android.graphics.Color.DKGRAY; textSize = bsz * 0.72f; typeface = Typeface.DEFAULT_BOLD
     }
-    val lText = "Reticle: ${reticle.name}"
+    val lText = if (reticle.sfpMagnification > 0.0)
+        "Reticle: ${reticle.name} @ ${formatNum(magFactor * reticle.sfpMagnification)}×"
+    else
+        "Reticle: ${reticle.name}"
     cv.drawText(lText, cx - pLbl.measureText(lText) / 2f, sectionTop + s * 8f + bsz * 0.72f, pLbl)
 
     // ---- pre-compute visible callouts before entering clip ----

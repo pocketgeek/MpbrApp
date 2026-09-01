@@ -23,11 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-New ammo: Hornady ELD Match .300 Win Mag (v2.05)
+New ammo: Prvi Partizan .300 Win Mag SPBT (v2.06)
 
-Added the Hornady ELD Match 178gr and 195gr .300 Winchester Magnum \
-loads, with MV and BC pulled from Hornady's own product and bullet \
-pages.\
+Added the Prvi Partizan (PPU) 165gr and 180gr SPBT .300 Winchester \
+Magnum loads, with MV and BC sourced from PPU's own site and \
+independently corroborated retailer data.\
 """
 
 def main():

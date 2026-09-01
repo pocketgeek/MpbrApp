@@ -676,12 +676,23 @@ object Ballistics {
         AmmoPreset("300 PRC 245gr Elite Hunter",  2720.0, 0.413, 245.0, 2.6, 6.0, DragModel.G7, caliber = "300 PRC"),
         AmmoPreset("300 PRC 250gr A-Tip",         2800.0, 0.442, 250.0, 2.6, 6.0, DragModel.G7, caliber = "300 PRC"),
         AmmoPreset("300 Win Mag 150gr PP",        3290.0, 0.310, 150.0, 2.6, 6.0, caliber = "300 Win Mag"),
+        // Prvi Partizan (PPU) item PP3002, 165gr PSPBT (pointed soft point boat tail —
+        // "SPBT" on US retail listings, PPU's own site just calls the bullet type "SP").
+        // MV 3051 fps and BC 0.228 G7 confirmed from LuckyGunner's product page (24" test
+        // barrel); PPU's own site doesn't publish BC for this load.
+        AmmoPreset("300 Win Mag 165gr PPU SPBT",   3051.0, 0.228, 165.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 168gr SMK",       3000.0, 0.235, 168.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         // Hornady Match #82043 (300 Win Mag 178gr ELD Match). MV from Hornady's own product
         // page (24" test barrel). BC is the bullet's own published G7 value (Hornady's #30178
         // 178gr ELD Match bullet, hornady.com/bc, Mach 2.25 / 2512 fps reference) since the
         // loaded-ammo page itself doesn't list a BC.
         AmmoPreset("300 Win Mag 178gr ELD Match",  2960.0, 0.275, 178.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // Prvi Partizan (PPU) item PP3003, 180gr SPBT (US retail naming; PPU's own site
+        // lists the bullet type plainly as "SP"). MV 2903 fps confirmed independently on
+        // PPU's own site (885 m/s) and by multiple US retailers (LuckyGunner, Target Sports
+        // USA). BC 0.413 (G1 — not explicitly labeled by PPU, but consistent with published
+        // third-party ballistics tables for this load; PPU doesn't publish a G7 figure).
+        AmmoPreset("300 Win Mag 180gr PPU SPBT",   2903.0, 0.413, 180.0, 2.6, 6.0, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 180gr AccuBond",  2950.0, 0.250, 180.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 190gr SMK",       2950.0, 0.290, 190.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         // Hornady Match #82180 (300 Win Mag 195gr ELD Match). MV from Hornady's own product

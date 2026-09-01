@@ -23,12 +23,15 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Fix: humidity now capped at 100% (v2.08)
+Reliability fixes (v2.09)
 
-Humidity above 100% relative humidity isn't physically possible, but \
-the app let you type any value and used it as-is. It's now clamped \
-to 0-100% at calculation time, including in exported/printed DOPE \
-charts.\
+Fixed the app being unusable on devices set to comma-decimal locales \
+(German, French, etc.) - preset values now always use a dot decimal \
+separator. Rotating the phone no longer wipes your inputs and \
+results. Saved DOPE charts and drift columns now always describe the \
+conditions used when Calculate was pressed, even if you've edited \
+fields since. Sessions now also remember the target-distance \
+settings.\
 """
 
 def main():

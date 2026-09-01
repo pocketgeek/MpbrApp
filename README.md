@@ -78,10 +78,14 @@ boilerplate Android needs to actually launch the app.
 App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 (Parma, ID defaults), 6" vital zone:
 
-- Near zero ≈ 25 yd
-- Far zero ≈ 229 yd
-- Max ordinate ≈ 3.0" @ 128 yd
-- MPBR ≈ 270 yd
+- Near zero ≈ 41 yd
+- Far zero ≈ 258 yd
+- Max ordinate ≈ 3.0" @ 151 yd
+- MPBR ≈ 301 yd
+
+These numbers are pinned by the unit test
+`BallisticsTest.m80DefaultScenarioMatchesDocumentedNumbers` — if the engine
+changes behaviour, that test fails and this section must be updated with it.
 
 ## Inputs
 

@@ -18,8 +18,8 @@ android {
         applicationId = "us.pgnet.mpbr"
         minSdk = 24
         targetSdk = 37
-        versionCode = 108
-        versionName = "2.08"
+        versionCode = 109
+        versionName = "2.09"
     }
 
     signingConfigs {
@@ -65,4 +65,7 @@ dependencies {
     implementation("androidx.print:print:1.1.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // Ballistics.kt is pure Kotlin with no Android deps — plain JVM unit tests.
+    testImplementation("junit:junit:4.13.2")
 }

@@ -977,7 +977,8 @@ object Ballistics {
         5.00 to 0.0712
     )
 
-    private fun cd(model: DragModel, mach: Double): Double {
+    // internal (not private) so unit tests can pin the drag-table interpolation.
+    internal fun cd(model: DragModel, mach: Double): Double {
         val tbl = if (model == DragModel.G1) G1 else G7
         if (mach <= tbl.first().first) return tbl.first().second
         if (mach >= tbl.last().first)  return tbl.last().second

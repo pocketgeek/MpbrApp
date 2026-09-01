@@ -18,6 +18,7 @@ import android.media.AudioManager
 import android.media.AudioTrack
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +61,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,44 +100,72 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Inputs captured at the moment Calculate ran, so everything derived from a
+ * result (DOPE chart header, drift-column visibility, target-distance energy)
+ * describes the conditions that actually produced it — not whatever the user
+ * has typed into the fields since. Humidity arrives here already clamped.
+ */
+private data class CalcInputs(
+    val ammoLabel: String,
+    val altitudeFt: Double,
+    val temperatureF: Double,
+    val humidityPct: Double,
+    val windSpeedMph: Double,
+    val vitalZoneIn: Double,
+    val bulletWeightGr: Double
+)
+
 @Composable
 fun MpbrScreen() {
-    val defaultPreset = Ballistics.PRESETS.first { it.name.startsWith("M80") }
+    val defaultPreset = Ballistics.PRESETS.firstOrNull { it.name.startsWith("M80") }
+        ?: Ballistics.PRESETS.first()
 
-    var muzzleVel    by remember { mutableStateOf(formatNum(defaultPreset.muzzleVelocityFps)) }
-    var bc           by remember { mutableStateOf("%.3f".format(defaultPreset.ballisticCoeff)) }
-    var bulletWeight by remember { mutableStateOf(formatNum(defaultPreset.bulletWeightGr)) }
-    var sightHeight  by remember { mutableStateOf("%.2f".format(defaultPreset.sightHeightIn)) }
-    var vitalZone    by remember { mutableStateOf("%.1f".format(defaultPreset.vitalZoneIn)) }
-    var dragModel    by remember { mutableStateOf(defaultPreset.dragModel) }
+    // All user inputs use rememberSaveable so rotation / split-screen resize /
+    // any other configuration change doesn't wipe the form.
+    var muzzleVel    by rememberSaveable { mutableStateOf(formatNum(defaultPreset.muzzleVelocityFps)) }
+    var bc           by rememberSaveable { mutableStateOf("%.3f".format(Locale.US, defaultPreset.ballisticCoeff)) }
+    var bulletWeight by rememberSaveable { mutableStateOf(formatNum(defaultPreset.bulletWeightGr)) }
+    var sightHeight  by rememberSaveable { mutableStateOf("%.2f".format(Locale.US, defaultPreset.sightHeightIn)) }
+    var vitalZone    by rememberSaveable { mutableStateOf("%.1f".format(Locale.US, defaultPreset.vitalZoneIn)) }
+    var dragModel    by rememberSaveable { mutableStateOf(defaultPreset.dragModel) }
 
-    // null = "Custom" — i.e. user has typed something, no canned preset is loaded
-    var selectedPreset by remember { mutableStateOf<Ballistics.AmmoPreset?>(defaultPreset) }
+    // Preset selection is stored by name ("" = Custom) so it survives config
+    // changes without needing the data class itself to be Bundle-friendly.
+    var selectedPresetName by rememberSaveable { mutableStateOf(defaultPreset.name) }
+    val selectedPreset = remember(selectedPresetName) {
+        Ballistics.PRESETS.find { it.name == selectedPresetName }
+    }
 
     // Atmospheric inputs (defaults = Parma, Idaho conditions)
-    var altitude     by remember { mutableStateOf("2231") }
-    var temperature  by remember { mutableStateOf("70") }
-    var humidity     by remember { mutableStateOf("25") }
-    var windSpeed    by remember { mutableStateOf("0") }
+    var altitude     by rememberSaveable { mutableStateOf("2231") }
+    var temperature  by rememberSaveable { mutableStateOf("70") }
+    var humidity     by rememberSaveable { mutableStateOf("25") }
+    var windSpeed    by rememberSaveable { mutableStateOf("0") }
 
-    var tableStart   by remember { mutableStateOf("0") }
-    var tableEnd     by remember { mutableStateOf("500") }
-    var tableStep    by remember { mutableStateOf("50") }
-    var dopeTitle    by remember { mutableStateOf("MPBR DOPE CARD") }
-    var dopeNotes    by remember { mutableStateOf("") }
+    var tableStart   by rememberSaveable { mutableStateOf("0") }
+    var tableEnd     by rememberSaveable { mutableStateOf("500") }
+    var tableStep    by rememberSaveable { mutableStateOf("50") }
+    var dopeTitle    by rememberSaveable { mutableStateOf("MPBR DOPE CARD") }
+    var dopeNotes    by rememberSaveable { mutableStateOf("") }
 
-    var targetDistEnabled   by remember { mutableStateOf(false) }
-    var targetDistYards     by remember { mutableStateOf("100") }
-    var targetOnlyCallout   by remember { mutableStateOf(false) }
+    var targetDistEnabled   by rememberSaveable { mutableStateOf(false) }
+    var targetDistYards     by rememberSaveable { mutableStateOf("100") }
+    var targetOnlyCallout   by rememberSaveable { mutableStateOf(false) }
 
-    var result by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
+    // The result itself isn't Bundle-saveable (and recomputing takes ~ms), so
+    // across a config change we just remember *that* there was one and rerun
+    // calculate() — see the LaunchedEffect below applySession().
+    var result     by remember { mutableStateOf<Ballistics.MpbrResult?>(null) }
+    var hadResult  by rememberSaveable { mutableStateOf(false) }
+    var calcInputs by remember { mutableStateOf<CalcInputs?>(null) }
 
-    val targetRow: Ballistics.TrajectoryRow? = remember(result, targetDistEnabled, targetDistYards, bulletWeight) {
+    val targetRow: Ballistics.TrajectoryRow? = remember(result, targetDistEnabled, targetDistYards, calcInputs) {
         if (!targetDistEnabled) return@remember null
         val r    = result ?: return@remember null
         val dist = targetDistYards.toIntOrNull() ?: return@remember null
         if (dist <= 0 || dist > 2000) return@remember null
-        Ballistics.trajectoryAt(r.rawTrajectory, dist, bulletWeight.toDoubleOrNull() ?: 0.0)
+        Ballistics.trajectoryAt(r.rawTrajectory, dist, calcInputs?.bulletWeightGr ?: 0.0)
     }
     var error  by remember { mutableStateOf<String?>(null) }
 
@@ -145,24 +175,37 @@ fun MpbrScreen() {
         ActivityResultContracts.RequestPermission()
     ) { granted -> onPermissionResult.value(granted) }
 
-    var selectedReticle by remember { mutableStateOf<Ballistics.ReticlePreset?>(null) }
+    // Reticle selection is stored by name ("" = None), same reasoning as presets.
+    var selectedReticleName by rememberSaveable { mutableStateOf("") }
+    val selectedReticle = remember(selectedReticleName) {
+        Ballistics.RETICLE_PRESETS.find { it.name == selectedReticleName }
+    }
     // Current scope magnification, only used/shown for SFP reticles (sfpMagnification > 0).
     // Defaults to the reticle's calibrated magnification when a new SFP reticle is picked.
-    var currentMag by remember { mutableStateOf("") }
+    var currentMag by rememberSaveable { mutableStateOf("") }
 
-    val showSaveDialog   = remember { mutableStateOf(false) }
-    val showLoadDialog   = remember { mutableStateOf(false) }
-    val showRenameDialog = remember { mutableStateOf(false) }
-    var saveDialogName   by remember { mutableStateOf("") }
-    var renameTarget     by remember { mutableStateOf("") }
-    var renameText       by remember { mutableStateOf("") }
+    val showSaveDialog   = rememberSaveable { mutableStateOf(false) }
+    val showLoadDialog   = rememberSaveable { mutableStateOf(false) }
+    val showRenameDialog = rememberSaveable { mutableStateOf(false) }
+    var saveDialogName   by rememberSaveable { mutableStateOf("") }
+    var renameTarget     by rememberSaveable { mutableStateOf("") }
+    var renameText       by rememberSaveable { mutableStateOf("") }
     var loadedSessions   by remember { mutableStateOf(listOf<SessionData>()) }
 
-    var metricMode by remember { mutableStateOf(false) }
+    // (Re)load the session list whenever the Load dialog opens — including when
+    // it reopens after a configuration change, when the plain `remember` list
+    // above has been reset to empty.
+    LaunchedEffect(showLoadDialog.value) {
+        if (showLoadDialog.value) loadedSessions = loadSessions(context)
+    }
 
-    // Display an imperial string in metric units (no-op when metricMode is false)
+    var metricMode by rememberSaveable { mutableStateOf(false) }
+
+    // Display an imperial string in metric units (no-op when metricMode is false).
+    // Locale.US keeps the decimal separator a '.', which the parse-back path
+    // (toDoubleOrNull in fromMetric/calculate) requires regardless of device locale.
     fun toMetric(s: String, fmt: String = "%.1f", convert: (Double) -> Double): String =
-        if (metricMode) s.toDoubleOrNull()?.let { fmt.format(convert(it)) } ?: s else s
+        if (metricMode) s.toDoubleOrNull()?.let { fmt.format(Locale.US, convert(it)) } ?: s else s
 
     // Convert metric user input back to imperial for storage (no-op when metricMode is false)
     fun fromMetric(s: String, convert: (Double) -> Double): String =
@@ -176,16 +219,16 @@ fun MpbrScreen() {
     // so it doesn't lie about what's loaded. These wrap the raw setters.
     fun userEdit(setter: (String) -> Unit, value: String) {
         setter(value)
-        selectedPreset = null
+        selectedPresetName = ""
     }
 
     fun applyPreset(p: Ballistics.AmmoPreset) {
-        selectedPreset = p
+        selectedPresetName = p.name
         muzzleVel    = formatNum(p.muzzleVelocityFps)
-        bc           = "%.3f".format(p.ballisticCoeff)
+        bc           = "%.3f".format(Locale.US, p.ballisticCoeff)
         bulletWeight = formatNum(p.bulletWeightGr)
-        sightHeight  = "%.2f".format(p.sightHeightIn)
-        vitalZone    = "%.1f".format(p.vitalZoneIn)
+        sightHeight  = "%.2f".format(Locale.US, p.sightHeightIn)
+        vitalZone    = "%.1f".format(Locale.US, p.vitalZoneIn)
         dragModel    = p.dragModel
     }
 
@@ -208,7 +251,10 @@ fun MpbrScreen() {
         dopeTitle    = dopeTitle,
         dopeNotes    = dopeNotes,
         reticleName  = selectedReticle?.name,
-        currentMag   = currentMag
+        currentMag   = currentMag,
+        targetDistEnabled = targetDistEnabled,
+        targetDistYards   = targetDistYards,
+        targetOnlyCallout = targetOnlyCallout
     )
 
     fun calculate() {
@@ -219,19 +265,18 @@ fun MpbrScreen() {
             val bw    = bulletWeight.toDouble()
             val sh    = sightHeight.toDouble()
             val vz    = vitalZone.toDouble()
+            val alt   = altitude.toDouble()
+            val temp  = temperature.toDouble()
+            val hum   = humidity.toDouble().coerceIn(0.0, 100.0)
+            val wind  = windSpeed.toDoubleOrNull() ?: 0.0
             val tMin  = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
             val tMax  = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
             val tStep = (tableStep.toIntOrNull()  ?: 50).coerceIn(1, 500)
             if (tMin >= tMax) {
                 error  = "Table start must be less than table end"
-                result = null
+                result = null; calcInputs = null; hadResult = false
                 return
             }
-            val atm = Ballistics.Atmosphere(
-                altitudeFt   = altitude.toDouble(),
-                temperatureF = temperature.toDouble(),
-                humidityPct  = humidity.toDouble().coerceIn(0.0, 100.0)
-            )
             result = Ballistics.calculateMpbr(
                 muzzleVelocity      = mv,
                 ballisticCoeff      = b,
@@ -239,18 +284,31 @@ fun MpbrScreen() {
                 vitalZoneDiameterIn = vz,
                 bulletWeightGr      = bw,
                 dragModel           = dragModel,
-                atmosphere          = atm,
-                windSpeedMph        = windSpeed.toDoubleOrNull() ?: 0.0,
+                atmosphere          = Ballistics.Atmosphere(alt, temp, hum),
+                windSpeedMph        = wind,
                 tableStepYards      = tStep,
                 tableMinYards       = tMin,
                 tableMaxYards       = tMax
             )
+            // Snapshot the inputs that produced this result so downstream output
+            // (DOPE header, drift columns, target-row energy) can't drift out of
+            // sync when the user edits fields without recalculating.
+            calcInputs = CalcInputs(
+                ammoLabel      = selectedPreset?.name ?: "Custom",
+                altitudeFt     = alt,
+                temperatureF   = temp,
+                humidityPct    = hum,
+                windSpeedMph   = wind,
+                vitalZoneIn    = vz,
+                bulletWeightGr = bw
+            )
+            hadResult = true
         } catch (_: NumberFormatException) {
             error  = "All fields must be numbers"
-            result = null
+            result = null; calcInputs = null; hadResult = false
         } catch (e: IllegalArgumentException) {
             error  = e.message
-            result = null
+            result = null; calcInputs = null; hadResult = false
         }
     }
 
@@ -261,7 +319,7 @@ fun MpbrScreen() {
         sightHeight     = s.sightHeight
         vitalZone       = s.vitalZone
         dragModel       = if (s.dragModel == "G7") Ballistics.DragModel.G7 else Ballistics.DragModel.G1
-        selectedPreset  = s.presetName?.let { n -> Ballistics.PRESETS.find { it.name == n } }
+        selectedPresetName = s.presetName ?: ""
         altitude        = s.altitude
         temperature     = s.temperature
         humidity        = s.humidity
@@ -271,11 +329,24 @@ fun MpbrScreen() {
         tableStep       = s.tableStep
         dopeTitle       = s.dopeTitle
         dopeNotes       = s.dopeNotes
-        selectedReticle = s.reticleName?.let { n -> Ballistics.RETICLE_PRESETS.find { it.name == n } }
+        selectedReticleName = s.reticleName ?: ""
+        // The derived selectedReticle val won't recompute until the next
+        // composition, so resolve the restored reticle locally for the
+        // magnification fallback.
+        val restoredReticle = Ballistics.RETICLE_PRESETS.find { it.name == s.reticleName }
         currentMag      = s.currentMag.ifEmpty {
-            selectedReticle?.let { if (it.sfpMagnification > 0.0) formatNum(it.sfpMagnification) else "" } ?: ""
+            restoredReticle?.let { if (it.sfpMagnification > 0.0) formatNum(it.sfpMagnification) else "" } ?: ""
         }
+        targetDistEnabled = s.targetDistEnabled
+        targetDistYards   = s.targetDistYards
+        targetOnlyCallout = s.targetOnlyCallout
         calculate()
+    }
+
+    // After a configuration change (rotation, resize, …) the saveable inputs
+    // come back but the result object doesn't — recompute it if there was one.
+    LaunchedEffect(Unit) {
+        if (hadResult && result == null) calculate()
     }
 
     Column(
@@ -303,10 +374,7 @@ fun MpbrScreen() {
             }) {
                 Icon(Icons.Default.Save, contentDescription = "Save session")
             }
-            IconButton(onClick = {
-                loadedSessions = loadSessions(context)
-                showLoadDialog.value = true
-            }) {
+            IconButton(onClick = { showLoadDialog.value = true }) {
                 Icon(Icons.Default.FolderOpen, contentDescription = "Load session")
             }
         }
@@ -317,7 +385,7 @@ fun MpbrScreen() {
             selected = selectedPreset,
             presets  = Ballistics.PRESETS,
             onSelect = { picked ->
-                if (picked == null) selectedPreset = null else applyPreset(picked)
+                if (picked == null) selectedPresetName = "" else applyPreset(picked)
             }
         )
 
@@ -331,12 +399,12 @@ fun MpbrScreen() {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
                     selected = dragModel == Ballistics.DragModel.G1,
-                    onClick  = { dragModel = Ballistics.DragModel.G1; selectedPreset = null },
+                    onClick  = { dragModel = Ballistics.DragModel.G1; selectedPresetName = "" },
                     label    = { Text("G1") }
                 )
                 FilterChip(
                     selected = dragModel == Ballistics.DragModel.G7,
-                    onClick  = { dragModel = Ballistics.DragModel.G7; selectedPreset = null },
+                    onClick  = { dragModel = Ballistics.DragModel.G7; selectedPresetName = "" },
                     label    = { Text("G7") }
                 )
             }
@@ -352,7 +420,7 @@ fun MpbrScreen() {
         ReticleDropdown(
             selected = selectedReticle,
             onSelect = { picked ->
-                selectedReticle = picked
+                selectedReticleName = picked?.name ?: ""
                 currentMag = if (picked != null && picked.sfpMagnification > 0.0)
                     formatNum(picked.sfpMagnification) else ""
             }
@@ -490,53 +558,53 @@ fun MpbrScreen() {
                 ) {
                     Text("Results", style = MaterialTheme.typography.titleLarge)
                     if (metricMode) {
-                        ResultRow("Near Zero", "%.0f m".format(r.nearZeroYards * 0.9144))
-                        ResultRow("Far Zero",  "%.0f m".format(r.farZeroYards  * 0.9144))
-                        ResultRow("Max Ordinate", "%.2f cm @ %.0f m".format(r.maxOrdinateInches * 2.54, r.maxOrdinateRangeYards * 0.9144))
+                        ResultRow("Near Zero", "%.0f m".format(Locale.US, r.nearZeroYards * 0.9144))
+                        ResultRow("Far Zero",  "%.0f m".format(Locale.US, r.farZeroYards  * 0.9144))
+                        ResultRow("Max Ordinate", "%.2f cm @ %.0f m".format(Locale.US, r.maxOrdinateInches * 2.54, r.maxOrdinateRangeYards * 0.9144))
                         if (r.energyAtMuzzleFtLb > 0.0)
-                            ResultRow("Muzzle Energy", "%.0f J".format(r.energyAtMuzzleFtLb * 1.35582))
-                        ResultRow("Maximum Point Blank Range", "%.0f m".format(r.mpbrYards * 0.9144))
+                            ResultRow("Muzzle Energy", "%.0f J".format(Locale.US, r.energyAtMuzzleFtLb * 1.35582))
+                        ResultRow("Maximum Point Blank Range", "%.0f m".format(Locale.US, r.mpbrYards * 0.9144))
                         if (r.energyAtMpbrFtLb > 0.0)
-                            ResultRow("Energy at MPBR", "%.0f J".format(r.energyAtMpbrFtLb * 1.35582))
-                        ResultRow("Velocity at Near Zero", "%.0f m/s".format(r.velocityAtNearZeroFps * 0.3048))
+                            ResultRow("Energy at MPBR", "%.0f J".format(Locale.US, r.energyAtMpbrFtLb * 1.35582))
+                        ResultRow("Velocity at Near Zero", "%.0f m/s".format(Locale.US, r.velocityAtNearZeroFps * 0.3048))
                         if (r.energyAtNearZeroFtLb > 0.0)
-                            ResultRow("Energy at Near Zero", "%.0f J".format(r.energyAtNearZeroFtLb * 1.35582))
-                        ResultRow("Velocity at Far Zero",  "%.0f m/s".format(r.velocityAtFarZeroFps * 0.3048))
+                            ResultRow("Energy at Near Zero", "%.0f J".format(Locale.US, r.energyAtNearZeroFtLb * 1.35582))
+                        ResultRow("Velocity at Far Zero",  "%.0f m/s".format(Locale.US, r.velocityAtFarZeroFps * 0.3048))
                         if (r.energyAtFarZeroFtLb > 0.0)
-                            ResultRow("Energy at Far Zero", "%.0f J".format(r.energyAtFarZeroFtLb * 1.35582))
+                            ResultRow("Energy at Far Zero", "%.0f J".format(Locale.US, r.energyAtFarZeroFtLb * 1.35582))
                     } else {
-                        ResultRow("Near Zero", "%.0f yd".format(r.nearZeroYards))
-                        ResultRow("Far Zero",  "%.0f yd".format(r.farZeroYards))
-                        ResultRow("Max Ordinate", "%.2f in @ %.0f yd".format(r.maxOrdinateInches, r.maxOrdinateRangeYards))
+                        ResultRow("Near Zero", "%.0f yd".format(Locale.US, r.nearZeroYards))
+                        ResultRow("Far Zero",  "%.0f yd".format(Locale.US, r.farZeroYards))
+                        ResultRow("Max Ordinate", "%.2f in @ %.0f yd".format(Locale.US, r.maxOrdinateInches, r.maxOrdinateRangeYards))
                         if (r.energyAtMuzzleFtLb > 0.0)
-                            ResultRow("Muzzle Energy", "%.0f ft·lb".format(r.energyAtMuzzleFtLb))
-                        ResultRow("Maximum Point Blank Range", "%.0f yd".format(r.mpbrYards))
+                            ResultRow("Muzzle Energy", "%.0f ft·lb".format(Locale.US, r.energyAtMuzzleFtLb))
+                        ResultRow("Maximum Point Blank Range", "%.0f yd".format(Locale.US, r.mpbrYards))
                         if (r.energyAtMpbrFtLb > 0.0)
-                            ResultRow("Energy at MPBR", "%.0f ft·lb".format(r.energyAtMpbrFtLb))
-                        ResultRow("Velocity at Near Zero", "%.0f fps".format(r.velocityAtNearZeroFps))
+                            ResultRow("Energy at MPBR", "%.0f ft·lb".format(Locale.US, r.energyAtMpbrFtLb))
+                        ResultRow("Velocity at Near Zero", "%.0f fps".format(Locale.US, r.velocityAtNearZeroFps))
                         if (r.energyAtNearZeroFtLb > 0.0)
-                            ResultRow("Energy at Near Zero", "%.0f ft·lb".format(r.energyAtNearZeroFtLb))
-                        ResultRow("Velocity at Far Zero",  "%.0f fps".format(r.velocityAtFarZeroFps))
+                            ResultRow("Energy at Near Zero", "%.0f ft·lb".format(Locale.US, r.energyAtNearZeroFtLb))
+                        ResultRow("Velocity at Far Zero",  "%.0f fps".format(Locale.US, r.velocityAtFarZeroFps))
                         if (r.energyAtFarZeroFtLb > 0.0)
-                            ResultRow("Energy at Far Zero", "%.0f ft·lb".format(r.energyAtFarZeroFtLb))
+                            ResultRow("Energy at Far Zero", "%.0f ft·lb".format(Locale.US, r.energyAtFarZeroFtLb))
                     }
-                    ResultRow("Bore Angle Above LOS", "%.2f MOA".format(r.boreAngleMoa))
+                    ResultRow("Bore Angle Above LOS", "%.2f MOA".format(Locale.US, r.boreAngleMoa))
                     if (targetRow != null && targetDistEnabled) {
                         val tDist  = targetDistYards.toIntOrNull() ?: 0
-                        val tLabel = if (metricMode) "%.0f m".format(tDist * 0.9144) else "$tDist yd"
+                        val tLabel = if (metricMode) "%.0f m".format(Locale.US, tDist * 0.9144) else "$tDist yd"
                         HorizontalDivider()
                         ResultRow("Drop @ $tLabel",
-                            if (metricMode) "%.2f cm".format(targetRow.dropInches * 2.54)
-                            else           "%.2f in".format(targetRow.dropInches))
+                            if (metricMode) "%.2f cm".format(Locale.US, targetRow.dropInches * 2.54)
+                            else           "%.2f in".format(Locale.US, targetRow.dropInches))
                         ResultRow("Holdover @ $tLabel",
-                            "%.1f MOA  /  %.2f MIL".format(targetRow.holdoverMoa, targetRow.holdoverMil))
+                            "%.1f MOA  /  %.2f MIL".format(Locale.US, targetRow.holdoverMoa, targetRow.holdoverMil))
                         ResultRow("Velocity @ $tLabel",
-                            if (metricMode) "%.0f m/s".format(targetRow.velocityFps * 0.3048)
-                            else            "%.0f fps".format(targetRow.velocityFps))
+                            if (metricMode) "%.0f m/s".format(Locale.US, targetRow.velocityFps * 0.3048)
+                            else            "%.0f fps".format(Locale.US, targetRow.velocityFps))
                         if (targetRow.energyFtLb > 0.0)
                             ResultRow("Energy @ $tLabel",
-                                if (metricMode) "%.0f J".format(targetRow.energyFtLb * 1.35582)
-                                else            "%.0f ft·lb".format(targetRow.energyFtLb))
+                                if (metricMode) "%.0f J".format(Locale.US, targetRow.energyFtLb * 1.35582)
+                                else            "%.0f ft·lb".format(Locale.US, targetRow.energyFtLb))
                     }
                 }
             }
@@ -561,9 +629,12 @@ fun MpbrScreen() {
                 TrajectoryTableCard(
                     rows       = r.trajectoryTable,
                     showEnergy = r.energyAtNearZeroFtLb > 0.0,
-                    showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0,
-                    showMoa    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MOA,
-                    showMil    = selectedReticle == null || selectedReticle!!.unit == Ballistics.ReticleUnit.MIL,
+                    // Wind from the snapshot, not the live field: editing the wind
+                    // field without recalculating must not hide/show drift columns
+                    // for a trajectory computed under different wind.
+                    showDrift  = (calcInputs?.windSpeedMph ?: 0.0) != 0.0,
+                    showMoa    = selectedReticle == null || selectedReticle.unit == Ballistics.ReticleUnit.MOA,
+                    showMil    = selectedReticle == null || selectedReticle.unit == Ballistics.ReticleUnit.MIL,
                     metricMode = metricMode
                 )
             }
@@ -584,28 +655,31 @@ fun MpbrScreen() {
                 modifier      = Modifier.fillMaxWidth()
             )
 
+            // Both export buttons build the identical chart from the inputs
+            // snapshotted at Calculate time (title/notes/reticle stay live —
+            // they're presentation choices, not trajectory inputs).
+            val ins = calcInputs
+            val chartLabel = ins?.ammoLabel ?: (selectedPreset?.name ?: "Custom")
+            fun buildChart(): Bitmap = buildDopeChartBitmap(
+                r, chartLabel,
+                ins?.altitudeFt   ?: 0.0,
+                ins?.temperatureF ?: 59.0,
+                ins?.humidityPct  ?: 0.0,
+                ins?.windSpeedMph ?: 0.0,
+                ins?.vitalZoneIn  ?: 6.0,
+                r.energyAtNearZeroFtLb > 0.0,
+                (ins?.windSpeedMph ?: 0.0) != 0.0,
+                selectedReticle,
+                dopeTitle,
+                metricMode,
+                dopeNotes,
+                magFactor
+            )
+
             Button(
                 onClick = {
-                    val label      = selectedPreset?.name ?: "Custom"
-                    val showEnergy = r.energyAtNearZeroFtLb > 0.0
-                    val showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
-
                     fun doSave() {
-                        val bmp = buildDopeChartBitmap(
-                            r, label,
-                            altitude.toDoubleOrNull()    ?: 0.0,
-                            temperature.toDoubleOrNull() ?: 59.0,
-                            (humidity.toDoubleOrNull() ?: 0.0).coerceIn(0.0, 100.0),
-                            windSpeed.toDoubleOrNull()   ?: 0.0,
-                            vitalZone.toDoubleOrNull()   ?: 6.0,
-                            showEnergy, showDrift,
-                            selectedReticle,
-                            dopeTitle,
-                            metricMode,
-                            dopeNotes,
-                            magFactor
-                        )
-                        val ok = saveDopeChart(context, bmp, label)
+                        val ok = saveDopeChart(context, buildChart(), chartLabel)
                         android.widget.Toast.makeText(
                             context,
                             if (ok) "Saved to Pictures/MPBR DOPE Charts" else "Save failed",
@@ -628,26 +702,9 @@ fun MpbrScreen() {
 
             Button(
                 onClick = {
-                    val label      = selectedPreset?.name ?: "Custom"
-                    val showEnergy = r.energyAtNearZeroFtLb > 0.0
-                    val showDrift  = (windSpeed.toDoubleOrNull() ?: 0.0) != 0.0
-                    val bmp = buildDopeChartBitmap(
-                        r, label,
-                        altitude.toDoubleOrNull()    ?: 0.0,
-                        temperature.toDoubleOrNull() ?: 59.0,
-                        (humidity.toDoubleOrNull() ?: 0.0).coerceIn(0.0, 100.0),
-                        windSpeed.toDoubleOrNull()   ?: 0.0,
-                        vitalZone.toDoubleOrNull()   ?: 6.0,
-                        showEnergy, showDrift,
-                        selectedReticle,
-                        dopeTitle,
-                        metricMode,
-                        dopeNotes,
-                        magFactor
-                    )
                     PrintHelper(context as android.app.Activity).apply {
                         scaleMode = PrintHelper.SCALE_MODE_FIT
-                    }.printBitmap("MPBR DOPE Chart — $label", bmp)
+                    }.printBitmap("MPBR DOPE Chart — $chartLabel", buildChart())
                 },
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Print DOPE Chart") }
@@ -694,7 +751,12 @@ fun MpbrScreen() {
                 if (loadedSessions.isEmpty()) {
                     Text("No saved sessions yet.")
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .heightIn(max = 400.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         for (s in loadedSessions) {
                             Row(
                                 modifier          = Modifier.fillMaxWidth(),
@@ -793,16 +855,16 @@ private fun TrajectoryTableCard(
 
             for (row in rows) {
                 val cells = buildList {
-                    add(if (metricMode) "%.0f m".format(row.rangeYards * 0.9144) else "${row.rangeYards} yd")
-                    add(if (metricMode) "%.1f cm".format(row.dropInches * 2.54)  else "%.1f in".format(row.dropInches))
-                    if (showMoa) add("%.1f".format(row.holdoverMoa))
-                    if (showMil) add("%.2f".format(row.holdoverMil))
+                    add(if (metricMode) "%.0f m".format(Locale.US, row.rangeYards * 0.9144) else "${row.rangeYards} yd")
+                    add(if (metricMode) "%.1f cm".format(Locale.US, row.dropInches * 2.54)  else "%.1f in".format(Locale.US, row.dropInches))
+                    if (showMoa) add("%.1f".format(Locale.US, row.holdoverMoa))
+                    if (showMil) add("%.2f".format(Locale.US, row.holdoverMil))
                     if (showDrift) {
-                        if (showMoa) add("%.1f".format(row.driftMoa))
-                        if (showMil) add("%.2f".format(row.driftMil))
+                        if (showMoa) add("%.1f".format(Locale.US, row.driftMoa))
+                        if (showMil) add("%.2f".format(Locale.US, row.driftMil))
                     }
-                    add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f fps".format(row.velocityFps))
-                    if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f ft·lb".format(row.energyFtLb))
+                    add(if (metricMode) "%.0f".format(Locale.US, row.velocityFps * 0.3048) else "%.0f fps".format(Locale.US, row.velocityFps))
+                    if (showEnergy) add(if (metricMode) "%.0f".format(Locale.US, row.energyFtLb * 1.35582) else "%.0f ft·lb".format(Locale.US, row.energyFtLb))
                 }
                 TrajRow(cells = cells, style = MaterialTheme.typography.bodyMedium)
             }
@@ -1205,7 +1267,7 @@ private fun drawReticleSection(
             if (dx * dx + dy * dy > margin * margin) continue
             if (abs(y - lastY) < bsz * 0.82f) continue
             val unitStr = if (reticle.unit == Ballistics.ReticleUnit.MIL)
-                "%.2f mil".format(hold) else "%.1f MOA".format(hold)
+                "%.2f mil".format(Locale.US, hold) else "%.1f MOA".format(Locale.US, hold)
             callouts.add(ReticleCallout(x, y, calloutColors[idx % calloutColors.size], "${row.rangeYards} yd  ($unitStr)"))
             lastY = y
             idx++
@@ -2647,27 +2709,27 @@ private fun buildDopeChartBitmap(
     val rwH = (bsz + 16).toInt()
 
     val info = if (metricMode) {
-        val windStr = if (windMph == 0.0) "calm" else "%.0f km/h".format(windMph * 1.60934)
+        val windStr = if (windMph == 0.0) "calm" else "%.0f km/h".format(Locale.US, windMph * 1.60934)
         listOf(
             ammoLabel,
             "Near Zero: %.0f m  |  Far Zero: %.0f m  |  MPBR: %.0f m"
-                .format(result.nearZeroYards * 0.9144, result.farZeroYards * 0.9144, result.mpbrYards * 0.9144),
+                .format(Locale.US, result.nearZeroYards * 0.9144, result.farZeroYards * 0.9144, result.mpbrYards * 0.9144),
             "Max Ordinate: %.2f cm @ %.0f m  |  Bore Angle: %.2f MOA  |  Vital Zone: %.1f cm"
-                .format(result.maxOrdinateInches * 2.54, result.maxOrdinateRangeYards * 0.9144, result.boreAngleMoa, vitalZoneIn * 2.54),
+                .format(Locale.US, result.maxOrdinateInches * 2.54, result.maxOrdinateRangeYards * 0.9144, result.boreAngleMoa, vitalZoneIn * 2.54),
             "Alt: %.0f m  |  Temp: %.1f°C  |  RH: %.0f%%  |  Wind: %s"
-                .format(altFt * 0.3048, (tempF - 32.0) * 5.0 / 9.0, rhPct, windStr),
+                .format(Locale.US, altFt * 0.3048, (tempF - 32.0) * 5.0 / 9.0, rhPct, windStr),
             "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
         )
     } else {
-        val windStr = if (windMph == 0.0) "calm" else "%.0f mph".format(windMph)
+        val windStr = if (windMph == 0.0) "calm" else "%.0f mph".format(Locale.US, windMph)
         listOf(
             ammoLabel,
             "Near Zero: %.0f yd  |  Far Zero: %.0f yd  |  MPBR: %.0f yd"
-                .format(result.nearZeroYards, result.farZeroYards, result.mpbrYards),
+                .format(Locale.US, result.nearZeroYards, result.farZeroYards, result.mpbrYards),
             "Max Ordinate: %.2f\" @ %.0f yd  |  Bore Angle: %.2f MOA  |  Vital Zone: %.1f\""
-                .format(result.maxOrdinateInches, result.maxOrdinateRangeYards, result.boreAngleMoa, vitalZoneIn),
+                .format(Locale.US, result.maxOrdinateInches, result.maxOrdinateRangeYards, result.boreAngleMoa, vitalZoneIn),
             "Alt: %.0f ft  |  Temp: %.0f°F  |  RH: %.0f%%  |  Wind: %s"
-                .format(altFt, tempF, rhPct, windStr),
+                .format(Locale.US, altFt, tempF, rhPct, windStr),
             "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
         )
     }
@@ -2735,16 +2797,16 @@ private fun buildDopeChartBitmap(
     result.trajectoryTable.forEachIndexed { idx, row ->
         if (idx % 2 == 1) cv.drawRect(0f, y - bsz * 0.9f, w.toFloat(), y + bsz * 0.3f, pStripe)
         val cells = buildList {
-            add(if (metricMode) "%.0f".format(row.rangeYards * 0.9144)  else "${row.rangeYards}")
-            add(if (metricMode) "%.1f".format(row.dropInches  * 2.54)   else "%.1f".format(row.dropInches))
-            if (showMoa) add("%.1f".format(row.holdoverMoa))
-            if (showMil) add("%.2f".format(row.holdoverMil))
+            add(if (metricMode) "%.0f".format(Locale.US, row.rangeYards * 0.9144)  else "${row.rangeYards}")
+            add(if (metricMode) "%.1f".format(Locale.US, row.dropInches  * 2.54)   else "%.1f".format(Locale.US, row.dropInches))
+            if (showMoa) add("%.1f".format(Locale.US, row.holdoverMoa))
+            if (showMil) add("%.2f".format(Locale.US, row.holdoverMil))
             if (showDrift) {
-                if (showMoa) add("%.1f".format(row.driftMoa))
-                if (showMil) add("%.2f".format(row.driftMil))
+                if (showMoa) add("%.1f".format(Locale.US, row.driftMoa))
+                if (showMil) add("%.2f".format(Locale.US, row.driftMil))
             }
-            add(if (metricMode) "%.0f".format(row.velocityFps * 0.3048) else "%.0f".format(row.velocityFps))
-            if (showEnergy) add(if (metricMode) "%.0f".format(row.energyFtLb * 1.35582) else "%.0f".format(row.energyFtLb))
+            add(if (metricMode) "%.0f".format(Locale.US, row.velocityFps * 0.3048) else "%.0f".format(Locale.US, row.velocityFps))
+            if (showEnergy) add(if (metricMode) "%.0f".format(Locale.US, row.energyFtLb * 1.35582) else "%.0f".format(Locale.US, row.energyFtLb))
         }
         cells.forEachIndexed { i, cell -> cv.drawText(cell, pad + i * colW, y, pBody) }
         y += rwH
@@ -2792,10 +2854,15 @@ private fun saveDopeChart(
     } catch (_: Exception) { false }
 }
 
-/** Format a Double as a clean integer string when whole, else trim trailing zeros. */
+/**
+ * Format a Double as a clean integer string when whole, else trim trailing zeros.
+ * Locale.US (like every numeric format in this file) so the output always uses a
+ * '.' decimal separator — these strings round-trip through toDouble()/toDoubleOrNull(),
+ * which only accept '.', so a comma-decimal device locale must never leak in.
+ */
 private fun formatNum(d: Double): String =
     if (d == d.toLong().toDouble()) d.toLong().toString()
-    else "%g".format(d).trimEnd('0').trimEnd('.')
+    else "%g".format(Locale.US, d).trimEnd('0').trimEnd('.')
 
 // ---- Session persistence ----
 
@@ -2818,7 +2885,10 @@ data class SessionData(
     val dopeTitle: String,
     val dopeNotes: String,
     val reticleName: String?,
-    val currentMag: String = ""
+    val currentMag: String = "",
+    val targetDistEnabled: Boolean = false,
+    val targetDistYards: String = "100",
+    val targetOnlyCallout: Boolean = false
 )
 
 private fun SessionData.toJson(): org.json.JSONObject = org.json.JSONObject().apply {
@@ -2841,6 +2911,9 @@ private fun SessionData.toJson(): org.json.JSONObject = org.json.JSONObject().ap
     put("dopeNotes",   dopeNotes)
     putOpt("reticleName", reticleName)
     put("currentMag",  currentMag)
+    put("targetDistEnabled", targetDistEnabled)
+    put("targetDistYards",   targetDistYards)
+    put("targetOnlyCallout", targetOnlyCallout)
 }
 
 private fun org.json.JSONObject.toSessionData() = SessionData(
@@ -2862,7 +2935,10 @@ private fun org.json.JSONObject.toSessionData() = SessionData(
     dopeTitle    = getString("dopeTitle"),
     dopeNotes    = optString("dopeNotes"),
     reticleName  = optString("reticleName").ifEmpty { null },
-    currentMag   = optString("currentMag")
+    currentMag   = optString("currentMag"),
+    targetDistEnabled = optBoolean("targetDistEnabled", false),
+    targetDistYards   = optString("targetDistYards").ifEmpty { "100" },
+    targetOnlyCallout = optBoolean("targetOnlyCallout", false)
 )
 
 private const val PREFS_NAME = "mpbr_sessions"

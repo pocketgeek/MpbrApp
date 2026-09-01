@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Share-sheet FileProvider scope: only the cached DOPE chart JPEGs. -->
+<paths>
+    <cache-path name="shared_charts" path="shared_charts/" />
+</paths>

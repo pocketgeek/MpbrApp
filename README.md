@@ -260,11 +260,14 @@ After calculating, the results screen shows (in order):
 
 ## Saving a DOPE chart
 
-After calculating, tap **Save DOPE Chart** or **Print DOPE Chart** (appear below
-the trajectory table). **Save** renders a 1200 px JPEG and writes it to
-**Pictures/MPBR DOPE Charts/** in your gallery (on Android 8 or earlier the app
-will ask for storage permission the first time). **Print** sends the same image
-to the system print dialog (AirPrint, PDF, etc.). Both render:
+After calculating, tap **Save DOPE Chart**, **Share DOPE Chart**, or
+**Print DOPE Chart** (appear below the trajectory table). **Save** renders a
+1200 px JPEG and writes it to **Pictures/MPBR DOPE Charts/** in your gallery
+(on Android 8 or earlier the app will ask for storage permission the first
+time). **Share** opens the system share sheet with the same JPEG so you can
+text or email it directly (served from the app cache via FileProvider —
+nothing is written to your gallery). **Print** sends the image to the system
+print dialog (AirPrint, PDF, etc.). All three render:
 
 - Load name, near/far zero, MPBR, max ordinate, bore angle
 - Altitude, temperature, humidity, wind conditions

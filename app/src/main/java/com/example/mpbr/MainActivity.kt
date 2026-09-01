@@ -701,6 +701,11 @@ fun MpbrScreen() {
             ) { Text("Save DOPE Chart") }
 
             Button(
+                onClick  = { shareDopeChart(context, buildChart(), chartLabel) },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Share DOPE Chart") }
+
+            Button(
                 onClick = {
                     PrintHelper(context as android.app.Activity).apply {
                         scaleMode = PrintHelper.SCALE_MODE_FIT
@@ -2852,6 +2857,40 @@ private fun saveDopeChart(
         }
         true
     } catch (_: Exception) { false }
+}
+
+/**
+ * Writes [bmp] as a JPEG into the app cache and opens the system share sheet.
+ * The file is served to the receiving app through the FileProvider declared in
+ * the manifest (authority "<applicationId>.fileprovider", scope: cache/shared_charts
+ * per res/xml/file_paths.xml). Stale share files are dropped first so the cache
+ * only ever holds the chart currently being shared.
+ */
+private fun shareDopeChart(
+    context: android.content.Context,
+    bmp: Bitmap,
+    ammoLabel: String
+) {
+    try {
+        val dir = java.io.File(context.cacheDir, "shared_charts")
+        dir.mkdirs()
+        dir.listFiles()?.forEach { it.delete() }
+        val name = "DOPE_${ammoLabel.replace(Regex("[^A-Za-z0-9]"), "_")}_" +
+                   SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date()) + ".jpg"
+        val file = java.io.File(dir, name)
+        file.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 95, it) }
+        val uri = androidx.core.content.FileProvider.getUriForFile(
+            context, "${context.packageName}.fileprovider", file
+        )
+        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+            type = "image/jpeg"
+            putExtra(android.content.Intent.EXTRA_STREAM, uri)
+            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(android.content.Intent.createChooser(send, "Share DOPE Chart"))
+    } catch (_: Exception) {
+        android.widget.Toast.makeText(context, "Share failed", android.widget.Toast.LENGTH_SHORT).show()
+    }
 }
 
 /**

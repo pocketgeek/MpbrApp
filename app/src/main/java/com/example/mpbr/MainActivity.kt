@@ -106,6 +106,20 @@ class MainActivity : ComponentActivity() {
  * describes the conditions that actually produced it — not whatever the user
  * has typed into the fields since. Humidity arrives here already clamped.
  */
+/**
+ * Imperial → metric conversion factors used throughout the UI and DOPE chart.
+ * Internal state and Ballistics.kt are always imperial; these apply only at
+ * display/parse boundaries when metric mode is on.
+ */
+private object Units {
+    const val YD_TO_M    = 0.9144
+    const val IN_TO_CM   = 2.54
+    const val IN_TO_MM   = 25.4
+    const val FT_TO_M    = 0.3048   // also fps → m/s
+    const val FTLB_TO_J  = 1.35582
+    const val MPH_TO_KMH = 1.60934
+}
+
 private data class CalcInputs(
     val ammoLabel: String,
     val altitudeFt: Double,
@@ -446,29 +460,29 @@ fun MpbrScreen() {
         SectionLabel("Bullet & Sight")
         NumberField(
             if (metricMode) "Muzzle Velocity (m/s)" else "Muzzle Velocity (fps)",
-            toMetric(muzzleVel) { it * 0.3048 },
+            toMetric(muzzleVel) { it * Units.FT_TO_M },
             Modifier.fillMaxWidth()
-        ) { v -> userEdit({ muzzleVel = it }, fromMetric(v) { it / 0.3048 }) }
+        ) { v -> userEdit({ muzzleVel = it }, fromMetric(v) { it / Units.FT_TO_M }) }
         NumberField("Ballistic Coefficient", bc, Modifier.fillMaxWidth()) { v -> userEdit({ bc = it }, v) }
         NumberField("Bullet Weight (gr)",    bulletWeight, Modifier.fillMaxWidth()) { v -> userEdit({ bulletWeight = it }, v) }
         NumberField(
             if (metricMode) "Sight Height over Bore (mm)" else "Sight Height over Bore (in)",
-            toMetric(sightHeight) { it * 25.4 },
+            toMetric(sightHeight) { it * Units.IN_TO_MM },
             Modifier.fillMaxWidth()
-        ) { v -> userEdit({ sightHeight = it }, fromMetric(v) { it / 25.4 }) }
+        ) { v -> userEdit({ sightHeight = it }, fromMetric(v) { it / Units.IN_TO_MM }) }
         NumberField(
             if (metricMode) "Vital Zone Diameter (cm)" else "Vital Zone Diameter (in)",
-            toMetric(vitalZone) { it * 2.54 },
+            toMetric(vitalZone) { it * Units.IN_TO_CM },
             Modifier.fillMaxWidth()
-        ) { v -> userEdit({ vitalZone = it }, fromMetric(v) { it / 2.54 }) }
+        ) { v -> userEdit({ vitalZone = it }, fromMetric(v) { it / Units.IN_TO_CM }) }
 
         // ---- Atmosphere ----
         SectionLabel("Atmosphere")
         NumberField(
             if (metricMode) "Altitude (m)" else "Altitude (ft)",
-            toMetric(altitude, "%.0f") { it * 0.3048 },
+            toMetric(altitude, "%.0f") { it * Units.FT_TO_M },
             Modifier.fillMaxWidth()
-        ) { v -> altitude = fromMetric(v) { it / 0.3048 } }
+        ) { v -> altitude = fromMetric(v) { it / Units.FT_TO_M } }
         NumberField(
             if (metricMode) "Temperature (°C)" else "Temperature (°F)",
             toMetric(temperature) { (it - 32.0) * 5.0 / 9.0 },
@@ -478,32 +492,32 @@ fun MpbrScreen() {
         NumberField("Humidity (%)", humidity, Modifier.fillMaxWidth()) { humidity = it }
         NumberField(
             if (metricMode) "Wind Speed (km/h, full value crosswind)" else "Wind Speed (mph, full value crosswind)",
-            toMetric(windSpeed) { it * 1.60934 },
+            toMetric(windSpeed) { it * Units.MPH_TO_KMH },
             Modifier.fillMaxWidth(),
             allowNegative = true
-        ) { v -> windSpeed = fromMetric(v) { it / 1.60934 } }
+        ) { v -> windSpeed = fromMetric(v) { it / Units.MPH_TO_KMH } }
 
         // ---- Trajectory table range ----
         SectionLabel("Trajectory Table")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NumberField(
                 if (metricMode) "Start (m)" else "Start (yd)",
-                toMetric(tableStart, "%.0f") { it * 0.9144 },
+                toMetric(tableStart, "%.0f") { it * Units.YD_TO_M },
                 Modifier.weight(1f),
                 intOnly = true
-            ) { v -> tableStart = fromMetricInt(v) { it / 0.9144 } }
+            ) { v -> tableStart = fromMetricInt(v) { it / Units.YD_TO_M } }
             NumberField(
                 if (metricMode) "Step (m)" else "Step (yd)",
-                toMetric(tableStep, "%.0f") { it * 0.9144 },
+                toMetric(tableStep, "%.0f") { it * Units.YD_TO_M },
                 Modifier.weight(1f),
                 intOnly = true
-            ) { v -> tableStep = fromMetricInt(v) { it / 0.9144 } }
+            ) { v -> tableStep = fromMetricInt(v) { it / Units.YD_TO_M } }
             NumberField(
                 if (metricMode) "End (m)" else "End (yd)",
-                toMetric(tableEnd, "%.0f") { it * 0.9144 },
+                toMetric(tableEnd, "%.0f") { it * Units.YD_TO_M },
                 Modifier.weight(1f),
                 intOnly = true
-            ) { v -> tableEnd = fromMetricInt(v) { it / 0.9144 } }
+            ) { v -> tableEnd = fromMetricInt(v) { it / Units.YD_TO_M } }
         }
 
         Row(
@@ -551,63 +565,12 @@ fun MpbrScreen() {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         result?.let { r ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text("Results", style = MaterialTheme.typography.titleLarge)
-                    if (metricMode) {
-                        ResultRow("Near Zero", "%.0f m".format(Locale.US, r.nearZeroYards * 0.9144))
-                        ResultRow("Far Zero",  "%.0f m".format(Locale.US, r.farZeroYards  * 0.9144))
-                        ResultRow("Max Ordinate", "%.2f cm @ %.0f m".format(Locale.US, r.maxOrdinateInches * 2.54, r.maxOrdinateRangeYards * 0.9144))
-                        if (r.energyAtMuzzleFtLb > 0.0)
-                            ResultRow("Muzzle Energy", "%.0f J".format(Locale.US, r.energyAtMuzzleFtLb * 1.35582))
-                        ResultRow("Maximum Point Blank Range", "%.0f m".format(Locale.US, r.mpbrYards * 0.9144))
-                        if (r.energyAtMpbrFtLb > 0.0)
-                            ResultRow("Energy at MPBR", "%.0f J".format(Locale.US, r.energyAtMpbrFtLb * 1.35582))
-                        ResultRow("Velocity at Near Zero", "%.0f m/s".format(Locale.US, r.velocityAtNearZeroFps * 0.3048))
-                        if (r.energyAtNearZeroFtLb > 0.0)
-                            ResultRow("Energy at Near Zero", "%.0f J".format(Locale.US, r.energyAtNearZeroFtLb * 1.35582))
-                        ResultRow("Velocity at Far Zero",  "%.0f m/s".format(Locale.US, r.velocityAtFarZeroFps * 0.3048))
-                        if (r.energyAtFarZeroFtLb > 0.0)
-                            ResultRow("Energy at Far Zero", "%.0f J".format(Locale.US, r.energyAtFarZeroFtLb * 1.35582))
-                    } else {
-                        ResultRow("Near Zero", "%.0f yd".format(Locale.US, r.nearZeroYards))
-                        ResultRow("Far Zero",  "%.0f yd".format(Locale.US, r.farZeroYards))
-                        ResultRow("Max Ordinate", "%.2f in @ %.0f yd".format(Locale.US, r.maxOrdinateInches, r.maxOrdinateRangeYards))
-                        if (r.energyAtMuzzleFtLb > 0.0)
-                            ResultRow("Muzzle Energy", "%.0f ft·lb".format(Locale.US, r.energyAtMuzzleFtLb))
-                        ResultRow("Maximum Point Blank Range", "%.0f yd".format(Locale.US, r.mpbrYards))
-                        if (r.energyAtMpbrFtLb > 0.0)
-                            ResultRow("Energy at MPBR", "%.0f ft·lb".format(Locale.US, r.energyAtMpbrFtLb))
-                        ResultRow("Velocity at Near Zero", "%.0f fps".format(Locale.US, r.velocityAtNearZeroFps))
-                        if (r.energyAtNearZeroFtLb > 0.0)
-                            ResultRow("Energy at Near Zero", "%.0f ft·lb".format(Locale.US, r.energyAtNearZeroFtLb))
-                        ResultRow("Velocity at Far Zero",  "%.0f fps".format(Locale.US, r.velocityAtFarZeroFps))
-                        if (r.energyAtFarZeroFtLb > 0.0)
-                            ResultRow("Energy at Far Zero", "%.0f ft·lb".format(Locale.US, r.energyAtFarZeroFtLb))
-                    }
-                    ResultRow("Bore Angle Above LOS", "%.2f MOA".format(Locale.US, r.boreAngleMoa))
-                    if (targetRow != null && targetDistEnabled) {
-                        val tDist  = targetDistYards.toIntOrNull() ?: 0
-                        val tLabel = if (metricMode) "%.0f m".format(Locale.US, tDist * 0.9144) else "$tDist yd"
-                        HorizontalDivider()
-                        ResultRow("Drop @ $tLabel",
-                            if (metricMode) "%.2f cm".format(Locale.US, targetRow.dropInches * 2.54)
-                            else           "%.2f in".format(Locale.US, targetRow.dropInches))
-                        ResultRow("Holdover @ $tLabel",
-                            "%.1f MOA  /  %.2f MIL".format(Locale.US, targetRow.holdoverMoa, targetRow.holdoverMil))
-                        ResultRow("Velocity @ $tLabel",
-                            if (metricMode) "%.0f m/s".format(Locale.US, targetRow.velocityFps * 0.3048)
-                            else            "%.0f fps".format(Locale.US, targetRow.velocityFps))
-                        if (targetRow.energyFtLb > 0.0)
-                            ResultRow("Energy @ $tLabel",
-                                if (metricMode) "%.0f J".format(Locale.US, targetRow.energyFtLb * 1.35582)
-                                else            "%.0f ft·lb".format(Locale.US, targetRow.energyFtLb))
-                    }
-                }
-            }
+            ResultsSummaryCard(
+                r            = r,
+                metricMode   = metricMode,
+                targetRow    = if (targetDistEnabled) targetRow else null,
+                targetDistYards = targetDistYards
+            )
 
             // Reticle illustration (on-screen) when a reticle is selected
             selectedReticle?.let { reticle ->
@@ -716,114 +679,229 @@ fun MpbrScreen() {
         }
     }
 
-    // ---- Save session dialog ----
     if (showSaveDialog.value) {
-        AlertDialog(
-            onDismissRequest = { showSaveDialog.value = false },
-            title   = { Text("Save Session") },
-            text    = {
-                OutlinedTextField(
-                    value         = saveDialogName,
-                    onValueChange = { saveDialogName = it },
-                    label         = { Text("Session name") },
-                    singleLine    = true,
-                    modifier      = Modifier.fillMaxWidth()
-                )
+        SaveSessionDialog(
+            name         = saveDialogName,
+            onNameChange = { saveDialogName = it },
+            onSave       = {
+                saveSession(context, currentSession(saveDialogName.trim()))
+                showSaveDialog.value = false
             },
-            confirmButton = {
-                Button(
-                    onClick  = {
-                        if (saveDialogName.isNotBlank()) {
-                            saveSession(context, currentSession(saveDialogName.trim()))
-                            showSaveDialog.value = false
-                        }
-                    },
-                    enabled = saveDialogName.isNotBlank()
-                ) { Text("Save") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSaveDialog.value = false }) { Text("Cancel") }
-            }
+            onDismiss    = { showSaveDialog.value = false }
         )
     }
 
-    // ---- Load session dialog ----
     if (showLoadDialog.value) {
-        AlertDialog(
-            onDismissRequest = { showLoadDialog.value = false },
-            title   = { Text("Load Session") },
-            text    = {
-                if (loadedSessions.isEmpty()) {
-                    Text("No saved sessions yet.")
-                } else {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .heightIn(max = 400.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        for (s in loadedSessions) {
-                            Row(
-                                modifier          = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                TextButton(
-                                    onClick  = { applySession(s); showLoadDialog.value = false },
-                                    modifier = Modifier.weight(1f)
-                                ) { Text(s.name) }
-                                IconButton(onClick = {
-                                    renameTarget = s.name
-                                    renameText   = s.name
-                                    showRenameDialog.value = true
-                                }) {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = "Rename",
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                                TextButton(onClick = {
-                                    deleteSession(context, s.name)
-                                    loadedSessions = loadSessions(context)
-                                }) { Text("✕") }
-                            }
-                        }
-                    }
-                }
+        LoadSessionDialog(
+            sessions  = loadedSessions,
+            onLoad    = { applySession(it); showLoadDialog.value = false },
+            onRename  = {
+                renameTarget = it.name
+                renameText   = it.name
+                showRenameDialog.value = true
             },
-            confirmButton = {
-                TextButton(onClick = { showLoadDialog.value = false }) { Text("Close") }
-            }
+            onDelete  = {
+                deleteSession(context, it.name)
+                loadedSessions = loadSessions(context)
+            },
+            onDismiss = { showLoadDialog.value = false }
         )
     }
 
     if (showRenameDialog.value) {
-        AlertDialog(
-            onDismissRequest = { showRenameDialog.value = false },
-            title   = { Text("Rename Session") },
-            text    = {
-                OutlinedTextField(
-                    value         = renameText,
-                    onValueChange = { renameText = it },
-                    label         = { Text("Name") },
-                    singleLine    = true,
-                    modifier      = Modifier.fillMaxWidth()
-                )
+        RenameSessionDialog(
+            currentName  = renameTarget,
+            text         = renameText,
+            onTextChange = { renameText = it },
+            onRename     = {
+                renameSession(context, renameTarget, renameText.trim())
+                loadedSessions = loadSessions(context)
+                showRenameDialog.value = false
             },
-            confirmButton = {
-                TextButton(
-                    enabled = renameText.isNotBlank() && renameText.trim() != renameTarget,
-                    onClick = {
-                        renameSession(context, renameTarget, renameText.trim())
-                        loadedSessions = loadSessions(context)
-                        showRenameDialog.value = false
-                    }
-                ) { Text("Rename") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRenameDialog.value = false }) { Text("Cancel") }
-            }
+            onDismiss    = { showRenameDialog.value = false }
         )
+    }
+}
+
+@Composable
+private fun SaveSessionDialog(
+    name: String,
+    onNameChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title   = { Text("Save Session") },
+        text    = {
+            OutlinedTextField(
+                value         = name,
+                onValueChange = onNameChange,
+                label         = { Text("Session name") },
+                singleLine    = true,
+                modifier      = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { if (name.isNotBlank()) onSave() },
+                enabled = name.isNotBlank()
+            ) { Text("Save") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+private fun LoadSessionDialog(
+    sessions: List<SessionData>,
+    onLoad: (SessionData) -> Unit,
+    onRename: (SessionData) -> Unit,
+    onDelete: (SessionData) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title   = { Text("Load Session") },
+        text    = {
+            if (sessions.isEmpty()) {
+                Text("No saved sessions yet.")
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    for (s in sessions) {
+                        Row(
+                            modifier          = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(
+                                onClick  = { onLoad(s) },
+                                modifier = Modifier.weight(1f)
+                            ) { Text(s.name) }
+                            IconButton(onClick = { onRename(s) }) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Rename",
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            TextButton(onClick = { onDelete(s) }) { Text("✕") }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Close") }
+        }
+    )
+}
+
+@Composable
+private fun RenameSessionDialog(
+    currentName: String,
+    text: String,
+    onTextChange: (String) -> Unit,
+    onRename: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title   = { Text("Rename Session") },
+        text    = {
+            OutlinedTextField(
+                value         = text,
+                onValueChange = onTextChange,
+                label         = { Text("Name") },
+                singleLine    = true,
+                modifier      = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = text.isNotBlank() && text.trim() != currentName,
+                onClick = onRename
+            ) { Text("Rename") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+/**
+ * The post-calculation summary card: zeros, MPBR, ordinate, velocities/energies,
+ * bore angle, and the optional target-distance block ([targetRow] non-null).
+ */
+@Composable
+private fun ResultsSummaryCard(
+    r: Ballistics.MpbrResult,
+    metricMode: Boolean,
+    targetRow: Ballistics.TrajectoryRow?,
+    targetDistYards: String
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("Results", style = MaterialTheme.typography.titleLarge)
+            if (metricMode) {
+                ResultRow("Near Zero", "%.0f m".format(Locale.US, r.nearZeroYards * Units.YD_TO_M))
+                ResultRow("Far Zero",  "%.0f m".format(Locale.US, r.farZeroYards  * Units.YD_TO_M))
+                ResultRow("Max Ordinate", "%.2f cm @ %.0f m".format(Locale.US, r.maxOrdinateInches * Units.IN_TO_CM, r.maxOrdinateRangeYards * Units.YD_TO_M))
+                if (r.energyAtMuzzleFtLb > 0.0)
+                    ResultRow("Muzzle Energy", "%.0f J".format(Locale.US, r.energyAtMuzzleFtLb * Units.FTLB_TO_J))
+                ResultRow("Maximum Point Blank Range", "%.0f m".format(Locale.US, r.mpbrYards * Units.YD_TO_M))
+                if (r.energyAtMpbrFtLb > 0.0)
+                    ResultRow("Energy at MPBR", "%.0f J".format(Locale.US, r.energyAtMpbrFtLb * Units.FTLB_TO_J))
+                ResultRow("Velocity at Near Zero", "%.0f m/s".format(Locale.US, r.velocityAtNearZeroFps * Units.FT_TO_M))
+                if (r.energyAtNearZeroFtLb > 0.0)
+                    ResultRow("Energy at Near Zero", "%.0f J".format(Locale.US, r.energyAtNearZeroFtLb * Units.FTLB_TO_J))
+                ResultRow("Velocity at Far Zero",  "%.0f m/s".format(Locale.US, r.velocityAtFarZeroFps * Units.FT_TO_M))
+                if (r.energyAtFarZeroFtLb > 0.0)
+                    ResultRow("Energy at Far Zero", "%.0f J".format(Locale.US, r.energyAtFarZeroFtLb * Units.FTLB_TO_J))
+            } else {
+                ResultRow("Near Zero", "%.0f yd".format(Locale.US, r.nearZeroYards))
+                ResultRow("Far Zero",  "%.0f yd".format(Locale.US, r.farZeroYards))
+                ResultRow("Max Ordinate", "%.2f in @ %.0f yd".format(Locale.US, r.maxOrdinateInches, r.maxOrdinateRangeYards))
+                if (r.energyAtMuzzleFtLb > 0.0)
+                    ResultRow("Muzzle Energy", "%.0f ft·lb".format(Locale.US, r.energyAtMuzzleFtLb))
+                ResultRow("Maximum Point Blank Range", "%.0f yd".format(Locale.US, r.mpbrYards))
+                if (r.energyAtMpbrFtLb > 0.0)
+                    ResultRow("Energy at MPBR", "%.0f ft·lb".format(Locale.US, r.energyAtMpbrFtLb))
+                ResultRow("Velocity at Near Zero", "%.0f fps".format(Locale.US, r.velocityAtNearZeroFps))
+                if (r.energyAtNearZeroFtLb > 0.0)
+                    ResultRow("Energy at Near Zero", "%.0f ft·lb".format(Locale.US, r.energyAtNearZeroFtLb))
+                ResultRow("Velocity at Far Zero",  "%.0f fps".format(Locale.US, r.velocityAtFarZeroFps))
+                if (r.energyAtFarZeroFtLb > 0.0)
+                    ResultRow("Energy at Far Zero", "%.0f ft·lb".format(Locale.US, r.energyAtFarZeroFtLb))
+            }
+            ResultRow("Bore Angle Above LOS", "%.2f MOA".format(Locale.US, r.boreAngleMoa))
+            if (targetRow != null) {
+                val tDist  = targetDistYards.toIntOrNull() ?: 0
+                val tLabel = if (metricMode) "%.0f m".format(Locale.US, tDist * Units.YD_TO_M) else "$tDist yd"
+                HorizontalDivider()
+                ResultRow("Drop @ $tLabel",
+                    if (metricMode) "%.2f cm".format(Locale.US, targetRow.dropInches * Units.IN_TO_CM)
+                    else           "%.2f in".format(Locale.US, targetRow.dropInches))
+                ResultRow("Holdover @ $tLabel",
+                    "%.1f MOA  /  %.2f MIL".format(Locale.US, targetRow.holdoverMoa, targetRow.holdoverMil))
+                ResultRow("Velocity @ $tLabel",
+                    if (metricMode) "%.0f m/s".format(Locale.US, targetRow.velocityFps * Units.FT_TO_M)
+                    else            "%.0f fps".format(Locale.US, targetRow.velocityFps))
+                if (targetRow.energyFtLb > 0.0)
+                    ResultRow("Energy @ $tLabel",
+                        if (metricMode) "%.0f J".format(Locale.US, targetRow.energyFtLb * Units.FTLB_TO_J)
+                        else            "%.0f ft·lb".format(Locale.US, targetRow.energyFtLb))
+            }
+        }
     }
 }
 
@@ -860,16 +938,16 @@ private fun TrajectoryTableCard(
 
             for (row in rows) {
                 val cells = buildList {
-                    add(if (metricMode) "%.0f m".format(Locale.US, row.rangeYards * 0.9144) else "${row.rangeYards} yd")
-                    add(if (metricMode) "%.1f cm".format(Locale.US, row.dropInches * 2.54)  else "%.1f in".format(Locale.US, row.dropInches))
+                    add(if (metricMode) "%.0f m".format(Locale.US, row.rangeYards * Units.YD_TO_M) else "${row.rangeYards} yd")
+                    add(if (metricMode) "%.1f cm".format(Locale.US, row.dropInches * Units.IN_TO_CM)  else "%.1f in".format(Locale.US, row.dropInches))
                     if (showMoa) add("%.1f".format(Locale.US, row.holdoverMoa))
                     if (showMil) add("%.2f".format(Locale.US, row.holdoverMil))
                     if (showDrift) {
                         if (showMoa) add("%.1f".format(Locale.US, row.driftMoa))
                         if (showMil) add("%.2f".format(Locale.US, row.driftMil))
                     }
-                    add(if (metricMode) "%.0f".format(Locale.US, row.velocityFps * 0.3048) else "%.0f fps".format(Locale.US, row.velocityFps))
-                    if (showEnergy) add(if (metricMode) "%.0f".format(Locale.US, row.energyFtLb * 1.35582) else "%.0f ft·lb".format(Locale.US, row.energyFtLb))
+                    add(if (metricMode) "%.0f".format(Locale.US, row.velocityFps * Units.FT_TO_M) else "%.0f fps".format(Locale.US, row.velocityFps))
+                    if (showEnergy) add(if (metricMode) "%.0f".format(Locale.US, row.energyFtLb * Units.FTLB_TO_J) else "%.0f ft·lb".format(Locale.US, row.energyFtLb))
                 }
                 TrajRow(cells = cells, style = MaterialTheme.typography.bodyMedium)
             }
@@ -2714,15 +2792,15 @@ private fun buildDopeChartBitmap(
     val rwH = (bsz + 16).toInt()
 
     val info = if (metricMode) {
-        val windStr = if (windMph == 0.0) "calm" else "%.0f km/h".format(Locale.US, windMph * 1.60934)
+        val windStr = if (windMph == 0.0) "calm" else "%.0f km/h".format(Locale.US, windMph * Units.MPH_TO_KMH)
         listOf(
             ammoLabel,
             "Near Zero: %.0f m  |  Far Zero: %.0f m  |  MPBR: %.0f m"
-                .format(Locale.US, result.nearZeroYards * 0.9144, result.farZeroYards * 0.9144, result.mpbrYards * 0.9144),
+                .format(Locale.US, result.nearZeroYards * Units.YD_TO_M, result.farZeroYards * Units.YD_TO_M, result.mpbrYards * Units.YD_TO_M),
             "Max Ordinate: %.2f cm @ %.0f m  |  Bore Angle: %.2f MOA  |  Vital Zone: %.1f cm"
-                .format(Locale.US, result.maxOrdinateInches * 2.54, result.maxOrdinateRangeYards * 0.9144, result.boreAngleMoa, vitalZoneIn * 2.54),
+                .format(Locale.US, result.maxOrdinateInches * Units.IN_TO_CM, result.maxOrdinateRangeYards * Units.YD_TO_M, result.boreAngleMoa, vitalZoneIn * Units.IN_TO_CM),
             "Alt: %.0f m  |  Temp: %.1f°C  |  RH: %.0f%%  |  Wind: %s"
-                .format(Locale.US, altFt * 0.3048, (tempF - 32.0) * 5.0 / 9.0, rhPct, windStr),
+                .format(Locale.US, altFt * Units.FT_TO_M, (tempF - 32.0) * 5.0 / 9.0, rhPct, windStr),
             "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
         )
     } else {
@@ -2802,16 +2880,16 @@ private fun buildDopeChartBitmap(
     result.trajectoryTable.forEachIndexed { idx, row ->
         if (idx % 2 == 1) cv.drawRect(0f, y - bsz * 0.9f, w.toFloat(), y + bsz * 0.3f, pStripe)
         val cells = buildList {
-            add(if (metricMode) "%.0f".format(Locale.US, row.rangeYards * 0.9144)  else "${row.rangeYards}")
-            add(if (metricMode) "%.1f".format(Locale.US, row.dropInches  * 2.54)   else "%.1f".format(Locale.US, row.dropInches))
+            add(if (metricMode) "%.0f".format(Locale.US, row.rangeYards * Units.YD_TO_M)  else "${row.rangeYards}")
+            add(if (metricMode) "%.1f".format(Locale.US, row.dropInches  * Units.IN_TO_CM)   else "%.1f".format(Locale.US, row.dropInches))
             if (showMoa) add("%.1f".format(Locale.US, row.holdoverMoa))
             if (showMil) add("%.2f".format(Locale.US, row.holdoverMil))
             if (showDrift) {
                 if (showMoa) add("%.1f".format(Locale.US, row.driftMoa))
                 if (showMil) add("%.2f".format(Locale.US, row.driftMil))
             }
-            add(if (metricMode) "%.0f".format(Locale.US, row.velocityFps * 0.3048) else "%.0f".format(Locale.US, row.velocityFps))
-            if (showEnergy) add(if (metricMode) "%.0f".format(Locale.US, row.energyFtLb * 1.35582) else "%.0f".format(Locale.US, row.energyFtLb))
+            add(if (metricMode) "%.0f".format(Locale.US, row.velocityFps * Units.FT_TO_M) else "%.0f".format(Locale.US, row.velocityFps))
+            if (showEnergy) add(if (metricMode) "%.0f".format(Locale.US, row.energyFtLb * Units.FTLB_TO_J) else "%.0f".format(Locale.US, row.energyFtLb))
         }
         cells.forEachIndexed { i, cell -> cv.drawText(cell, pad + i * colW, y, pBody) }
         y += rwH

@@ -23,11 +23,9 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Share your DOPE charts (v2.11)
+Internal cleanup (v2.12)
 
-New Share DOPE Chart button between Save and Print - opens the \
-system share sheet so you can text or email the chart directly \
-without saving it to your gallery first.\
+Code maintenance release - no user-visible changes.\
 """
 
 def main():

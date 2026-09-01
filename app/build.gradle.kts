@@ -18,8 +18,8 @@ android {
         applicationId = "us.pgnet.mpbr"
         minSdk = 24
         targetSdk = 37
-        versionCode = 109
-        versionName = "2.09"
+        versionCode = 110
+        versionName = "2.10"
     }
 
     signingConfigs {
@@ -33,7 +33,14 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 shrink + optimize + obfuscate. The app has no reflection-based
+            // serialization (SessionData JSON is hand-written field by field),
+            // so no custom -keep rules are needed. Crash deobfuscation: the
+            // mapping file is embedded in the AAB and Play Console applies it
+            // automatically. Debug builds never minify — verify release-only
+            // behavior on an installed assembleRelease APK, not assembleDebug.
+            isMinifyEnabled   = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }

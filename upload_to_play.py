@@ -23,15 +23,10 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Reliability fixes (v2.09)
+Much smaller download (v2.10)
 
-Fixed the app being unusable on devices set to comma-decimal locales \
-(German, French, etc.) - preset values now always use a dot decimal \
-separator. Rotating the phone no longer wipes your inputs and \
-results. Saved DOPE charts and drift columns now always describe the \
-conditions used when Calculate was pressed, even if you've edited \
-fields since. Sessions now also remember the target-distance \
-settings.\
+Enabled code and resource shrinking - the app download is now about \
+a quarter of its previous size, with no feature changes.\
 """
 
 def main():

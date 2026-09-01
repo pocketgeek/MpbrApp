@@ -977,20 +977,29 @@ object Ballistics {
         5.00 to 0.0712
     )
 
+    // Primitive-array copies of the drag tables: cd() runs once per integrator
+    // step (~1M calls per calculateMpbr), so lookups must not box or allocate.
+    private val G1_MACH = DoubleArray(G1.size) { G1[it].first }
+    private val G1_CD   = DoubleArray(G1.size) { G1[it].second }
+    private val G7_MACH = DoubleArray(G7.size) { G7[it].first }
+    private val G7_CD   = DoubleArray(G7.size) { G7[it].second }
+
     // internal (not private) so unit tests can pin the drag-table interpolation.
     internal fun cd(model: DragModel, mach: Double): Double {
-        val tbl = if (model == DragModel.G1) G1 else G7
-        if (mach <= tbl.first().first) return tbl.first().second
-        if (mach >= tbl.last().first)  return tbl.last().second
-        for (i in 0 until tbl.size - 1) {
-            val (m0, c0) = tbl[i]
-            val (m1, c1) = tbl[i + 1]
-            if (mach in m0..m1) {
-                val t = (mach - m0) / (m1 - m0)
-                return c0 + t * (c1 - c0)
-            }
+        val machs = if (model == DragModel.G1) G1_MACH else G7_MACH
+        val cds   = if (model == DragModel.G1) G1_CD   else G7_CD
+        val last = machs.size - 1
+        if (mach <= machs[0])    return cds[0]
+        if (mach >= machs[last]) return cds[last]
+        // Binary search for the bracketing pair: machs[lo] <= mach < machs[hi].
+        var lo = 0
+        var hi = last
+        while (hi - lo > 1) {
+            val mid = (lo + hi) ushr 1
+            if (machs[mid] <= mach) lo = mid else hi = mid
         }
-        return tbl.last().second
+        val t = (mach - machs[lo]) / (machs[hi] - machs[lo])
+        return cds[lo] + t * (cds[hi] - cds[lo])
     }
 
     /**

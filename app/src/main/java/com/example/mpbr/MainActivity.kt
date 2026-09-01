@@ -64,6 +64,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
@@ -78,6 +79,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.core.content.edit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.exp
@@ -182,6 +186,10 @@ fun MpbrScreen() {
         Ballistics.trajectoryAt(r.rawTrajectory, dist, calcInputs?.bulletWeightGr ?: 0.0)
     }
     var error  by remember { mutableStateOf<String?>(null) }
+    // Transient (deliberately not saveable): true while calculateMpbr runs on a
+    // background dispatcher. Gates the Calculate button against double-launch.
+    var calculating by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val context = LocalContext.current
     val onPermissionResult = remember { mutableStateOf<(Boolean) -> Unit>({}) }
@@ -272,57 +280,77 @@ fun MpbrScreen() {
     )
 
     fun calculate() {
+        if (calculating) return
         error = null
+        // Parse and validate synchronously so field errors surface immediately;
+        // only the simulation itself moves off the main thread.
+        val mv: Double; val b: Double; val bw: Double; val sh: Double; val vz: Double
+        val alt: Double; val temp: Double; val hum: Double; val wind: Double
         try {
-            val mv    = muzzleVel.toDouble()
-            val b     = bc.toDouble()
-            val bw    = bulletWeight.toDouble()
-            val sh    = sightHeight.toDouble()
-            val vz    = vitalZone.toDouble()
-            val alt   = altitude.toDouble()
-            val temp  = temperature.toDouble()
-            val hum   = humidity.toDouble().coerceIn(0.0, 100.0)
-            val wind  = windSpeed.toDoubleOrNull() ?: 0.0
-            val tMin  = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
-            val tMax  = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
-            val tStep = (tableStep.toIntOrNull()  ?: 50).coerceIn(1, 500)
-            if (tMin >= tMax) {
-                error  = "Table start must be less than table end"
-                result = null; calcInputs = null; hadResult = false
-                return
-            }
-            result = Ballistics.calculateMpbr(
-                muzzleVelocity      = mv,
-                ballisticCoeff      = b,
-                sightHeightIn       = sh,
-                vitalZoneDiameterIn = vz,
-                bulletWeightGr      = bw,
-                dragModel           = dragModel,
-                atmosphere          = Ballistics.Atmosphere(alt, temp, hum),
-                windSpeedMph        = wind,
-                tableStepYards      = tStep,
-                tableMinYards       = tMin,
-                tableMaxYards       = tMax
-            )
-            // Snapshot the inputs that produced this result so downstream output
-            // (DOPE header, drift columns, target-row energy) can't drift out of
-            // sync when the user edits fields without recalculating.
-            calcInputs = CalcInputs(
-                ammoLabel      = selectedPreset?.name ?: "Custom",
-                altitudeFt     = alt,
-                temperatureF   = temp,
-                humidityPct    = hum,
-                windSpeedMph   = wind,
-                vitalZoneIn    = vz,
-                bulletWeightGr = bw
-            )
-            hadResult = true
+            mv   = muzzleVel.toDouble()
+            b    = bc.toDouble()
+            bw   = bulletWeight.toDouble()
+            sh   = sightHeight.toDouble()
+            vz   = vitalZone.toDouble()
+            alt  = altitude.toDouble()
+            temp = temperature.toDouble()
+            hum  = humidity.toDouble().coerceIn(0.0, 100.0)
+            wind = windSpeed.toDoubleOrNull() ?: 0.0
         } catch (_: NumberFormatException) {
             error  = "All fields must be numbers"
             result = null; calcInputs = null; hadResult = false
-        } catch (e: IllegalArgumentException) {
-            error  = e.message
+            return
+        }
+        val tMin  = (tableStart.toIntOrNull() ?: 0).coerceIn(0, 2000)
+        val tMax  = (tableEnd.toIntOrNull()   ?: 500).coerceIn(0, 2000)
+        val tStep = (tableStep.toIntOrNull()  ?: 50).coerceIn(1, 500)
+        if (tMin >= tMax) {
+            error  = "Table start must be less than table end"
             result = null; calcInputs = null; hadResult = false
+            return
+        }
+        // Capture click-time values the coroutine needs; the button is disabled
+        // while calculating, but capturing keeps the snapshot honest regardless.
+        val model     = dragModel
+        val ammoLabel = selectedPreset?.name ?: "Custom"
+        calculating = true
+        scope.launch {
+            try {
+                val res = withContext(Dispatchers.Default) {
+                    Ballistics.calculateMpbr(
+                        muzzleVelocity      = mv,
+                        ballisticCoeff      = b,
+                        sightHeightIn       = sh,
+                        vitalZoneDiameterIn = vz,
+                        bulletWeightGr      = bw,
+                        dragModel           = model,
+                        atmosphere          = Ballistics.Atmosphere(alt, temp, hum),
+                        windSpeedMph        = wind,
+                        tableStepYards      = tStep,
+                        tableMinYards       = tMin,
+                        tableMaxYards       = tMax
+                    )
+                }
+                result = res
+                // Snapshot the inputs that produced this result so downstream output
+                // (DOPE header, drift columns, target-row energy) can't drift out of
+                // sync when the user edits fields without recalculating.
+                calcInputs = CalcInputs(
+                    ammoLabel      = ammoLabel,
+                    altitudeFt     = alt,
+                    temperatureF   = temp,
+                    humidityPct    = hum,
+                    windSpeedMph   = wind,
+                    vitalZoneIn    = vz,
+                    bulletWeightGr = bw
+                )
+                hadResult = true
+            } catch (e: IllegalArgumentException) {
+                error  = e.message
+                result = null; calcInputs = null; hadResult = false
+            } finally {
+                calculating = false
+            }
         }
     }
 
@@ -559,8 +587,9 @@ fun MpbrScreen() {
 
         Button(
             onClick  = { calculate() },
+            enabled  = !calculating,
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Calculate") }
+        ) { Text(if (calculating) "Calculating…" else "Calculate") }
 
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 

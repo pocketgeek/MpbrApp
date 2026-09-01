@@ -44,7 +44,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 **`MainActivity.kt`** — single `@Composable` function (`MpbrScreen`) with all state as composable-local vars. No ViewModel, no architecture layers. Flow:
 1. User picks an ammo preset via the three-step Type → Caliber → Load cascade (`AmmoPresetDropdown`/`SimpleDropdown` in `MainActivity.kt`) → `applyPreset()` populates all fields and sets `selectedPresetName`; any manual field edit calls `userEdit()` which resets `selectedPresetName = ""` (shows "Custom" in the Type picker)
 2. User optionally selects a reticle preset (`selectedReticleName`) for the DOPE chart illustration
-3. Calculate button → validates table start/end (0–2000 yd), calls `Ballistics.calculateMpbr()` with `tableMinYards`/`tableMaxYards`, stores result in `result` state
+3. Calculate button → parses/validates inputs synchronously (table start/end 0–2000 yd), then runs `Ballistics.calculateMpbr()` on `Dispatchers.Default` via `scope.launch` and stores the result in `result` state on completion. A transient `calculating` flag (plain `remember`, deliberately not saveable) disables the button while a run is in flight; `calculate()` also guards on it, so double-launch is impossible. Values the coroutine needs (`dragModel`, ammo label) are captured before launch
 4. Result renders as: summary Card → reticle illustration Card (if reticle selected, via `buildReticleBitmap()`) → `TrajectoryTableCard` → Save DOPE Chart button
 
 **State-management invariants (v2.09)** — three rules future edits must preserve:

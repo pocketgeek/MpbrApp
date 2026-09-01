@@ -23,9 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Internal cleanup (v2.12)
+Performance improvements (v2.13)
 
-Code maintenance release - no user-visible changes.\
+- Trajectory calculation now runs in the background so the UI never stutters on slower devices
+- Faster drag-table lookups inside the simulation
+- Internal code cleanup\
 """
 
 def main():

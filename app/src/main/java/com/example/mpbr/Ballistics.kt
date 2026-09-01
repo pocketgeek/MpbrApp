@@ -676,17 +676,35 @@ object Ballistics {
         AmmoPreset("300 PRC 245gr Elite Hunter",  2720.0, 0.413, 245.0, 2.6, 6.0, DragModel.G7, caliber = "300 PRC"),
         AmmoPreset("300 PRC 250gr A-Tip",         2800.0, 0.442, 250.0, 2.6, 6.0, DragModel.G7, caliber = "300 PRC"),
         AmmoPreset("300 Win Mag 150gr PP",        3290.0, 0.310, 150.0, 2.6, 6.0, caliber = "300 Win Mag"),
+        // Hornady American Whitetail #8204, 150gr InterLock SP. MV/BC both cross-verified
+        // between Hornady's own fps product page (3275 fps) and their metric ballistics
+        // chart (998 m/s = 3274 fps) and hornady.com/bc (G1 .338).
+        AmmoPreset("300 Win Mag 150gr InterLock",  3275.0, 0.338, 150.0, 2.6, 6.0, caliber = "300 Win Mag"),
         // Prvi Partizan (PPU) item PP3002, 165gr PSPBT (pointed soft point boat tail —
         // "SPBT" on US retail listings, PPU's own site just calls the bullet type "SP").
         // MV 3051 fps and BC 0.228 G7 confirmed from LuckyGunner's product page (24" test
         // barrel); PPU's own site doesn't publish BC for this load.
         AmmoPreset("300 Win Mag 165gr PPU SPBT",   3051.0, 0.228, 165.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // Hornady Superformance #820264, 165gr CX. MV cross-verified between Hornady's own
+        // fps product page (3260 fps) and metric chart (994 m/s = 3261 fps); BC from
+        // hornady.com/bc (G1 .440).
+        AmmoPreset("300 Win Mag 165gr CX",         3260.0, 0.440, 165.0, 2.6, 6.0, caliber = "300 Win Mag"),
+        // Hornady American Whitetail TIPPED #82024, 165gr SST (a 2026 "NEW!" product line
+        // per hornady.com/bc — not to be confused with the plain, non-tipped 165gr SST loads
+        // sold under other Hornady product lines). MV 3150 fps confirmed on Hornady's own
+        // product page and independently by a retailer (ableammo.com); a couple of other
+        // retailers list 3250 fps instead, but that figure doesn't trace to Hornady's own
+        // site, so 3150 is treated as authoritative. BC from hornady.com/bc (G1 .447).
+        AmmoPreset("300 Win Mag 165gr SST Tipped", 3150.0, 0.447, 165.0, 2.6, 6.0, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 168gr SMK",       3000.0, 0.235, 168.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         // Hornady Match #82043 (300 Win Mag 178gr ELD Match). MV from Hornady's own product
         // page (24" test barrel). BC is the bullet's own published G7 value (Hornady's #30178
         // 178gr ELD Match bullet, hornady.com/bc, Mach 2.25 / 2512 fps reference) since the
         // loaded-ammo page itself doesn't list a BC.
         AmmoPreset("300 Win Mag 178gr ELD Match",  2960.0, 0.275, 178.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // Hornady Precision Hunter #82041, 178gr ELD-X. MV from Hornady's metric ballistics
+        // chart (902 m/s = 2959 fps, item 82041); BC from hornady.com/bc (G1 .552 / G7 .278).
+        AmmoPreset("300 Win Mag 178gr ELD-X",      2959.0, 0.278, 178.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         // Prvi Partizan (PPU) item PP3003, 180gr SPBT (US retail naming; PPU's own site
         // lists the bullet type plainly as "SP"). MV 2903 fps confirmed independently on
         // PPU's own site (885 m/s) and by multiple US retailers (LuckyGunner, Target Sports
@@ -694,13 +712,29 @@ object Ballistics {
         // third-party ballistics tables for this load; PPU doesn't publish a G7 figure).
         AmmoPreset("300 Win Mag 180gr PPU SPBT",   2903.0, 0.413, 180.0, 2.6, 6.0, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 180gr AccuBond",  2950.0, 0.250, 180.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // Hornady American Whitetail #82044, 180gr InterLock SP. MV from Hornady's metric
+        // ballistics chart (902 m/s = 2959 fps); BC from hornady.com/bc (G1 .452).
+        AmmoPreset("300 Win Mag 180gr InterLock",  2959.0, 0.452, 180.0, 2.6, 6.0, caliber = "300 Win Mag"),
+        // Hornady Custom International #8206, same 180gr InterLock SP bullet as the American
+        // Whitetail load above (identical MV/BC per Hornady's own metric chart — Custom
+        // International is a separately catalogued export-market product line, not a
+        // duplicate entry) — a distinct item number for the international market.
+        AmmoPreset("300 Win Mag 180gr InterLock (Custom Intl)", 2959.0, 0.452, 180.0, 2.6, 6.0, caliber = "300 Win Mag"),
+        // Hornady Superformance #82193, 180gr SST. MV from Hornady's metric ballistics chart
+        // (954 m/s = 3131 fps); BC from hornady.com/bc (G1 .480).
+        AmmoPreset("300 Win Mag 180gr SST",        3131.0, 0.480, 180.0, 2.6, 6.0, caliber = "300 Win Mag"),
+        // Hornady Outfitter #821974, 180gr CX. MV from Hornady's metric ballistics chart
+        // (902 m/s = 2959 fps); BC from hornady.com/bc (G1 .469).
+        AmmoPreset("300 Win Mag 180gr CX",         2959.0, 0.469, 180.0, 2.6, 6.0, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 190gr SMK",       2950.0, 0.290, 190.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         // Hornady Match #82180 (300 Win Mag 195gr ELD Match). MV from Hornady's own product
-        // page (24" test barrel). BC is the bullet's own published G7 value (Hornady's #30951
-        // 195gr ELD Match bullet, hornady.com/bc, Mach 2.25 / 2512 fps reference) since the
-        // loaded-ammo page itself doesn't list a BC.
-        AmmoPreset("300 Win Mag 195gr ELD Match",  2930.0, 0.294, 195.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // page (24" test barrel). BC G7 corrected to 0.292 (was 0.294, an earlier misread) —
+        // confirmed against Hornady's own hornady.com/bc table (G1 .584 / G7 .292).
+        AmmoPreset("300 Win Mag 195gr ELD Match",  2930.0, 0.292, 195.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 Win Mag 200gr Partition", 2930.0, 0.245, 200.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
+        // Hornady Precision Hunter #82002, 200gr ELD-X. MV from Hornady's metric ballistics
+        // chart (872 m/s = 2861 fps); BC from hornady.com/bc (G1 .597 / G7 .301).
+        AmmoPreset("300 Win Mag 200gr ELD-X",      2861.0, 0.301, 200.0, 2.6, 6.0, DragModel.G7, caliber = "300 Win Mag"),
         AmmoPreset("300 WSM 150gr BT",            3300.0, 0.435, 150.0, 2.6, 6.0, caliber = "300 WSM"),
         AmmoPreset("300 WSM 180gr AccuBond",      2970.0, 0.250, 180.0, 2.6, 6.0, DragModel.G7, caliber = "300 WSM"),
         AmmoPreset("300 WSM 180gr Power Point",   2970.0, 0.474, 180.0, 2.6, 6.0, caliber = "300 WSM"),

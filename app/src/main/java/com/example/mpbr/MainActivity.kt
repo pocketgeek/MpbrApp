@@ -230,7 +230,7 @@ fun MpbrScreen() {
             val atm = Ballistics.Atmosphere(
                 altitudeFt   = altitude.toDouble(),
                 temperatureF = temperature.toDouble(),
-                humidityPct  = humidity.toDouble()
+                humidityPct  = humidity.toDouble().coerceIn(0.0, 100.0)
             )
             result = Ballistics.calculateMpbr(
                 muzzleVelocity      = mv,
@@ -595,7 +595,7 @@ fun MpbrScreen() {
                             r, label,
                             altitude.toDoubleOrNull()    ?: 0.0,
                             temperature.toDoubleOrNull() ?: 59.0,
-                            humidity.toDoubleOrNull()    ?: 0.0,
+                            (humidity.toDoubleOrNull() ?: 0.0).coerceIn(0.0, 100.0),
                             windSpeed.toDoubleOrNull()   ?: 0.0,
                             vitalZone.toDoubleOrNull()   ?: 6.0,
                             showEnergy, showDrift,
@@ -635,7 +635,7 @@ fun MpbrScreen() {
                         r, label,
                         altitude.toDoubleOrNull()    ?: 0.0,
                         temperature.toDoubleOrNull() ?: 59.0,
-                        humidity.toDoubleOrNull()    ?: 0.0,
+                        (humidity.toDoubleOrNull() ?: 0.0).coerceIn(0.0, 100.0),
                         windSpeed.toDoubleOrNull()   ?: 0.0,
                         vitalZone.toDoubleOrNull()   ?: 6.0,
                         showEnergy, showDrift,

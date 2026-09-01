@@ -23,14 +23,12 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-9 new Hornady .300 Win Mag loads (v2.07)
+Fix: humidity now capped at 100% (v2.08)
 
-Added 9 Hornady .300 Winchester Magnum factory loads (InterLock, CX, \
-SST Tipped, ELD-X across the American Whitetail, Superformance, \
-Outfitter, Custom International, and Precision Hunter lines), all \
-sourced from Hornady's own product pages and ballistics data. Also \
-corrected the existing 195gr ELD Match preset's G7 BC (0.294 -> \
-0.292) to match Hornady's own published figure.\
+Humidity above 100% relative humidity isn't physically possible, but \
+the app let you type any value and used it as-is. It's now clamped \
+to 0-100% at calculation time, including in exported/printed DOPE \
+charts.\
 """
 
 def main():

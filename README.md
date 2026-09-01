@@ -175,8 +175,11 @@ inside a normal table). Even the slowest cataloged subsonic loads run
 
 **Atmosphere** — altitude (ft), temperature (°F), humidity (%), wind speed
 (mph full-value crosswind). Defaults are Parma, ID conditions (2231 ft, 70°F,
-25% RH, 0 mph). Set wind to 0 to hide the drift columns in the trajectory
-table.
+25% RH, 0 mph). Humidity is clamped to 0–100% at calculation time (physically
+it can't exceed 100% relative humidity); the field itself doesn't block typing
+a larger number, but the calculation and any exported/printed DOPE chart both
+use the clamped value. Set wind to 0 to hide the drift columns in the
+trajectory table.
 
 **Trajectory Table** — configurable start, step, and end range (defaults
 0 / 50 / 500 yd; start 0–2000, step 1–500, end 0–2000). Both on-screen

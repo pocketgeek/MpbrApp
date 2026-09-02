@@ -3,7 +3,7 @@
 An Android app that computes Maximum Point Blank Range (MPBR), modeled after
 shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
-atmospheric corrections and full-value crosswind drift.
+atmospheric corrections, full-value crosswind drift, and headwind/tailwind drag effects.
 
 Includes 329 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
@@ -178,7 +178,8 @@ inside a normal table). Even the slowest cataloged subsonic loads run
 700+ fps, so 400 fps rejects only physically unrealistic inputs.
 
 **Atmosphere** — altitude (ft), temperature (°F), humidity (%), wind speed
-(mph full-value crosswind). Defaults are Parma, ID conditions (2231 ft, 70°F,
+(mph full-value crosswind), and headwind (mph, positive = headwind, negative =
+tailwind). Defaults are Parma, ID conditions (2231 ft, 70°F,
 25% RH, 0 mph). Humidity is clamped to 0–100% at calculation time (physically
 it can't exceed 100% relative humidity); the field itself doesn't block typing
 a larger number, but the calculation and any exported/printed DOPE chart both

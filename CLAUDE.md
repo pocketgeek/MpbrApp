@@ -37,7 +37,7 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 - `ReticleStyle` enum — `HASH`, `DOT`, `CHRISTMAS_TREE`, `BDC`, `MRAD_TREE`, `CIRCLE_DOT`, `MOA_TREE`, `DRT`, `BRC`, `AR_BDC3`, `CIRCLE_BDC`, `DUPLEX`, `BALLISTIC_E3`, `BALLISTIC_3X`, `SIG_FL4`, `ACOG_CHEVRON`, `ACOG_DONUT`, `CHEVRON_BDC`, `LEAD_RINGS`, `SPIDER_SIGHT`, `HORSESHOE_BDC`, `RING_BDC`
 - `RETICLE_PRESETS` list is sorted by manufacturer (Burris → EOTech → Firefield → German/Czech → Holosun → Leupold → SIG → Trijicon → U.S. Army → UUQ → Viridian → Vortex)
 - `Atmosphere` data class — ICAO pressure model + Magnus humidity correction; call `.densityRatio()` and `.speedOfSound()` for scaled values
-- `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind enters the drag force naturally. Returns `List<TrajectoryPoint>`
+- `simulate()` — 3D point-mass Euler integrator (x=downrange, y=vertical, z=lateral); dt=0.0005 s by default, 0.0002 s for the high-res final pass. Drag computed from air-relative velocity so crosswind (z) and headwind/tailwind (`headwindMph`, x) enter the drag force naturally. `TrajectoryPoint.velocityFps` reports ground-frame speed, not airspeed — drag needs vRel but the velocity/energy a target sees is ground speed (a headwind raises vRel while costing energy). Returns `List<TrajectoryPoint>`
 - `calculateMpbr()` — binary-searches bore angle (50 iterations) until trajectory peak = `vitalZone/2`, then re-simulates at high resolution to extract near zero, far zero, max ordinate, MPBR, and trajectory table. Entry point for the UI. Requires muzzle velocity ≥ 400 fps and that the trajectory actually reaches a far zero — below 400 fps the flat-fire assumption breaks down (the bullet decelerates below its drag-limited terminal fall speed before traveling far, so reported velocity can climb with range instead of decaying, and drop/holdover blow up to thousands of MOA); throws `IllegalArgumentException` with a user-facing message instead of returning nonsense values
 - `trajectoryTable()` — interpolates `TrajectoryPoint` list onto clean yard steps; computes holdover MOA/MIL and wind drift MOA/MIL for each row
 
@@ -137,10 +137,11 @@ The entire app lives in two files under `app/src/main/java/com/example/mpbr/`:
 
 **Adding a CHEVRON_BDC reticle preset** (upward chevron + BDC post, e.g. UUQ Ranger ER) — append with `style = ReticleStyle.CHEVRON_BDC`, `majorSpacing = <chevron base half-width MOA>`, `minorSpacing = <chevron tip-to-base depth MOA>`, `holdoverMarks = listOf(...)` (BDC labeled tick depths — integers), `windageMarks = listOf(innerEdge, tick..., outerEdge)` (H arm structure: first = arm inner edge MOA, last = arm outer edge MOA, middle entries = interior ticks), `vertExtent = <last holdover MOA + 3 or more>`. Drawing: two separate H arm segments (NOT a continuous crosshair, gap at center); V post below chevron tip only; 1 MOA minor ticks on V post with labeled ticks wider at holdoverMarks; upward chevron at center. For fixed-magnification prisms subtensions are always accurate. No drawing code changes needed.
 
-**Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph wind.
+**Atmospheric defaults** — set in the `mutableStateOf` initializers in `MainActivity.kt`: 2231 ft (Parma, ID), 70°F, 25% RH, 0 mph crosswind, 0 mph headwind.
 
 **Sign conventions**:
 - `dropInches` — positive = bullet below LOS (need to hold over)
 - `holdoverMoa/Mil` — positive = hold over
 - `driftInches/Moa/Mil` — positive = bullet drifts downwind (left-to-right for positive wind input)
 - Wind input is full-value crosswind in mph; user is responsible for clock-position adjustment
+- `headwindMph` — positive = headwind (into the shot, more drag/drop), negative = tailwind. Affects the vertical arc, so `calculateMpbr()` passes it into the bore-angle binary search too (crosswind stays omitted there — nil vertical effect in a point-mass model). Produces no lateral drift; the W.MOA/W.MIL columns key off crosswind only

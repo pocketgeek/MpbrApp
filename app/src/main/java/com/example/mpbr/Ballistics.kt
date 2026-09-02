@@ -1055,6 +1055,7 @@ object Ballistics {
         dragModel: DragModel       = DragModel.G1,
         atmosphere: Atmosphere     = Atmosphere.STANDARD,
         windSpeedMph: Double       = 0.0,   // full-value crosswind; positive = left-to-right
+        headwindMph: Double        = 0.0,   // positive = headwind (into the shot), negative = tailwind
         maxRangeYards: Double      = 1500.0,
         dt: Double                 = 0.0005
     ): List<TrajectoryPoint> {
@@ -1063,6 +1064,7 @@ object Ballistics {
         val ss            = atmosphere.speedOfSound()
         val dragCoef      = DRAG_K * rhoRatio / ballisticCoeff
         val windFps       = windSpeedMph * (5280.0 / 3600.0)
+        val headwindFps   = headwindMph * (5280.0 / 3600.0)
 
         var x  = 0.0
         var y  = -sightHeightFt
@@ -1076,8 +1078,10 @@ object Ballistics {
         var nextSampleX = 0.0
 
         while (x < maxX) {
-            // Velocity relative to the air mass (crosswind shifts z component)
-            val rx   = vx
+            // Velocity relative to the air mass (crosswind shifts the z component,
+            // headwind/tailwind the x component — air moving toward the shooter
+            // adds to the bullet's airspeed, so drag rises into a headwind)
+            val rx   = vx + headwindFps
             val ry   = vy
             val rz   = vz - windFps
             val vRel = sqrt(rx * rx + ry * ry + rz * rz)
@@ -1099,7 +1103,11 @@ object Ballistics {
             t  += dt
 
             if (x >= nextSampleX) {
-                out.add(TrajectoryPoint(x / 3.0, y * 12.0, z * 12.0, vRel, t))
+                // Report ground-frame speed, not vRel: drag needs airspeed, but
+                // the velocity/energy a target sees is ground speed — a headwind
+                // raises vRel while actually costing the bullet energy.
+                val vGround = sqrt(vx * vx + vy * vy + vz * vz)
+                out.add(TrajectoryPoint(x / 3.0, y * 12.0, z * 12.0, vGround, t))
                 nextSampleX += 3.0
             }
         }
@@ -1216,6 +1224,7 @@ object Ballistics {
         dragModel: DragModel       = DragModel.G1,
         atmosphere: Atmosphere     = Atmosphere.STANDARD,
         windSpeedMph: Double       = 0.0,
+        headwindMph: Double        = 0.0,
         tableStepYards: Int        = 50,
         tableMaxYards: Int         = 500,
         tableMinYards: Int         = 0
@@ -1244,8 +1253,11 @@ object Ballistics {
 
         repeat(50) {
             val mid  = (lo + hi) / 2.0
+            // Headwind changes drag and therefore the vertical arc, so the
+            // bore-angle search must see it; crosswind stays omitted here
+            // (its vertical effect in a point-mass model is nil).
             val traj = simulate(muzzleVelocity, ballisticCoeff, sightHeightIn, mid,
-                                dragModel, atmosphere)
+                                dragModel, atmosphere, headwindMph = headwindMph)
             val peak = traj.maxOfOrNull { it.heightInches } ?: 0.0
             if (peak > rIn) hi = mid else lo = mid
         }
@@ -1253,7 +1265,7 @@ object Ballistics {
 
         val traj = simulate(
             muzzleVelocity, ballisticCoeff, sightHeightIn, angle,
-            dragModel, atmosphere, windSpeedMph,
+            dragModel, atmosphere, windSpeedMph, headwindMph,
             maxRangeYards = 2000.0, dt = 0.0002
         )
 

@@ -187,6 +187,42 @@ class BallisticsTest {
         assertEquals(calm.farZeroYards, windy.farZeroYards, 1.0)
     }
 
+    @Test
+    fun headwindIncreasesDropAndTailwindReducesIt() {
+        val calm = m80()
+        val head = Ballistics.calculateMpbr(
+            2750.0, 0.398, 2.6, 6.0, 147.0,
+            Ballistics.DragModel.G1, parma, headwindMph = 20.0
+        )
+        val tail = Ballistics.calculateMpbr(
+            2750.0, 0.398, 2.6, 6.0, 147.0,
+            Ballistics.DragModel.G1, parma, headwindMph = -20.0
+        )
+        // A headwind raises airspeed → more drag → the bullet falls out of the
+        // vital zone sooner; a tailwind does the opposite. The effect at 20 mph
+        // is small but must be strictly ordered.
+        assertTrue("headwind must shorten MPBR", head.mpbrYards < calm.mpbrYards)
+        assertTrue("tailwind must extend MPBR",  tail.mpbrYards > calm.mpbrYards)
+        assertTrue("headwind must shorten far zero", head.farZeroYards < calm.farZeroYards)
+        // More drag also means less retained velocity at the far zero.
+        assertTrue("headwind must cost velocity", head.velocityAtFarZeroFps < calm.velocityAtFarZeroFps)
+        // Pure headwind produces no lateral drift.
+        assertEquals("headwind alone must not drift", 0.0,
+            head.trajectoryTable.last().driftInches, 0.05)
+    }
+
+    @Test
+    fun zeroHeadwindDefaultMatchesExplicitZero() {
+        val implicit = m80()
+        val explicit = Ballistics.calculateMpbr(
+            2750.0, 0.398, 2.6, 6.0, 147.0,
+            Ballistics.DragModel.G1, parma, headwindMph = 0.0
+        )
+        assertEquals(implicit.mpbrYards,    explicit.mpbrYards,    1e-9)
+        assertEquals(implicit.farZeroYards, explicit.farZeroYards, 1e-9)
+        assertEquals(implicit.boreAngleMoa, explicit.boreAngleMoa, 1e-9)
+    }
+
     // ---- Input validation ---------------------------------------------------
 
     @Test(expected = IllegalArgumentException::class)

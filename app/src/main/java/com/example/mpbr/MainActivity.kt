@@ -130,6 +130,7 @@ private data class CalcInputs(
     val temperatureF: Double,
     val humidityPct: Double,
     val windSpeedMph: Double,
+    val headwindMph: Double,
     val vitalZoneIn: Double,
     val bulletWeightGr: Double
 )
@@ -160,6 +161,7 @@ fun MpbrScreen() {
     var temperature  by rememberSaveable { mutableStateOf("70") }
     var humidity     by rememberSaveable { mutableStateOf("25") }
     var windSpeed    by rememberSaveable { mutableStateOf("0") }
+    var headwind     by rememberSaveable { mutableStateOf("0") }   // + = headwind, − = tailwind
 
     var tableStart   by rememberSaveable { mutableStateOf("0") }
     var tableEnd     by rememberSaveable { mutableStateOf("500") }
@@ -267,6 +269,7 @@ fun MpbrScreen() {
         temperature  = temperature,
         humidity     = humidity,
         windSpeed    = windSpeed,
+        headwind     = headwind,
         tableStart   = tableStart,
         tableEnd     = tableEnd,
         tableStep    = tableStep,
@@ -285,7 +288,7 @@ fun MpbrScreen() {
         // Parse and validate synchronously so field errors surface immediately;
         // only the simulation itself moves off the main thread.
         val mv: Double; val b: Double; val bw: Double; val sh: Double; val vz: Double
-        val alt: Double; val temp: Double; val hum: Double; val wind: Double
+        val alt: Double; val temp: Double; val hum: Double; val wind: Double; val hw: Double
         try {
             mv   = muzzleVel.toDouble()
             b    = bc.toDouble()
@@ -296,6 +299,7 @@ fun MpbrScreen() {
             temp = temperature.toDouble()
             hum  = humidity.toDouble().coerceIn(0.0, 100.0)
             wind = windSpeed.toDoubleOrNull() ?: 0.0
+            hw   = headwind.toDoubleOrNull() ?: 0.0
         } catch (_: NumberFormatException) {
             error  = "All fields must be numbers"
             result = null; calcInputs = null; hadResult = false
@@ -326,6 +330,7 @@ fun MpbrScreen() {
                         dragModel           = model,
                         atmosphere          = Ballistics.Atmosphere(alt, temp, hum),
                         windSpeedMph        = wind,
+                        headwindMph         = hw,
                         tableStepYards      = tStep,
                         tableMinYards       = tMin,
                         tableMaxYards       = tMax
@@ -341,6 +346,7 @@ fun MpbrScreen() {
                     temperatureF   = temp,
                     humidityPct    = hum,
                     windSpeedMph   = wind,
+                    headwindMph    = hw,
                     vitalZoneIn    = vz,
                     bulletWeightGr = bw
                 )
@@ -366,6 +372,7 @@ fun MpbrScreen() {
         temperature     = s.temperature
         humidity        = s.humidity
         windSpeed       = s.windSpeed
+        headwind        = s.headwind
         tableStart      = s.tableStart
         tableEnd        = s.tableEnd
         tableStep       = s.tableStep
@@ -524,6 +531,12 @@ fun MpbrScreen() {
             Modifier.fillMaxWidth(),
             allowNegative = true
         ) { v -> windSpeed = fromMetric(v) { it / Units.MPH_TO_KMH } }
+        NumberField(
+            if (metricMode) "Headwind (km/h, + head / − tail)" else "Headwind (mph, + head / − tail)",
+            toMetric(headwind) { it * Units.MPH_TO_KMH },
+            Modifier.fillMaxWidth(),
+            allowNegative = true
+        ) { v -> headwind = fromMetric(v) { it / Units.MPH_TO_KMH } }
 
         // ---- Trajectory table range ----
         SectionLabel("Trajectory Table")
@@ -665,7 +678,8 @@ fun MpbrScreen() {
                 dopeTitle,
                 metricMode,
                 dopeNotes,
-                magFactor
+                magFactor,
+                headwindMph = ins?.headwindMph ?: 0.0
             )
 
             Button(
@@ -2810,7 +2824,8 @@ private fun buildDopeChartBitmap(
     cardTitle: String = "MPBR DOPE CARD",
     metricMode: Boolean = false,
     notes: String = "",
-    magFactor: Double = 1.0
+    magFactor: Double = 1.0,
+    headwindMph: Double = 0.0
 ): Bitmap {
     val s   = 3
     val w   = 400 * s
@@ -2820,8 +2835,18 @@ private fun buildDopeChartBitmap(
     val lnH = (bsz + 12).toInt()
     val rwH = (bsz + 16).toInt()
 
+    // Wind description: crosswind and headwind/tailwind are independent inputs,
+    // so name each component present; "calm" only when both are zero.
+    fun windLabel(fmt: (Double) -> String): String {
+        val parts = buildList {
+            if (windMph != 0.0) add("${fmt(windMph)} cross")  // sign preserved: + is L→R
+            if (headwindMph > 0.0) add("${fmt(headwindMph)} head")
+            if (headwindMph < 0.0) add("${fmt(-headwindMph)} tail")
+        }
+        return if (parts.isEmpty()) "calm" else parts.joinToString(", ")
+    }
     val info = if (metricMode) {
-        val windStr = if (windMph == 0.0) "calm" else "%.0f km/h".format(Locale.US, windMph * Units.MPH_TO_KMH)
+        val windStr = windLabel { "%.0f km/h".format(Locale.US, it * Units.MPH_TO_KMH) }
         listOf(
             ammoLabel,
             "Near Zero: %.0f m  |  Far Zero: %.0f m  |  MPBR: %.0f m"
@@ -2833,7 +2858,7 @@ private fun buildDopeChartBitmap(
             "Date: ${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}"
         )
     } else {
-        val windStr = if (windMph == 0.0) "calm" else "%.0f mph".format(Locale.US, windMph)
+        val windStr = windLabel { "%.0f mph".format(Locale.US, it) }
         listOf(
             ammoLabel,
             "Near Zero: %.0f yd  |  Far Zero: %.0f yd  |  MPBR: %.0f yd"
@@ -3025,6 +3050,7 @@ data class SessionData(
     val temperature: String,
     val humidity: String,
     val windSpeed: String,
+    val headwind: String = "0",
     val tableStart: String,
     val tableEnd: String,
     val tableStep: String,
@@ -3050,6 +3076,7 @@ private fun SessionData.toJson(): org.json.JSONObject = org.json.JSONObject().ap
     put("temperature", temperature)
     put("humidity",    humidity)
     put("windSpeed",   windSpeed)
+    put("headwind",    headwind)
     put("tableStart",  tableStart)
     put("tableEnd",    tableEnd)
     put("tableStep",   tableStep)
@@ -3075,6 +3102,7 @@ private fun org.json.JSONObject.toSessionData() = SessionData(
     temperature  = getString("temperature"),
     humidity     = getString("humidity"),
     windSpeed    = getString("windSpeed"),
+    headwind     = optString("headwind").ifEmpty { "0" },
     tableStart   = getString("tableStart"),
     tableEnd     = getString("tableEnd"),
     tableStep    = getString("tableStep"),

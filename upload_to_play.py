@@ -23,11 +23,12 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Performance improvements (v2.13)
+Headwind/tailwind support (v2.14)
 
-- Trajectory calculation now runs in the background so the UI never stutters on slower devices
-- Faster drag-table lookups inside the simulation
-- Internal code cleanup\
+- New Headwind input (mph or km/h): positive = headwind, negative = tailwind
+- Headwind/tailwind now affects drag, drop, MPBR, and downrange energy
+- Velocity/energy columns now report true ground speed
+- Wind conditions shown on the DOPE chart header\
 """
 
 def main():

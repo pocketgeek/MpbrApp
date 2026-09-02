@@ -177,9 +177,10 @@ of decaying, and drop/holdover values blow up to thousands of MOA well
 inside a normal table). Even the slowest cataloged subsonic loads run
 700+ fps, so 400 fps rejects only physically unrealistic inputs.
 
-**Atmosphere** — altitude (ft), temperature (°F), humidity (%), wind speed
-(mph full-value crosswind), and headwind (mph, positive = headwind, negative =
-tailwind). Defaults are Parma, ID conditions (2231 ft, 70°F,
+**Atmosphere** — altitude (ft), temperature (°F), humidity (%), crosswind
+(mph full-value, positive = left-to-right, negative = right-to-left), and
+headwind (mph, positive = headwind, negative = tailwind). Defaults are Parma,
+ID conditions (2231 ft, 70°F,
 25% RH, 0 mph). Humidity is clamped to 0–100% at calculation time (physically
 it can't exceed 100% relative humidity); the field itself doesn't block typing
 a larger number, but the calculation and any exported/printed DOPE chart both

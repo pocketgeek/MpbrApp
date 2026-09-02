@@ -526,7 +526,7 @@ fun MpbrScreen() {
         ) { v -> temperature = fromMetric(v) { it * 9.0 / 5.0 + 32.0 } }
         NumberField("Humidity (%)", humidity, Modifier.fillMaxWidth()) { humidity = it }
         NumberField(
-            if (metricMode) "Wind Speed (km/h, full value crosswind)" else "Wind Speed (mph, full value crosswind)",
+            if (metricMode) "Crosswind (km/h, + L→R / − R→L)" else "Crosswind (mph, + L→R / − R→L)",
             toMetric(windSpeed) { it * Units.MPH_TO_KMH },
             Modifier.fillMaxWidth(),
             allowNegative = true

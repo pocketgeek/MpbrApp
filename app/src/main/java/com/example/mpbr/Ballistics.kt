@@ -645,6 +645,9 @@ object Ballistics {
         AmmoPreset("7.62×54R 174gr FMJ",          2600.0, 0.490, 174.0, 2.6, 6.0, caliber = "7.62×54R"),
         AmmoPreset("7.62×39 122gr FMJ",           2418.0, 0.257, 122.0, 2.6, 6.0, caliber = "7.62×39"),
         AmmoPreset("7.62×39 123gr HP",            2350.0, 0.270, 123.0, 2.6, 6.0, caliber = "7.62×39"),
+        // Prvi Partizan (PPU) Subsonic, TRZ load PPS739, 182gr FMJBT. MV 1033 fps and BC .220
+        // (unlabeled; treated as G1 — matches PPU's 945 fps @ 100 yd) from ppu-usa.com.
+        AmmoPreset("7.62×39 182gr PPU FMJBT (subsonic)", 1033.0, 0.220, 182.0, 2.6, 6.0, caliber = "7.62×39"),
         AmmoPreset("30 Carbine 110gr FMJ",        1990.0, 0.166, 110.0, 2.6, 6.0, caliber = "30 Carbine"),
         AmmoPreset("30 Carbine 110gr FTX",        2000.0, 0.166, 110.0, 2.6, 6.0, caliber = "30 Carbine"),
         AmmoPreset("30 Carbine 125gr HC",         1950.0, 0.126, 125.0, 2.6, 6.0, caliber = "30 Carbine"),
@@ -752,7 +755,12 @@ object Ballistics {
         AmmoPreset("308 Win 180gr SP",            2600.0, 0.383, 180.0, 2.6, 6.0, caliber = "308 Win/7.62x51"),
         AmmoPreset("308 Win 190gr Fusion (subsonic)", 1000.0, 0.494, 190.0, 2.6, 6.0, caliber = "308 Win/7.62x51"),
         AmmoPreset("308 Win 200gr FMJBT (subsonic)",  1066.0, 0.235, 200.0, 2.6, 6.0, DragModel.G7, caliber = "308 Win/7.62x51"),
-        AmmoPreset("308 Win 205gr HP (subsonic)",     1000.0, 0.480, 205.0, 2.6, 6.0, caliber = "308 Win/7.62x51"),
+        // Prvi Partizan (PPU) 7.62×51 Subsonic, TRZ load PPS762, 200gr FMJBT. MV 1050 fps and BC
+        // .429 (unlabeled; treated as G1 — matches PPU's 997 fps @ 100 yd) from ppu-usa.com.
+        AmmoPreset("308 Win 200gr PPU FMJBT (subsonic)", 1050.0, 0.429, 200.0, 2.6, 6.0, caliber = "308 Win/7.62x51"),
+        // Remington Subsonic Rifle #27746 (29-27746), 205gr HP. MV 1050 fps and G1 BC .480
+        // from remington.com product page.
+        AmmoPreset("308 Win 205gr HP (subsonic)",     1050.0, 0.480, 205.0, 2.6, 6.0, caliber = "308 Win/7.62x51"),
         // .338
         AmmoPreset("338 Win Mag 200gr AccuBond",  2960.0, 0.225, 200.0, 2.6, 6.0, DragModel.G7, caliber = "338 Win Mag"),
         AmmoPreset("338 Win Mag 225gr AccuBond",  2785.0, 0.249, 225.0, 2.6, 6.0, DragModel.G7, caliber = "338 Win Mag"),
@@ -870,6 +878,9 @@ object Ballistics {
         AmmoPreset("9mm NATO 124 gr",             1180.0, 0.165, 124.0, 0.7, 4.0, category = AmmoCategory.PISTOL, caliber = "9mm"),
         AmmoPreset("9mm 135gr Critical Duty", 1160.0, 0.195, 135.0, 0.7, 4.0, category = AmmoCategory.PISTOL, caliber = "9mm"),
         AmmoPreset("9mm 147 gr (subsonic)",    990.0, 0.190, 147.0, 0.7, 4.0, category = AmmoCategory.PISTOL, caliber = "9mm"),
+        // Prvi Partizan (PPU) 9mm Luger Subsonic, TRZ load PPS9, 158gr FMJ. MV 950 fps and BC
+        // .160 (unlabeled; treated as G1) from ppu-usa.com.
+        AmmoPreset("9mm 158gr PPU FMJ (subsonic)", 950.0, 0.160, 158.0, 0.7, 4.0, category = AmmoCategory.PISTOL, caliber = "9mm"),
         AmmoPreset("9mm 147gr HST",           1000.0, 0.200, 147.0, 0.7, 4.0, category = AmmoCategory.PISTOL, caliber = "9mm"),
         // .38 Spl / .357
         AmmoPreset("38 Spl 110gr JHP",           990.0, 0.125, 110.0, 0.7, 4.0, category = AmmoCategory.PISTOL, caliber = "38 Spl"),

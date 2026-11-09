@@ -23,12 +23,10 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Headwind/tailwind support (v2.14)
+New subsonic ammo presets (v2.15)
 
-- New Headwind input (mph or km/h): positive = headwind, negative = tailwind
-- Headwind/tailwind now affects drag, drop, MPBR, and downrange energy
-- Velocity/energy columns now report true ground speed
-- Wind conditions shown on the DOPE chart header\
+- Added PPU Subsonic 9mm 158gr FMJ, 7.62x39 182gr FMJBT, and 7.62x51 200gr FMJBT
+- Remington Subsonic 308 Win 205gr HP muzzle velocity corrected to 1050 fps\
 """
 
 def main():

@@ -28,7 +28,7 @@ the reticle's extent.
 </tr>
 <tr>
 <td align="center"><img src="screenshots/Screenshot_20260829-102600.MPBR%20Calculator.png" width="190"><br><em>Trajectory table and Save DOPE Chart</em></td>
-<td align="center"><img src="screenshots/DOPE_M80__7_62_51_NATO__20260830_181601.jpg" width="190"><br><em>Exported DOPE chart JPEG</em></td>
+<td align="center"><img src="screenshots/DOPE_M80__7_62_51_NATO__20261118_153616.jpg" width="190"><br><em>Exported DOPE chart JPEG</em></td>
 <td></td>
 </tr>
 </table>

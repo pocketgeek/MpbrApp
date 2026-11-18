@@ -5,7 +5,7 @@ shooterscalculator.com's MPBR tool. Uses a point-mass exterior ballistics
 simulator with G1 or G7 drag, and supports altitude / temperature / humidity
 atmospheric corrections, full-value crosswind drift, and headwind/tailwind drag effects.
 
-Includes 331 factory ammo presets organized into color-coded categories
+Includes 336 factory ammo presets organized into color-coded categories
 (rifle, rimfire, pistol, shotgun) with a configurable trajectory table (50 yd
 steps, default 50–500 yd, max 2,000 yd). DOPE charts can be saved as a JPEG
 to your gallery, optionally with a scope reticle illustration showing
@@ -78,10 +78,10 @@ boilerplate Android needs to actually launch the app.
 App opens with the M80 (7.62×51 NATO) preset at 2231 ft / 70°F / 25% RH
 (Parma, ID defaults), 6" vital zone:
 
-- Near zero ≈ 41 yd
-- Far zero ≈ 258 yd
-- Max ordinate ≈ 3.0" @ 151 yd
-- MPBR ≈ 301 yd
+- Near zero ≈ 40 yd
+- Far zero ≈ 245 yd
+- Max ordinate ≈ 3.0" @ 145 yd
+- MPBR ≈ 284 yd
 
 These numbers are pinned by the unit test
 `BallisticsTest.m80DefaultScenarioMatchesDocumentedNumbers` — if the engine
@@ -89,7 +89,7 @@ changes behaviour, that test fails and this section must be updated with it.
 
 ## Inputs
 
-**Ammo preset** — 331 factory loads picked via a three-step Type → Caliber →
+**Ammo preset** — 336 factory loads picked via a three-step Type → Caliber →
 Load cascade instead of one long scrolling list: pick a category (Rifle
 green, Rimfire blue, Pistol amber, Shotgun purple, or Custom), then a caliber
 within that category, then the specific load. Selecting a load populates all
@@ -239,7 +239,9 @@ SharedPreferences).
    - **MPBR** — range where bullet drops to `-vital_zone / 2`
    - **Bore angle** — informational, barrel angle above LOS
 
-Drag uses standard G1/G7 Cd vs Mach tables with linear interpolation. Air
+Drag uses the standard G1/G7 Cd vs Mach reference tables (79 and 84 points,
+Mach 0–5) with linear interpolation; unit tests check the resulting
+velocities against Hornady's published factory tables to within 10 fps. Air
 density and speed of sound scale from ICAO sea-level standards using the
 ICAO troposphere pressure model, temperature, and humidity (Magnus saturation
 + standard `1 − 0.378·Pᵥ/P` correction). Crosswind enters as a lateral

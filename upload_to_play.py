@@ -23,10 +23,11 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-New subsonic ammo presets (v2.15)
+Trajectory accuracy fix + 338 ARC presets (v2.16)
 
-- Added PPU Subsonic 9mm 158gr FMJ, 7.62x39 182gr FMJBT, and 7.62x51 200gr FMJBT
-- Remington Subsonic 308 Win 205gr HP muzzle velocity corrected to 1050 fps\
+- Corrected the G1/G7 drag tables: velocity, energy, drop and holdovers now match factory ballistics tables. Supersonic loads show a shorter MPBR and more drop at distance than before
+- Re-create any DOPE charts saved from earlier versions
+- Added Hornady's five 338 ARC loads: 170gr MonoFlex, 175gr HP Match, 215gr FTX, 285gr FMJ (subsonic), 307gr Sub-X (subsonic)\
 """
 
 def main():

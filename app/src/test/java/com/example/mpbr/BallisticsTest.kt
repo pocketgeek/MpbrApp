@@ -34,12 +34,12 @@ class BallisticsTest {
     @Test
     fun m80DefaultScenarioMatchesDocumentedNumbers() {
         val r = m80()
-        assertEquals("near zero",     41.0,  r.nearZeroYards,         2.0)
-        assertEquals("far zero",      258.0, r.farZeroYards,          3.0)
-        assertEquals("MPBR",          301.0, r.mpbrYards,             3.0)
+        assertEquals("near zero",     40.0,  r.nearZeroYards,         2.0)
+        assertEquals("far zero",      245.0, r.farZeroYards,          3.0)
+        assertEquals("MPBR",          284.0, r.mpbrYards,             3.0)
         assertEquals("max ordinate",  3.0,   r.maxOrdinateInches,     0.1)
-        assertEquals("ordinate range", 151.0, r.maxOrdinateRangeYards, 5.0)
-        assertEquals("bore angle",    7.0,   r.boreAngleMoa,          0.3)
+        assertEquals("ordinate range", 145.0, r.maxOrdinateRangeYards, 5.0)
+        assertEquals("bore angle",    7.1,   r.boreAngleMoa,          0.3)
     }
 
     @Test
@@ -103,16 +103,19 @@ class BallisticsTest {
     fun dragTableExactNodesAndClamping() {
         // Node values straight from the embedded G1/G7 tables.
         assertEquals(0.2629, Ballistics.cd(Ballistics.DragModel.G1, 0.0), 1e-9)
-        assertEquals(0.1530, Ballistics.cd(Ballistics.DragModel.G1, 5.0), 1e-9)
+        assertEquals(0.5934, Ballistics.cd(Ballistics.DragModel.G1, 2.0), 1e-9)
+        assertEquals(0.4988, Ballistics.cd(Ballistics.DragModel.G1, 5.0), 1e-9)
         assertEquals(0.1198, Ballistics.cd(Ballistics.DragModel.G7, 0.0), 1e-9)
+        assertEquals(0.2980, Ballistics.cd(Ballistics.DragModel.G7, 2.0), 1e-9)
+        assertEquals(0.1618, Ballistics.cd(Ballistics.DragModel.G7, 5.0), 1e-9)
         // Beyond-table Mach clamps to the last entry.
-        assertEquals(0.1530, Ballistics.cd(Ballistics.DragModel.G1, 9.0), 1e-9)
+        assertEquals(0.4988, Ballistics.cd(Ballistics.DragModel.G1, 9.0), 1e-9)
     }
 
     @Test
     fun dragTableLinearMidpoint() {
-        // G1 between M0.70 (0.2400) and M0.80 (0.2389): midpoint at M0.75.
-        assertEquals(0.23945, Ballistics.cd(Ballistics.DragModel.G1, 0.75), 1e-9)
+        // G1 between M0.60 (0.2034) and M0.70 (0.2165): midpoint at M0.65.
+        assertEquals(0.20995, Ballistics.cd(Ballistics.DragModel.G1, 0.65), 1e-9)
     }
 
     @Test
@@ -120,6 +123,51 @@ class BallisticsTest {
         val subsonic   = Ballistics.cd(Ballistics.DragModel.G1, 0.8)
         val transonic  = Ballistics.cd(Ballistics.DragModel.G1, 1.1)
         assertTrue("drag must spike through the sound barrier", transonic > subsonic * 1.5)
+    }
+
+    // ---- Drag tables vs. published factory ballistics ----------------------
+    //
+    // Node pins above only prove the table equals itself. These check the whole
+    // engine against manufacturers' own downrange velocities — the one external
+    // truth a wrong-but-plausible drag table can't satisfy (the app's original
+    // tables passed every other test while reading 300–500 fps high at 500 yd).
+    // Hornady quotes BCs at ICAO standard, i.e. Atmosphere.STANDARD.
+
+    /** Velocities at 100–500 yd in the standard atmosphere. */
+    private fun velocities(mv: Double, bc: Double, model: Ballistics.DragModel) =
+        Ballistics.calculateMpbr(mv, bc, 1.5, 6.0, dragModel = model, tableStepYards = 100)
+            .trajectoryTable.map { it.velocityFps }
+
+    private fun assertVelocities(label: String, expected: List<Double>, actual: List<Double>) {
+        assertEquals("$label: row count", expected.size, actual.size)
+        expected.forEachIndexed { i, e ->
+            assertEquals("$label @ ${(i + 1) * 100} yd", e, actual[i], 10.0)
+        }
+    }
+
+    @Test
+    fun g1TableReproducesFactoryVelocityTables() {
+        // Hornady BLACK #82271, 338 ARC 175gr HP Match, G1 .385 — Mach 1.9 down to 1.1.
+        assertVelocities("338 ARC 175gr HP Match",
+            listOf(1878.0, 1694.0, 1525.0, 1373.0, 1242.0),
+            velocities(2075.0, 0.385, Ballistics.DragModel.G1))
+        // Hornady Subsonic #82272, 338 ARC 307gr Sub-X, G1 .375 — subsonic branch.
+        assertVelocities("338 ARC 307gr Sub-X",
+            listOf(990.0, 942.0, 901.0, 866.0, 833.0),
+            velocities(1050.0, 0.375, Ballistics.DragModel.G1))
+        // Hornady Match #80966, 308 Win 168gr ELD Match, G1 .523 — Mach 2.4 down to 1.7.
+        assertVelocities("308 Win 168gr ELD Match (G1)",
+            listOf(2530.0, 2366.0, 2209.0, 2057.0, 1912.0),
+            velocities(2700.0, 0.523, Ballistics.DragModel.G1))
+    }
+
+    @Test
+    fun g7TableReproducesFactoryVelocityTable() {
+        // Same Hornady #80966 load through the G7 table with its G7 BC (.263):
+        // both models must land on the one published trajectory.
+        assertVelocities("308 Win 168gr ELD Match (G7)",
+            listOf(2530.0, 2366.0, 2209.0, 2057.0, 1912.0),
+            velocities(2700.0, 0.263, Ballistics.DragModel.G7))
     }
 
     // ---- Trajectory table & angular conversions ----------------------------

@@ -762,6 +762,17 @@ object Ballistics {
         // from remington.com product page.
         AmmoPreset("308 Win 205gr HP (subsonic)",     1050.0, 0.480, 205.0, 2.6, 6.0, caliber = "308 Win/7.62x51"),
         // .338
+        // 338 ARC — Hornady's full factory lineup (hornady.com/338arc; no other maker loads
+        // it yet): BLACK #82273/#82271/#82274, Frontier #FR430, Subsonic #82272. MVs from
+        // Hornady's product pages (16" test barrel; 24" for the Frontier FMJ). Hornady's
+        // pages omit BCs — the G1 values are the retailer-listed figures, each checked
+        // against Hornady's own 100–500 yd velocity table. Hornady publishes no BC for the
+        // 285gr FMJ; .657 is LuckyGunner's figure derived from that table.
+        AmmoPreset("338 ARC 170gr MonoFlex",      2075.0, 0.314, 170.0, 2.6, 6.0, caliber = "338 ARC"),
+        AmmoPreset("338 ARC 175gr HP Match",      2075.0, 0.385, 175.0, 2.6, 6.0, caliber = "338 ARC"),
+        AmmoPreset("338 ARC 215gr FTX",           1900.0, 0.376, 215.0, 2.6, 6.0, caliber = "338 ARC"),
+        AmmoPreset("338 ARC 285gr FMJ Frontier (subsonic)", 1050.0, 0.657, 285.0, 2.6, 6.0, caliber = "338 ARC"),
+        AmmoPreset("338 ARC 307gr Sub-X (subsonic)", 1050.0, 0.375, 307.0, 2.6, 6.0, caliber = "338 ARC"),
         AmmoPreset("338 Win Mag 200gr AccuBond",  2960.0, 0.225, 200.0, 2.6, 6.0, DragModel.G7, caliber = "338 Win Mag"),
         AmmoPreset("338 Win Mag 225gr AccuBond",  2785.0, 0.249, 225.0, 2.6, 6.0, DragModel.G7, caliber = "338 Win Mag"),
         AmmoPreset("338 Win Mag 250gr Partition", 2650.0, 0.473, 250.0, 2.6, 6.0, caliber = "338 Win Mag"),
@@ -966,26 +977,61 @@ object Ballistics {
         AmmoPreset("20ga #3 Buck (per pellet)",       1200.0, 0.063,  30.0, 0.5, 4.0, category = AmmoCategory.SHOTGUN, caliber = "20ga")
     )
 
-    /** Standard G1 drag coefficient table. */
+    /**
+     * Standard G1 drag coefficient table — the 79-point Mach 0–5 tabulation of the
+     * G1 reference projectile that published G1 BCs are defined against. Do not
+     * thin or retune it: BallisticsTest checks the engine against factory velocity
+     * tables, which only reproduce with the reference values.
+     */
     private val G1 = listOf(
-        0.00 to 0.2629, 0.50 to 0.2487, 0.60 to 0.2413, 0.70 to 0.2400,
-        0.80 to 0.2389, 0.85 to 0.2382, 0.90 to 0.2424, 0.95 to 0.2773,
-        1.00 to 0.3678, 1.05 to 0.4275, 1.10 to 0.4496, 1.15 to 0.4543,
-        1.20 to 0.4521, 1.30 to 0.4356, 1.40 to 0.4137, 1.50 to 0.3909,
-        1.75 to 0.3393, 2.00 to 0.2989, 2.25 to 0.2682, 2.50 to 0.2444,
-        2.75 to 0.2257, 3.00 to 0.2106, 3.50 to 0.1882, 4.00 to 0.1730,
-        5.00 to 0.1530
+        0.000 to 0.2629, 0.050 to 0.2558, 0.100 to 0.2487, 0.150 to 0.2413,
+        0.200 to 0.2344, 0.250 to 0.2278, 0.300 to 0.2214, 0.350 to 0.2155,
+        0.400 to 0.2104, 0.450 to 0.2061, 0.500 to 0.2032, 0.550 to 0.2020,
+        0.600 to 0.2034, 0.700 to 0.2165, 0.725 to 0.2230, 0.750 to 0.2313,
+        0.775 to 0.2417, 0.800 to 0.2546, 0.825 to 0.2706, 0.850 to 0.2901,
+        0.875 to 0.3136, 0.900 to 0.3415, 0.925 to 0.3734, 0.950 to 0.4084,
+        0.975 to 0.4448, 1.000 to 0.4805, 1.025 to 0.5136, 1.050 to 0.5427,
+        1.075 to 0.5677, 1.100 to 0.5883, 1.125 to 0.6053, 1.150 to 0.6191,
+        1.200 to 0.6393, 1.250 to 0.6518, 1.300 to 0.6589, 1.350 to 0.6621,
+        1.400 to 0.6625, 1.450 to 0.6607, 1.500 to 0.6573, 1.550 to 0.6528,
+        1.600 to 0.6474, 1.650 to 0.6413, 1.700 to 0.6347, 1.750 to 0.6280,
+        1.800 to 0.6210, 1.850 to 0.6141, 1.900 to 0.6072, 1.950 to 0.6003,
+        2.000 to 0.5934, 2.050 to 0.5867, 2.100 to 0.5804, 2.150 to 0.5743,
+        2.200 to 0.5685, 2.250 to 0.5630, 2.300 to 0.5577, 2.350 to 0.5527,
+        2.400 to 0.5481, 2.450 to 0.5438, 2.500 to 0.5397, 2.600 to 0.5325,
+        2.700 to 0.5264, 2.800 to 0.5211, 2.900 to 0.5168, 3.000 to 0.5133,
+        3.100 to 0.5105, 3.200 to 0.5084, 3.300 to 0.5067, 3.400 to 0.5054,
+        3.500 to 0.5040, 3.600 to 0.5030, 3.700 to 0.5022, 3.800 to 0.5016,
+        3.900 to 0.5010, 4.000 to 0.5006, 4.200 to 0.4998, 4.400 to 0.4995,
+        4.600 to 0.4992, 4.800 to 0.4990, 5.000 to 0.4988
     )
 
-    /** Standard G7 drag coefficient table (long boat-tail reference projectile). */
+    /**
+     * Standard G7 drag coefficient table (long boat-tail reference projectile) —
+     * the 84-point Mach 0–5 tabulation that published G7 BCs are defined against.
+     */
     private val G7 = listOf(
-        0.00 to 0.1198, 0.50 to 0.1197, 0.60 to 0.1166, 0.70 to 0.1142,
-        0.80 to 0.1138, 0.85 to 0.1138, 0.90 to 0.1175, 0.95 to 0.1281,
-        1.00 to 0.1583, 1.05 to 0.1773, 1.10 to 0.1814, 1.15 to 0.1812,
-        1.20 to 0.1808, 1.30 to 0.1742, 1.40 to 0.1675, 1.50 to 0.1606,
-        1.75 to 0.1450, 2.00 to 0.1311, 2.25 to 0.1206, 2.50 to 0.1116,
-        2.75 to 0.1042, 3.00 to 0.0980, 3.50 to 0.0883, 4.00 to 0.0809,
-        5.00 to 0.0712
+        0.000 to 0.1198, 0.050 to 0.1197, 0.100 to 0.1196, 0.150 to 0.1194,
+        0.200 to 0.1193, 0.250 to 0.1194, 0.300 to 0.1194, 0.350 to 0.1194,
+        0.400 to 0.1193, 0.450 to 0.1193, 0.500 to 0.1194, 0.550 to 0.1193,
+        0.600 to 0.1194, 0.650 to 0.1197, 0.700 to 0.1202, 0.725 to 0.1207,
+        0.750 to 0.1215, 0.775 to 0.1226, 0.800 to 0.1242, 0.825 to 0.1266,
+        0.850 to 0.1306, 0.875 to 0.1368, 0.900 to 0.1464, 0.925 to 0.1660,
+        0.950 to 0.2054, 0.975 to 0.2993, 1.000 to 0.3803, 1.025 to 0.4015,
+        1.050 to 0.4043, 1.075 to 0.4034, 1.100 to 0.4014, 1.125 to 0.3987,
+        1.150 to 0.3955, 1.200 to 0.3884, 1.250 to 0.3810, 1.300 to 0.3732,
+        1.350 to 0.3657, 1.400 to 0.3580, 1.500 to 0.3440, 1.550 to 0.3376,
+        1.600 to 0.3315, 1.650 to 0.3260, 1.700 to 0.3209, 1.750 to 0.3160,
+        1.800 to 0.3117, 1.850 to 0.3078, 1.900 to 0.3042, 1.950 to 0.3010,
+        2.000 to 0.2980, 2.050 to 0.2951, 2.100 to 0.2922, 2.150 to 0.2892,
+        2.200 to 0.2864, 2.250 to 0.2835, 2.300 to 0.2807, 2.350 to 0.2779,
+        2.400 to 0.2752, 2.450 to 0.2725, 2.500 to 0.2697, 2.550 to 0.2670,
+        2.600 to 0.2643, 2.650 to 0.2615, 2.700 to 0.2588, 2.750 to 0.2561,
+        2.800 to 0.2533, 2.850 to 0.2506, 2.900 to 0.2479, 2.950 to 0.2451,
+        3.000 to 0.2424, 3.100 to 0.2368, 3.200 to 0.2313, 3.300 to 0.2258,
+        3.400 to 0.2205, 3.500 to 0.2154, 3.600 to 0.2106, 3.700 to 0.2060,
+        3.800 to 0.2017, 3.900 to 0.1975, 4.000 to 0.1935, 4.200 to 0.1861,
+        4.400 to 0.1793, 4.600 to 0.1730, 4.800 to 0.1672, 5.000 to 0.1618
     )
 
     // Primitive-array copies of the drag tables: cd() runs once per integrator

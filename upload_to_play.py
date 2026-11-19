@@ -23,11 +23,9 @@ SCOPES       = ["https://www.googleapis.com/auth/androidpublisher"]
 
 # Update this before each release (max 500 characters)
 RELEASE_NOTES = """\
-Trajectory accuracy fix + 338 ARC presets (v2.16)
+New 338 ARC presets (v2.17)
 
-- Corrected the G1/G7 drag tables: velocity, energy, drop and holdovers now match factory ballistics tables. Supersonic loads show a shorter MPBR and more drop at distance than before
-- Re-create any DOPE charts saved from earlier versions
-- Added Hornady's five 338 ARC loads: 170gr MonoFlex, 175gr HP Match, 215gr FTX, 285gr FMJ (subsonic), 307gr Sub-X (subsonic)\
+- Added AAC (America's Ammunition Company) 338 ARC loads: 175gr OTM and 300gr HPBT (subsonic)\
 """
 
 def main():

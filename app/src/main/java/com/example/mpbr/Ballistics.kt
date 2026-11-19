@@ -762,8 +762,7 @@ object Ballistics {
         // from remington.com product page.
         AmmoPreset("308 Win 205gr HP (subsonic)",     1050.0, 0.480, 205.0, 2.6, 6.0, caliber = "308 Win/7.62x51"),
         // .338
-        // 338 ARC — Hornady's full factory lineup (hornady.com/338arc; no other maker loads
-        // it yet): BLACK #82273/#82271/#82274, Frontier #FR430, Subsonic #82272. MVs from
+        // 338 ARC — Hornady's full factory lineup (hornady.com/338arc): BLACK #82273/#82271/#82274, Frontier #FR430, Subsonic #82272. MVs from
         // Hornady's product pages (16" test barrel; 24" for the Frontier FMJ). Hornady's
         // pages omit BCs — the G1 values are the retailer-listed figures, each checked
         // against Hornady's own 100–500 yd velocity table. Hornady publishes no BC for the
@@ -773,6 +772,12 @@ object Ballistics {
         AmmoPreset("338 ARC 215gr FTX",           1900.0, 0.376, 215.0, 2.6, 6.0, caliber = "338 ARC"),
         AmmoPreset("338 ARC 285gr FMJ Frontier (subsonic)", 1050.0, 0.657, 285.0, 2.6, 6.0, caliber = "338 ARC"),
         AmmoPreset("338 ARC 307gr Sub-X (subsonic)", 1050.0, 0.375, 307.0, 2.6, 6.0, caliber = "338 ARC"),
+        // AAC (America's Ammunition Company) 338 ARC, Hornady-made bullets: 175gr OTM
+        // AAC338ARCOTM1-20 and 300gr HPBT Match AAC338ARCHPBT1-20. MV and BC from AAC's
+        // listed specs (BC unlabeled; treated as G1 — the 175gr's .385 matches Hornady's
+        // own 175gr HP Match). No barrel length or velocity table published to cross-check.
+        AmmoPreset("338 ARC 175gr AAC OTM",       2050.0, 0.385, 175.0, 2.6, 6.0, caliber = "338 ARC"),
+        AmmoPreset("338 ARC 300gr AAC HPBT (subsonic)", 1000.0, 0.716, 300.0, 2.6, 6.0, caliber = "338 ARC"),
         AmmoPreset("338 Win Mag 200gr AccuBond",  2960.0, 0.225, 200.0, 2.6, 6.0, DragModel.G7, caliber = "338 Win Mag"),
         AmmoPreset("338 Win Mag 225gr AccuBond",  2785.0, 0.249, 225.0, 2.6, 6.0, DragModel.G7, caliber = "338 Win Mag"),
         AmmoPreset("338 Win Mag 250gr Partition", 2650.0, 0.473, 250.0, 2.6, 6.0, caliber = "338 Win Mag"),
